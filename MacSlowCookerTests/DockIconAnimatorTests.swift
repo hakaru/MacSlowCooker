@@ -162,4 +162,116 @@ final class DockIconAnimatorTests: XCTestCase {
         animator.tickForTesting()
         XCTAssertTrue(CapturingRenderer.captured.last!.isBoiling)
     }
+
+    // MARK: - Timer lifecycle
+
+    func testIdleAnimatorStopsTimer() {
+        settings.flameAnimation = .none
+        let animator = DockIconAnimator(settings: settings,
+                                        renderer: CapturingRenderer.self,
+                                        clock: clock,
+                                        autostartTimer: true)
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0))
+
+        // Drive simulated ticks until interpolation converges
+        for _ in 0..<30 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        XCTAssertFalse(animator.isTimerRunningForTesting)
+    }
+
+    func testWiggleKeepsTimerRunning() {
+        settings.flameAnimation = .wiggle
+        let animator = DockIconAnimator(settings: settings,
+                                        renderer: CapturingRenderer.self,
+                                        clock: clock,
+                                        autostartTimer: true)
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5))
+
+        for _ in 0..<30 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        XCTAssertTrue(animator.isTimerRunningForTesting)
+    }
+
+    // MARK: - System sleep
+
+    func testSystemSleepStopsTimer() {
+        settings.flameAnimation = .both
+        let animator = DockIconAnimator(settings: settings,
+                                        renderer: CapturingRenderer.self,
+                                        clock: clock,
+                                        autostartTimer: true)
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5))
+        XCTAssertTrue(animator.isTimerRunningForTesting)
+
+        animator.setSystemAsleep(true)
+        XCTAssertFalse(animator.isTimerRunningForTesting)
+    }
+
+    func testSystemWakeRestartsAnimation() {
+        settings.flameAnimation = .both
+        let animator = DockIconAnimator(settings: settings,
+                                        renderer: CapturingRenderer.self,
+                                        clock: clock,
+                                        autostartTimer: true)
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5))
+        animator.setSystemAsleep(true)
+        XCTAssertFalse(animator.isTimerRunningForTesting)
+
+        animator.setSystemAsleep(false)
+        XCTAssertTrue(animator.isTimerRunningForTesting)
+    }
+
+    // MARK: - Disconnect / reconnect
+
+    func testDisconnectResetsBoiling() {
+        settings.boilingTrigger = .temperature
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5, temperature: 90))
+        animator.tickForTesting()
+        XCTAssertTrue(CapturingRenderer.captured.last!.isBoiling)
+
+        animator.setConnected(false)
+        animator.tickForTesting()
+        XCTAssertFalse(CapturingRenderer.captured.last!.isBoiling)
+    }
+
+    func testReconnectRestartsCombinedTimer() {
+        settings.boilingTrigger = .combined
+        let animator = makeAnimator()
+
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.95))
+        XCTAssertNotNil(animator.aboveThresholdSinceForTesting)
+
+        animator.setConnected(false)
+        XCTAssertNil(animator.aboveThresholdSinceForTesting)
+
+        clock.advance(by: 30)
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.95))
+        XCTAssertEqual(animator.aboveThresholdSinceForTesting, clock.now)
+    }
+
+    // MARK: - Settings change
+
+    func testSettingsChangeResetsCombinedTimerWhenSwitchingMode() {
+        settings.boilingTrigger = .combined
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.95))
+        XCTAssertNotNil(animator.aboveThresholdSinceForTesting)
+
+        settings.boilingTrigger = .temperature
+        animator.settingsDidChange()
+        XCTAssertNil(animator.aboveThresholdSinceForTesting)
+    }
 }

@@ -80,13 +80,48 @@ final class DockIconAnimator {
         isConnected = connected
         if !connected {
             targetUsage = 0
+            isBoiling = false
+            aboveThresholdSince = nil
         }
         ensureTimerRunning()
     }
 
+    func setSystemAsleep(_ asleep: Bool) {
+        isSystemAsleep = asleep
+        if asleep {
+            timer?.invalidate()
+            timer = nil
+        } else {
+            ensureTimerRunning()
+        }
+    }
+
+    func settingsDidChange() {
+        if settings.boilingTrigger != .combined {
+            aboveThresholdSince = nil
+        }
+        ensureTimerRunning()
+    }
+
+    // MARK: - Test introspection
+
+    var isTimerRunningForTesting: Bool { timer != nil }
+    var aboveThresholdSinceForTesting: Date? { aboveThresholdSince }
+
     /// Synchronous tick for tests — bypasses Timer.
     func tickForTesting() {
         tick(dt: Self.tickInterval)
+    }
+
+    // MARK: - Animation predicate
+
+    private func needsAnimation() -> Bool {
+        if isSystemAsleep { return false }
+        if settings.flameAnimation.hasWiggle { return true }
+        if abs(displayedUsage - targetUsage) > 0.005 { return true }
+        let boilingTarget: Double = isBoiling ? 1.0 : 0.0
+        if abs(boilingIntensity - boilingTarget) > 0.005 { return true }
+        return false
     }
 
     // MARK: - Timer
@@ -130,6 +165,11 @@ final class DockIconAnimator {
             boilingIntensity:  boilingIntensity)
 
         _ = renderer.render(state: state)
+
+        if !needsAnimation() {
+            timer?.invalidate()
+            timer = nil
+        }
     }
 
     // MARK: - Pure helpers
