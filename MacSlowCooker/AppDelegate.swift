@@ -11,6 +11,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var popupController = PopupWindowController(store: store)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        // Skip helper-daemon setup when running under XCTest. Otherwise a failed
+        // install raises a modal NSAlert that blocks the run loop and prevents
+        // the test runner from establishing a connection.
+        if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] != nil {
+            return
+        }
+
         updateDockIcon()
         Task {
             do {
