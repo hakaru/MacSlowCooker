@@ -51,6 +51,9 @@ extension IconState {
         if flameWiggleEnabled {
             hasher.combine(Int((flameWigglePhase * 20.0).rounded())) // 0.05 rad step
         }
+        if let temperature {
+            hasher.combine(Int(temperature.rounded()))             // 1°C step
+        }
         return hasher.finalize()
     }
 }
