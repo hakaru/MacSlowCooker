@@ -178,6 +178,12 @@ final class DockIconAnimator {
     private var isConnected: Bool = false
     private var latestSample: GPUSample?
 
+    // システム状態
+    private var isSystemAsleep: Bool = false  // NSWorkspace スリープ通知で更新
+
+    // レンダリングガード
+    private var lastRenderedHash: Int = 0
+
     private var timer: Timer?
 }
 ```
@@ -185,7 +191,8 @@ final class DockIconAnimator {
 ### 5.2 定数
 
 - `tickInterval = 1.0 / 10.0` （10 fps）
-- `interpolationTimeConstant = 0.4` 秒（指数 lerp、0.4 秒で 63% 到達）
+- `interpolationTimeConstant = 0.7` 秒（指数 lerp、0.7 秒で 63% 到達）
+  - サンプル周期 1Hz に対して、0.4s だと前半 0.5s で 70% 到達してから後半 0.5s が静止し「カクつき」を感じる。0.7s なら次サンプル到着までに 76% 到達で滑らかに繋がる
 - `boilingFadeTimeConstant = 0.6` 秒
 - `wiggleSpeed = 4.0` rad/s
 
@@ -198,6 +205,7 @@ init(settings: Settings = .shared,
 
 func update(sample: GPUSample)        // XPC からのサンプル
 func setConnected(_ connected: Bool)  // 接続状態変化
+func setSystemAsleep(_ asleep: Bool)  // システムスリープ通知 (§5.7 参照)
 func settingsDidChange()              // @Observable 変更通知の受け口
 ```
 
@@ -225,20 +233,34 @@ state = IconState(
     isBoiling:          isBoiling,
     boilingIntensity:   boilingIntensity)
 
-NSApp.applicationIconImage = renderer.render(state: state)
+// 重複 set ガード: 前フレームと visually 同一なら applicationIconImage を更新しない
+// (Dock の WindowServer IPC コスト削減)
+let stateHash = state.visualHash
+if stateHash != lastRenderedHash {
+    NSApp.applicationIconImage = renderer.render(state: state)
+    lastRenderedHash = stateHash
+}
 
 // 自己停止
 if !needsAnimation() { timer.invalidate(); timer = nil }
 ```
 
+`IconState.visualHash` は 1 ピクセルレベルの差分を弾くため**量子化済みフィールド**で計算:
+- `displayedUsage` を 0.005 刻みに丸めて hash
+- `wigglePhase` を 0.05 rad 刻みに丸めて hash
+- `boilingIntensity` を 0.01 刻みに丸めて hash
+- `isConnected` / `isBoiling` / `flameWiggleEnabled` をそのまま含める
+
+これで「肉眼で違いの出ないフレーム」では NSApp への代入をスキップ。
+
 ### 5.5 `needsAnimation()` 条件
 
-タイマー継続条件（OR 結合）:
+タイマー継続条件（AND `!isSystemAsleep` で OR 結合）:
 - `settings.flameAnimation in [.wiggle, .both]`（常時アニメ）
 - `|displayedUsage - targetUsage| > 0.005`（補間中）
 - `|boilingIntensity - boilingTarget| > 0.005`（フェード中）
 
-いずれも false → タイマー停止 → 次の `update()` / `setConnected()` / `settingsDidChange()` まで CPU 0%。
+いずれも false、もしくは `isSystemAsleep == true` → タイマー停止 → 次の `update()` / `setConnected()` / `setSystemAsleep(false)` / `settingsDidChange()` まで CPU 0%。
 
 ### 5.6 沸騰判定
 
@@ -286,6 +308,30 @@ private func evaluateBoiling(sample: GPUSample) {
 
 `settingsDidChange()` で `boilingTrigger` が `.combined` 以外に変わった場合は `aboveThresholdSince = nil` にリセットする。
 
+### 5.7 システムスリープ対応
+
+Mac スリープ・ディスプレイオフ時にアニメーションを回し続けるのは無駄。`AppDelegate` で `NSWorkspace.shared.notificationCenter` の以下を購読し、Animator に通知:
+
+| 通知 | 動作 |
+|---|---|
+| `willSleepNotification` | `animator.setSystemAsleep(true)` → タイマー停止 |
+| `didWakeNotification` | `animator.setSystemAsleep(false)` → 必要なら再起動 |
+| `screensDidSleepNotification` | `animator.setSystemAsleep(true)` |
+| `screensDidWakeNotification` | `animator.setSystemAsleep(false)` |
+
+`setSystemAsleep(true)` は `aboveThresholdSince` をリセットしない（起床後に持続判定を継続したいため）が、もしスリープが長時間続いた場合は次の `update(sample:)` でクロックジャンプを検出して再評価する。
+
+```swift
+func setSystemAsleep(_ asleep: Bool) {
+    isSystemAsleep = asleep
+    if asleep {
+        timer?.invalidate(); timer = nil
+    } else {
+        ensureTimerRunning()
+    }
+}
+```
+
 ---
 
 ## 6. PreferencesWindowController
@@ -329,13 +375,32 @@ struct PreferencesView: View {
 
 ### 6.3 メニュー連携
 
-`AppDelegate.applicationDidFinishLaunching` で `NSApp.mainMenu` を手動構築:
+`AppDelegate.applicationDidFinishLaunching` で `NSApp.mainMenu` を手動構築する。**重要: macOS 標準の Edit / Window メニューを必ず含める** — 含めないと Preferences ウィンドウで Cmd-C / Cmd-V / Cmd-W などが効かない致命的 UX バグになる。
 
-- 「MacSlowCooker について」
-- セパレータ
-- 「設定…」 (⌘,)  → `showPreferences()`
-- セパレータ
-- 「MacSlowCooker を終了」 (⌘Q)
+メニュー構成:
+
+1. **App メニュー** (アプリ名)
+   - 「MacSlowCooker について」
+   - セパレータ
+   - 「設定…」 (⌘,) → `showPreferences()`
+   - 「サービス」（標準サブメニュー、`NSApp.servicesMenu` に紐づけ）
+   - セパレータ
+   - 「MacSlowCooker を隠す」 (⌘H)
+   - 「ほかを隠す」 (⌥⌘H)
+   - 「すべてを表示」
+   - セパレータ
+   - 「MacSlowCooker を終了」 (⌘Q)
+
+2. **Edit メニュー**
+   - Undo (⌘Z) / Redo (⇧⌘Z)
+   - セパレータ
+   - Cut (⌘X) / Copy (⌘C) / Paste (⌘V) / Select All (⌘A)
+   - これらは `NSResponder` チェーンに沿った標準セレクタ (`undo:`, `cut:`, `copy:`, `paste:`, `selectAll:`) に紐づける
+
+3. **Window メニュー**
+   - Minimize (⌘M) / Zoom
+   - 「すべてを手前に移動」
+   - 構築後 `NSApp.windowsMenu = windowMenu` で標準動作を有効化
 
 Storyboard / MainMenu.xib は使わない（既存 main.swift と同じ手動構築方針）。
 
@@ -360,8 +425,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         buildMainMenu()
         observeSettings()
+        observeSystemSleep()
         animator.setConnected(false)  // 初回 Disconnected 描画
         Task { /* HelperInstaller → connectXPC */ }
+    }
+
+    private func observeSystemSleep() {
+        let nc = NSWorkspace.shared.notificationCenter
+        nc.addObserver(forName: NSWorkspace.willSleepNotification,        object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(true) }
+        nc.addObserver(forName: NSWorkspace.didWakeNotification,          object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(false) }
+        nc.addObserver(forName: NSWorkspace.screensDidSleepNotification,  object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(true) }
+        nc.addObserver(forName: NSWorkspace.screensDidWakeNotification,   object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(false) }
     }
 
     private func connectXPC() {
@@ -453,8 +527,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 - `.thermalPressure`: "Nominal"/"Fair"/"Serious"/"Critical" × 期待値
 - `.combined`: usage 持続時間と thermalPressure の組み合わせ
 
-**DockIconAnimatorTests** (~15 ケース、`TestClock` 注入)
-- 補間: targetUsage = 1.0 で 10 tick 後に displayedUsage が 0.92 程度
+**DockIconAnimatorTests** (~17 ケース、`TestClock` 注入)
+- 補間: targetUsage = 1.0 で 10 tick 後に displayedUsage が 0.76 程度（時定数 0.7s）
 - wiggle 無効でアイドル状態 → タイマー自己停止
 - wiggle 有効 → タイマー継続
 - 沸騰フェードイン: isBoiling true で 1 秒後に boilingIntensity > 0.8
@@ -462,6 +536,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 - 5 秒持続: usage = 0.95 を 4.9 秒 → not boiling、5.1 秒 → boiling
 - isConnected = false で targetUsage = 0、isBoiling = false にリセット
 - `settingsDidChange()` 後にタイマー状態が再評価される
+- **XPC 再接続シナリオ**: setConnected(false) → setConnected(true) → 新サンプル投入で `aboveThresholdSince` が新規再起算されるか検証
+- **システムスリープ**: setSystemAsleep(true) でタイマー停止、setSystemAsleep(false) で再開
+- **重複 set ガード**: 連続 tick で IconState が量子化レベルで同一なら `applicationIconImage` への代入回数が増えないこと（モックレンダラの呼び出し回数で検証）
 
 **DutchOvenRendererTests** (3 ケース)
 - 各代表状態 (idle / cooking / boiling) で `render()` が non-empty NSImage を返す
@@ -480,6 +557,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 - [ ] アイドル時 (`top -l 1 | grep MacSlowCooker`) で CPU が ~0%（タイマー停止確認）
 - [ ] アニメ `.both` モードで CPU が許容範囲（< 2%）
 - [ ] HelperTool kickstart 後の再接続で animator が new sample を受けて動く
+- [ ] Mac をスリープ → 起床して animator が再開する
+- [ ] Preferences ウィンドウで Cmd-C/V/X が動作する（Edit メニュー欠落チェック）
 
 ---
 
@@ -514,3 +593,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 - **per-process 表示（具材プカプカ）**: IOAccelerator 系 private API 調査が前提。現状は技術検証フェーズが必要
 - **ロケール検出 + 表示名切替**: `InfoPlist.strings` に `ja.lproj` 追加 + `Locale.preferredLanguages` で初期 potStyle のヒントを与える
 - **スナップショットテスト**: ビジュアル安定後、`SnapshotTesting` 導入を検討
+- **CGLayer による静的パーツのキャッシュ** (deferred): 鍋本体を一度描画してキャッシュ、炎・湯気のみ毎フレーム再描画。実機計測で CPU/GPU 占有率に問題が出てから着手（早すぎる最適化を避ける）
+- **低電力モード対応**: `ProcessInfo.isLowPowerModeEnabled` 監視、tick を 5fps へ降格 / wiggle 強制 OFF。「Slow Cooker = エコ」のブランドコンセプトと整合する将来機能。設定 UI で「低電力モード時の挙動」を明示してユーザー混乱を避ける
+- **`power` (W) 急増を沸騰補助シグナルに**: M3 Max/Ultra で `gpuUsage` がサチりにくい問題への対応。閾値の検証が必要なため Phase 2 で実機計測込みで詰める
