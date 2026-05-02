@@ -9,10 +9,12 @@
 /* Begin PBXBuildFile section */
 		0EAFD6B5ABFA5B1F45DA1672 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59F6AFB7A4D5C502FE90536A /* AppDelegate.swift */; };
 		27CEF30175E707F93F3D8D75 /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */; };
+		2DAB9D347E6C17E03AC42A9C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A374B00177825463470C0C6 /* PowerMetricsParser.swift */; };
 		3473092E04615DBB8AE7969B /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF86BD245048776217B7E5A /* GPUSample.swift */; };
 		3A3B3A17350E160D13338618 /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4D77520291CF43413AA488 /* GPUSampleTests.swift */; };
 		3CB96833702DAF02BA9345F8 /* PowerMetricsParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */; };
 		4FDA1C712C851A02219F70BA /* DockIconRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */; };
+		5E9683B12D207E2EDC05C158 /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A374B00177825463470C0C6 /* PowerMetricsParser.swift */; };
 		7CD280B4E95C46C45152CAFB /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */; };
 		859B91F2AE8CAD75757C8B36 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F1127DBD6F81F1F3229B51 /* main.swift */; };
 		8B2D8C94648F07DE41990CDF /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */; };
@@ -58,6 +60,7 @@
 		73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
 		74808542E7D63C7F404DC17E /* GPUSMI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUSMI.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E4D77520291CF43413AA488 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
+		8A374B00177825463470C0C6 /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
 		8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
 		959EAF4267771ED79EAE6378 /* DockIconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconRenderer.swift; sourceTree = "<group>"; };
 		B2BDA3F81AEEB551BBB8284A /* HelperInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
@@ -106,6 +109,7 @@
 			isa = PBXGroup;
 			children = (
 				DDF86BD245048776217B7E5A /* GPUSample.swift */,
+				8A374B00177825463470C0C6 /* PowerMetricsParser.swift */,
 				C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */,
 			);
 			path = Shared;
@@ -254,6 +258,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				BC335288AE3F0F1C0425C17D /* GPUSample.swift in Sources */,
+				5E9683B12D207E2EDC05C158 /* PowerMetricsParser.swift in Sources */,
 				FB03B3F96CEE61C4EC95296E /* PowerMetricsRunner.swift in Sources */,
 				C9837EB24EC762F208576BDA /* XPCProtocol.swift in Sources */,
 				859B91F2AE8CAD75757C8B36 /* main.swift in Sources */,
@@ -282,6 +287,7 @@
 				A36936ACC220AC9342470915 /* HelperInstaller.swift in Sources */,
 				E62BA83AF094C5D838211353 /* PopupView.swift in Sources */,
 				8B2D8C94648F07DE41990CDF /* PopupWindowController.swift in Sources */,
+				2DAB9D347E6C17E03AC42A9C /* PowerMetricsParser.swift in Sources */,
 				D4A89691E9FB5260DC306F11 /* XPCClient.swift in Sources */,
 				27CEF30175E707F93F3D8D75 /* XPCProtocol.swift in Sources */,
 			);
