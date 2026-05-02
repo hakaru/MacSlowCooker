@@ -9,6 +9,8 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    DEVELOPMENT_TEAM: K38MBRNKAT
+    CODE_SIGN_STYLE: Automatic
 
 targets:
   GPUSMI:
@@ -33,13 +35,18 @@ targets:
       - target: HelperTool
         embed: false
     postBuildScripts:
-      - name: "Copy HelperTool to LaunchDaemons"
+      - name: "Copy HelperTool to MacOS and plist to LaunchDaemons"
         script: |
+          MACOS_DEST="${CODESIGNING_FOLDER_PATH}/Contents/MacOS"
+          PLIST_DEST="${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons"
+          mkdir -p "${MACOS_DEST}" "${PLIST_DEST}"
           HELPER_SRC="${BUILT_PRODUCTS_DIR}/HelperTool"
-          DEST="${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons"
-          mkdir -p "${DEST}"
           if [ -f "${HELPER_SRC}" ]; then
-            cp "${HELPER_SRC}" "${DEST}/HelperTool"
+            cp "${HELPER_SRC}" "${MACOS_DEST}/HelperTool"
+          fi
+          PLIST_SRC="${SRCROOT}/GPUSMI/Library/LaunchDaemons/com.gpusmi.helper.plist"
+          if [ -f "${PLIST_SRC}" ]; then
+            cp "${PLIST_SRC}" "${PLIST_DEST}/com.gpusmi.helper.plist"
           fi
         basedOnDependencyAnalysis: false
 
@@ -55,6 +62,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.gpusmi.helper
         INFOPLIST_FILE: HelperTool/Info.plist
         CODE_SIGN_ENTITLEMENTS: HelperTool/HelperTool.entitlements
+        OTHER_LDFLAGS: "-sectcreate __TEXT __info_plist $(INFOPLIST_FILE)"
 
   GPUSMITests:
     type: bundle.unit-test

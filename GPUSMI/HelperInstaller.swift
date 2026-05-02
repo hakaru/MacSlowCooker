@@ -32,13 +32,7 @@ final class HelperInstaller {
             try await register(service: service)
 
         case .enabled:
-            if await needsUpdate() {
-                os_log("Updating daemon...", log: log, type: .info)
-                try await service.unregister()
-                try await register(service: service)
-            } else {
-                os_log("Daemon already up-to-date", log: log, type: .info)
-            }
+            os_log("Daemon enabled", log: log, type: .info)
 
         case .requiresApproval:
             os_log("Requires approval in System Settings", log: log, type: .error)
@@ -63,30 +57,10 @@ final class HelperInstaller {
         } catch {
             throw HelperInstallerError.registrationFailed(error)
         }
-    }
-
-    private static func needsUpdate() async -> Bool {
-        guard let bundleHelperURL = Bundle.main.url(
-            forResource: "HelperTool",
-            withExtension: nil,
-            subdirectory: "Contents/Library/LaunchDaemons"
-        ),
-        let bundleVersion = Bundle(url: bundleHelperURL)?.infoDictionary?["CFBundleVersion"] as? String
-        else { return false }
-
-        return await withCheckedContinuation { continuation in
-            let conn = NSXPCConnection(machServiceName: "com.gpusmi.helper", options: [])
-            conn.remoteObjectInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
-            conn.resume()
-
-            let proxy = conn.remoteObjectProxyWithErrorHandler { _ in
-                continuation.resume(returning: true)
-            } as? GPUSMIHelperProtocol
-
-            proxy?.helperVersion { installedVersion in
-                conn.invalidate()
-                continuation.resume(returning: installedVersion != bundleVersion)
-            }
+        if service.status == .requiresApproval {
+            os_log("Registration requires user approval", log: log, type: .info)
+            SMAppService.openSystemSettingsLoginItems()
+            throw HelperInstallerError.requiresApproval
         }
     }
 }

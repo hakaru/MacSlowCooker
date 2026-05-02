@@ -9,7 +9,7 @@ final class PopupWindowController: NSWindowController {
 
     convenience init(store: GPUDataStore) {
         let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 320, height: 280),
+            contentRect: NSRect(x: 0, y: 0, width: 520, height: 480),
             styleMask: [.borderless, .nonactivatingPanel],
             backing: .buffered,
             defer: false

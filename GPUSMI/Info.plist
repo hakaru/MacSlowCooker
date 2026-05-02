@@ -10,14 +10,7 @@
     <string>1</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0</string>
-    <key>LSUIElement</key>
-    <true/>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
-    <key>SMPrivilegedExecutables</key>
-    <dict>
-        <key>com.gpusmi.helper</key>
-        <string>identifier "com.gpusmi.helper" and anchor apple generic</string>
-    </dict>
 </dict>
 </plist>

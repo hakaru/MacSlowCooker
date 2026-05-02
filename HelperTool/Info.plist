@@ -3,12 +3,12 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <string>com.gpusmi.helper</string>
     <key>CFBundleVersion</key>
     <string>1</string>
     <key>SMAuthorizedClients</key>
     <array>
-        <string>identifier "com.gpusmi.app" and anchor apple generic</string>
+        <string>identifier "com.gpusmi.app" and anchor apple generic and certificate leaf[subject.OU] = "K38MBRNKAT"</string>
     </array>
 </dict>
 </plist>

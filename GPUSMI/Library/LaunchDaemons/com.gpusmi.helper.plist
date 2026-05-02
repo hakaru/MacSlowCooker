@@ -10,6 +10,6 @@
         <true/>
     </dict>
     <key>BundleProgram</key>
-    <string>Contents/Library/LaunchDaemons/HelperTool</string>
+    <string>Contents/MacOS/HelperTool</string>
 </dict>
 </plist>

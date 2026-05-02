@@ -15,6 +15,8 @@
 		3CB96833702DAF02BA9345F8 /* PowerMetricsParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */; };
 		4FDA1C712C851A02219F70BA /* DockIconRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */; };
 		5E9683B12D207E2EDC05C158 /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A374B00177825463470C0C6 /* PowerMetricsParser.swift */; };
+		628EC5B01F73DF682C7211D0 /* TemperatureReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52929F8EB31ADF12AC87A206 /* TemperatureReader.swift */; };
+		69127FE305D7E246D9BA1699 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14347D1C3827B9B2878D5502 /* main.swift */; };
 		7CD280B4E95C46C45152CAFB /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */; };
 		859B91F2AE8CAD75757C8B36 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F1127DBD6F81F1F3229B51 /* main.swift */; };
 		8B2D8C94648F07DE41990CDF /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */; };
@@ -48,12 +50,14 @@
 /* Begin PBXFileReference section */
 		042C66BFAD5EE69DFDB1B523 /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A499C057F0A5923BA849860 /* GPUSMITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GPUSMITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		14347D1C3827B9B2878D5502 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1ACDF47A4E1F3D01716AB448 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStore.swift; sourceTree = "<group>"; };
 		2AA6E6153101B0511D3E6B01 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
 		2C105BD6A424E86F8FDB77D3 /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
 		316714102102F2CF6C4ABEDF /* XPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCClient.swift; sourceTree = "<group>"; };
 		4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconRendererTests.swift; sourceTree = "<group>"; };
+		52929F8EB31ADF12AC87A206 /* TemperatureReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureReader.swift; sourceTree = "<group>"; };
 		59F6AFB7A4D5C502FE90536A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		683824A5ADB04C0D19CFD147 /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
 		71F1127DBD6F81F1F3229B51 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -101,6 +105,7 @@
 				BD7F05A068418E2C0D9D9F67 /* Info.plist */,
 				71F1127DBD6F81F1F3229B51 /* main.swift */,
 				683824A5ADB04C0D19CFD147 /* PowerMetricsRunner.swift */,
+				52929F8EB31ADF12AC87A206 /* TemperatureReader.swift */,
 			);
 			path = HelperTool;
 			sourceTree = "<group>";
@@ -134,6 +139,7 @@
 				B8579DF82B2FA5AF491E27E4 /* GPUSMI.entitlements */,
 				B2BDA3F81AEEB551BBB8284A /* HelperInstaller.swift */,
 				BAB6A2E0D3F2A33DFC75A8AD /* Info.plist */,
+				14347D1C3827B9B2878D5502 /* main.swift */,
 				1ACDF47A4E1F3D01716AB448 /* PopupView.swift */,
 				8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */,
 				316714102102F2CF6C4ABEDF /* XPCClient.swift */,
@@ -149,7 +155,7 @@
 			buildConfigurationList = 0C741478D8E1D02DA83DB049 /* Build configuration list for PBXNativeTarget "GPUSMI" */;
 			buildPhases = (
 				FD5CE30792135F7776DBF2E8 /* Sources */,
-				A6A75678B29B1B55CE8DDEE3 /* Copy HelperTool to LaunchDaemons */,
+				5EE5E7E0B004090EC9B0C2FD /* Copy HelperTool to MacOS and plist to LaunchDaemons */,
 			);
 			buildRules = (
 			);
@@ -207,6 +213,18 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					6B6BDC715EB4FC00AE0B6DBE = {
+						DevelopmentTeam = K38MBRNKAT;
+						ProvisioningStyle = Automatic;
+					};
+					D38374FD60A738E49D98AFE7 = {
+						DevelopmentTeam = K38MBRNKAT;
+						ProvisioningStyle = Automatic;
+					};
+					F238F076BB5B9A471E72E446 = {
+						DevelopmentTeam = K38MBRNKAT;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = D9E3F2FB85245B48E6882D26 /* Build configuration list for PBXProject "GPUSMI" */;
@@ -231,7 +249,7 @@
 /* End PBXProject section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		A6A75678B29B1B55CE8DDEE3 /* Copy HelperTool to LaunchDaemons */ = {
+		5EE5E7E0B004090EC9B0C2FD /* Copy HelperTool to MacOS and plist to LaunchDaemons */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -241,14 +259,14 @@
 			);
 			inputPaths = (
 			);
-			name = "Copy HelperTool to LaunchDaemons";
+			name = "Copy HelperTool to MacOS and plist to LaunchDaemons";
 			outputFileListPaths = (
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "HELPER_SRC=\"${BUILT_PRODUCTS_DIR}/HelperTool\"\nDEST=\"${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons\"\nmkdir -p \"${DEST}\"\nif [ -f \"${HELPER_SRC}\" ]; then\n  cp \"${HELPER_SRC}\" \"${DEST}/HelperTool\"\nfi\n";
+			shellScript = "MACOS_DEST=\"${CODESIGNING_FOLDER_PATH}/Contents/MacOS\"\nPLIST_DEST=\"${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons\"\nmkdir -p \"${MACOS_DEST}\" \"${PLIST_DEST}\"\nHELPER_SRC=\"${BUILT_PRODUCTS_DIR}/HelperTool\"\nif [ -f \"${HELPER_SRC}\" ]; then\n  cp \"${HELPER_SRC}\" \"${MACOS_DEST}/HelperTool\"\nfi\nPLIST_SRC=\"${SRCROOT}/GPUSMI/Library/LaunchDaemons/com.gpusmi.helper.plist\"\nif [ -f \"${PLIST_SRC}\" ]; then\n  cp \"${PLIST_SRC}\" \"${PLIST_DEST}/com.gpusmi.helper.plist\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -260,6 +278,7 @@
 				BC335288AE3F0F1C0425C17D /* GPUSample.swift in Sources */,
 				5E9683B12D207E2EDC05C158 /* PowerMetricsParser.swift in Sources */,
 				FB03B3F96CEE61C4EC95296E /* PowerMetricsRunner.swift in Sources */,
+				628EC5B01F73DF682C7211D0 /* TemperatureReader.swift in Sources */,
 				C9837EB24EC762F208576BDA /* XPCProtocol.swift in Sources */,
 				859B91F2AE8CAD75757C8B36 /* main.swift in Sources */,
 			);
@@ -290,6 +309,7 @@
 				2DAB9D347E6C17E03AC42A9C /* PowerMetricsParser.swift in Sources */,
 				D4A89691E9FB5260DC306F11 /* XPCClient.swift in Sources */,
 				27CEF30175E707F93F3D8D75 /* XPCProtocol.swift in Sources */,
+				69127FE305D7E246D9BA1699 /* main.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -337,6 +357,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_LDFLAGS = "-sectcreate __TEXT __info_plist $(INFOPLIST_FILE)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.helper;
 				SDKROOT = macosx;
 			};
@@ -375,8 +396,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = K38MBRNKAT;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -448,8 +471,10 @@
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = K38MBRNKAT;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -523,6 +548,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				OTHER_LDFLAGS = "-sectcreate __TEXT __info_plist $(INFOPLIST_FILE)";
 				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.helper;
 				SDKROOT = macosx;
 			};

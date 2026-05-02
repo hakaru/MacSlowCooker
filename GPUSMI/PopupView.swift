@@ -5,29 +5,32 @@ struct PopupView: View {
     let store: GPUDataStore
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 18) {
             header
             charts
             metrics
         }
-        .padding(16)
-        .frame(width: 320, height: 280)
-        .background(.black.opacity(0.92))
+        .padding(24)
+        .frame(width: 520, height: 480)
+        .background(.black.opacity(0.94))
         .preferredColorScheme(.dark)
     }
 
     private var header: some View {
-        HStack {
+        HStack(spacing: 8) {
             Text("GPUSMI")
-                .font(.system(size: 13, weight: .semibold, design: .monospaced))
+                .font(.system(size: 18, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white)
-            Text("· \(gpuName)")
-                .font(.system(size: 12))
-                .foregroundStyle(.secondary)
+            Text(gpuName)
+                .font(.system(size: 14))
+                .foregroundStyle(.white.opacity(0.85))
             Spacer()
+            Text("\(store.samples.count) samples")
+                .font(.system(size: 11, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.6))
             Circle()
-                .fill(store.isConnected ? Color.green : Color.gray)
-                .frame(width: 6, height: 6)
+                .fill(store.isConnected ? Color.green : Color.red)
+                .frame(width: 10, height: 10)
         }
     }
 
@@ -60,9 +63,9 @@ struct PopupView: View {
         format: String,
         scale: Double
     ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(alignment: .leading, spacing: 6) {
             Text(title)
-                .font(.system(size: 10))
+                .font(.system(size: 13, weight: .medium))
                 .foregroundStyle(.secondary)
             Chart(samples.indices, id: \.self) { i in
                 let v = value(samples[i])
@@ -76,34 +79,39 @@ struct PopupView: View {
                     y: .value("v", v * scale)
                 )
                 .foregroundStyle(color)
-                .lineStyle(StrokeStyle(lineWidth: 1.5))
+                .lineStyle(StrokeStyle(lineWidth: 2))
             }
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
-            .frame(height: 80)
+            .frame(height: 130)
             .opacity(store.isConnected ? 1.0 : 0.4)
         }
     }
 
     private var metrics: some View {
-        HStack {
-            metricItem(label: "GPU", value: gpuText, color: .cyan)
-            metricItem(label: "Temp", value: tempText, color: .orange)
-            metricItem(label: "Power", value: powerText, color: .secondary)
-            metricItem(label: "ANE", value: aneText, color: .purple)
+        HStack(spacing: 8) {
+            metricItem(label: "GPU使用率", value: gpuText, color: .cyan)
+            metricItem(label: "SoC 温度", value: tempText, color: tempColor)
+            metricItem(label: "電力", value: powerText, color: Color(red: 0.7, green: 0.7, blue: 0.75))
+            metricItem(label: "ANE 電力", value: anePowerText, color: .purple)
         }
     }
 
     private func metricItem(label: String, value: String, color: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.system(size: 14, weight: .semibold, design: .monospaced))
-                .foregroundStyle(color)
+        VStack(spacing: 8) {
             Text(label)
-                .font(.system(size: 9))
-                .foregroundStyle(.secondary)
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundStyle(.white)
+            Text(value)
+                .font(.system(size: 28, weight: .bold, design: .monospaced))
+                .foregroundStyle(.white)
+                .minimumScaleFactor(0.5)
+                .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, 18)
+        .background(color.opacity(0.55))
+        .cornerRadius(12)
     }
 
     private var gpuName: String {
@@ -119,12 +127,34 @@ struct PopupView: View {
         latest.map { String(format: "%.0f%%", $0.gpuUsage * 100) } ?? "--"
     }
     private var tempText: String {
-        latest?.temperature.map { String(format: "%.0f°C", $0) } ?? "--"
+        if let t = latest?.temperature {
+            return String(format: "%.0f°C", t)
+        }
+        // Fallback to thermal_pressure level when actual sensor temperature is unavailable
+        switch latest?.thermalPressure {
+        case "Nominal":  return "良好"
+        case "Fair":     return "やや高"
+        case "Serious":  return "高"
+        case "Critical": return "危険"
+        default:         return "--"
+        }
+    }
+    private var tempColor: Color {
+        if latest?.temperature != nil {
+            return .orange
+        }
+        switch latest?.thermalPressure {
+        case "Nominal":  return .green
+        case "Fair":     return .yellow
+        case "Serious":  return .orange
+        case "Critical": return .red
+        default:         return .orange
+        }
     }
     private var powerText: String {
         latest?.power.map { String(format: "%.1fW", $0) } ?? "--"
     }
-    private var aneText: String {
-        latest?.aneUsage.map { String(format: "%.0f%%", $0 * 100) } ?? "--"
+    private var anePowerText: String {
+        latest?.anePower.map { String(format: "%.2fW", $0) } ?? "--"
     }
 }

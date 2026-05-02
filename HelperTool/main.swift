@@ -3,16 +3,33 @@ import os.log
 
 private let log = OSLog(subsystem: "com.gpusmi", category: "helper")
 
-// MARK: - XPC Service implementation
+// MARK: - Shared service implementation
 
 final class HelperService: NSObject, GPUSMIHelperProtocol {
+    static let shared = HelperService()
+
     private let runner = PowerMetricsRunner()
+    private let temperatureReader = TemperatureReader()
+    private let queue = DispatchQueue(label: "com.gpusmi.helper.sample")
     private var latestSampleData: Data?
+    private var sampling = false
 
     override init() {
         super.init()
         runner.onSample = { [weak self] sample in
-            self?.latestSampleData = try? JSONEncoder().encode(sample)
+            guard let self else { return }
+            let temp = self.temperatureReader.readGPUTemperature()
+            let augmented = GPUSample(
+                timestamp: sample.timestamp,
+                gpuUsage: sample.gpuUsage,
+                temperature: temp ?? sample.temperature,
+                thermalPressure: sample.thermalPressure,
+                power: sample.power,
+                anePower: sample.anePower,
+                aneUsage: sample.aneUsage
+            )
+            let data = try? JSONEncoder().encode(augmented)
+            self.queue.async { self.latestSampleData = data }
         }
         runner.onError = { message in
             os_log("Runner error: %{public}s", log: log, type: .error, message)
@@ -20,23 +37,32 @@ final class HelperService: NSObject, GPUSMIHelperProtocol {
     }
 
     func startSampling(withReply reply: @escaping (Bool, String?) -> Void) {
-        do {
-            try runner.start()
-            os_log("Sampling started", log: log, type: .info)
-            reply(true, nil)
-        } catch {
-            os_log("Failed to start: %{public}s", log: log, type: .error, error.localizedDescription)
-            reply(false, error.localizedDescription)
+        queue.async { [weak self] in
+            guard let self else { reply(false, "service deallocated"); return }
+            if self.sampling {
+                reply(true, nil)
+                return
+            }
+            do {
+                try self.runner.start()
+                self.sampling = true
+                os_log("Sampling started", log: log, type: .info)
+                reply(true, nil)
+            } catch {
+                os_log("Failed to start: %{public}s", log: log, type: .error, error.localizedDescription)
+                reply(false, error.localizedDescription)
+            }
         }
     }
 
     func stopSampling(withReply reply: @escaping () -> Void) {
-        runner.stop()
+        // Multi-client daemon: keep runner alive while daemon is loaded.
+        // launchd will idle the process out when no clients remain connected.
         reply()
     }
 
     func fetchLatestSample(withReply reply: @escaping (Data?) -> Void) {
-        reply(latestSampleData)
+        queue.async { [weak self] in reply(self?.latestSampleData) }
     }
 
     func helperVersion(withReply reply: @escaping (String) -> Void) {
@@ -45,14 +71,19 @@ final class HelperService: NSObject, GPUSMIHelperProtocol {
     }
 }
 
-// MARK: - XPC Listener
+// MARK: - XPC Listener with code signing requirement
 
 final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
+
+    private static let appRequirement =
+        "identifier \"com.gpusmi.app\" and anchor apple generic and certificate leaf[subject.OU] = \"K38MBRNKAT\""
+
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
-        // In production this would verify the caller's Team ID via auditToken + SecCode.
-        // For development without code signing, accept all connections.
+        if #available(macOS 13.0, *) {
+            connection.setCodeSigningRequirement(Self.appRequirement)
+        }
         connection.exportedInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
-        connection.exportedObject = HelperService()
+        connection.exportedObject = HelperService.shared
         connection.resume()
         os_log("Accepted XPC connection", log: log, type: .info)
         return true

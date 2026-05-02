@@ -4,7 +4,6 @@ import os.log
 private let log = OSLog(subsystem: "com.gpusmi", category: "app")
 
 @MainActor
-@main
 final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let store = GPUDataStore()
@@ -12,14 +11,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private lazy var popupController = PopupWindowController(store: store)
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NSApp.setActivationPolicy(.accessory)
-
+        updateDockIcon()
         Task {
             do {
                 try await HelperInstaller.installIfNeeded()
                 connectXPC()
             } catch {
                 os_log("Install failed: %{public}s", log: log, type: .error, error.localizedDescription)
+                NSApp.activate(ignoringOtherApps: true)
                 showError(error.localizedDescription)
             }
         }

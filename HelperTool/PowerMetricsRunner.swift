@@ -9,6 +9,7 @@ final class PowerMetricsRunner {
     private var stdoutPipe: Pipe?
     private var buffer = Data()
     private var failureCount = 0
+    private var isStopping = false
     private let maxFailures = 3
     private let restartDelay: TimeInterval = 5.0
 
@@ -17,10 +18,12 @@ final class PowerMetricsRunner {
 
     func start() throws {
         failureCount = 0
+        isStopping = false
         try launchProcess()
     }
 
     func stop() {
+        isStopping = true
         stdoutPipe?.fileHandleForReading.readabilityHandler = nil
         process?.terminate()
         process = nil
@@ -32,15 +35,18 @@ final class PowerMetricsRunner {
     private func launchProcess() throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/powermetrics")
-        p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist"]
+        // --show-all is required on macOS 26 to surface processor.ane_power; drop it
+        // if/when powermetrics regains that field under the bare ane_power sampler.
+        p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist", "--show-all"]
 
         let pipe = Pipe()
         p.standardOutput = pipe
         p.standardError = FileHandle.nullDevice
 
         p.terminationHandler = { [weak self] _ in
-            os_log("powermetrics terminated", log: log, type: .error)
-            self?.handleCrash()
+            guard let self, !self.isStopping else { return }
+            os_log("powermetrics terminated unexpectedly", log: log, type: .error)
+            self.handleCrash()
         }
 
         try p.run()
@@ -67,7 +73,7 @@ final class PowerMetricsRunner {
         }
         os_log("powermetrics crash #%d, restarting in 5s", log: log, type: .error, failureCount)
         DispatchQueue.global().asyncAfter(deadline: .now() + restartDelay) { [weak self] in
-            guard let self else { return }
+            guard let self, !self.isStopping else { return }
             do {
                 try self.launchProcess()
             } catch {
@@ -85,8 +91,6 @@ final class PowerMetricsRunner {
             guard !chunk.isEmpty else { continue }
             if let sample = PowerMetricsParser.parse(plistData: chunk, timestamp: Date()) {
                 onSample?(sample)
-            } else {
-                os_log("Failed to parse plist chunk (%d bytes)", log: log, type: .debug, chunk.count)
             }
         }
     }

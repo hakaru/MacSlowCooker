@@ -32,7 +32,7 @@ final class XPCClient {
     }
 
     private func makeConnection() {
-        let conn = NSXPCConnection(machServiceName: "com.gpusmi.helper", options: [])
+        let conn = NSXPCConnection(machServiceName: "com.gpusmi.helper", options: .privileged)
         conn.remoteObjectInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
 
         conn.interruptionHandler = { [weak self] in
