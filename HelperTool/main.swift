@@ -1,16 +1,16 @@
 import Foundation
 import os.log
 
-private let log = OSLog(subsystem: "com.gpusmi", category: "helper")
+private let log = OSLog(subsystem: "com.macslowcooker", category: "helper")
 
 // MARK: - Shared service implementation
 
-final class HelperService: NSObject, GPUSMIHelperProtocol {
+final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     static let shared = HelperService()
 
     private let runner = PowerMetricsRunner()
     private let temperatureReader = TemperatureReader()
-    private let queue = DispatchQueue(label: "com.gpusmi.helper.sample")
+    private let queue = DispatchQueue(label: "com.macslowcooker.helper.sample")
     private var latestSampleData: Data?
     private var sampling = false
 
@@ -76,13 +76,13 @@ final class HelperService: NSObject, GPUSMIHelperProtocol {
 final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
 
     private static let appRequirement =
-        "identifier \"com.gpusmi.app\" and anchor apple generic and certificate leaf[subject.OU] = \"K38MBRNKAT\""
+        "identifier \"com.macslowcooker.app\" and anchor apple generic and certificate leaf[subject.OU] = \"K38MBRNKAT\""
 
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
         if #available(macOS 13.0, *) {
             connection.setCodeSigningRequirement(Self.appRequirement)
         }
-        connection.exportedInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
+        connection.exportedInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)
         connection.exportedObject = HelperService.shared
         connection.resume()
         os_log("Accepted XPC connection", log: log, type: .info)
@@ -93,7 +93,7 @@ final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
 // MARK: - Entry point
 
 let serviceDelegate = ServiceDelegate()
-let listener = NSXPCListener(machServiceName: "com.gpusmi.helper")
+let listener = NSXPCListener(machServiceName: "com.macslowcooker.helper")
 listener.delegate = serviceDelegate
 listener.resume()
 os_log("HelperTool started", log: log, type: .info)

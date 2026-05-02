@@ -2,7 +2,7 @@ import Foundation
 import ServiceManagement
 import os.log
 
-private let log = OSLog(subsystem: "com.gpusmi", category: "app")
+private let log = OSLog(subsystem: "com.macslowcooker", category: "app")
 
 enum HelperInstallerError: LocalizedError {
     case requiresApproval
@@ -11,7 +11,7 @@ enum HelperInstallerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .requiresApproval:
-            return "System Settings でGPUSMIの実行を許可してください"
+            return "System Settings でMacSlowCookerの実行を許可してください"
         case .registrationFailed(let e):
             return "HelperToolのインストールに失敗しました: \(e.localizedDescription)"
         }
@@ -21,7 +21,7 @@ enum HelperInstallerError: LocalizedError {
 @MainActor
 final class HelperInstaller {
 
-    private static let plistName = "com.gpusmi.helper.plist"
+    private static let plistName = "com.macslowcooker.helper.plist"
 
     static func installIfNeeded() async throws {
         let service = SMAppService.daemon(plistName: plistName)
@@ -42,7 +42,7 @@ final class HelperInstaller {
         case .notFound:
             os_log("Daemon plist not found in bundle", log: log, type: .fault)
             throw HelperInstallerError.registrationFailed(
-                NSError(domain: "com.gpusmi", code: -1,
+                NSError(domain: "com.macslowcooker", code: -1,
                         userInfo: [NSLocalizedDescriptionKey: "Daemon plist not found"])
             )
 

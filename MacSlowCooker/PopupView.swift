@@ -18,7 +18,7 @@ struct PopupView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text("GPUSMI")
+            Text("MacSlowCooker")
                 .font(.system(size: 18, weight: .bold, design: .monospaced))
                 .foregroundStyle(.white)
             Text(gpuName)

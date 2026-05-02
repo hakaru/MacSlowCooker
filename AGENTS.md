@@ -1,7 +1,7 @@
 <claude-mem-context>
 # Memory Context
 
-# [GPUSMI] recent context, 2026-05-03 2:06am GMT+9
+# [MacSlowCooker] recent context, 2026-05-03 2:06am GMT+9
 
 Legend: 🎯session 🔴bugfix 🟣feature 🔄refactor ✅change 🔵discovery ⚖️decision 🚨security_alert 🔐security_note
 Format: ID TIME TYPE TITLE
@@ -20,7 +20,7 @@ S1396 Observe and document completion of GPUSMI design specification refinement 
 S1410 GPUSMI 実装プラン文書を作成・コミット (May 2 at 7:29 PM)
 S1411 GPUSMI — 実装計画文書の作成と実行方式の選択（「OK 進めよう」） (May 2 at 7:37 PM)
 S1415 Initialize GPUSMI project structure with design spec, implementation plan, and task breakdown for GPU monitoring Mac app with temperature display (May 2 at 7:40 PM)
-1729 7:47p 🔵 GPUSMI — GPUSMITests Has No Standalone Scheme; Tests Run Under GPUSMI Scheme
+1729 7:47p 🔵 GPUSMI — MacSlowCookerTests Has No Standalone Scheme; Tests Run Under GPUSMI Scheme
 1730 " 🔴 GPUSMI — GPUSampleTests Compile Error: XCTAssertEqual accuracy overload Requires Non-Optional Double
 1731 " 🟣 GPUSMI — Task 3 Complete: GPUSample Tests Pass 2/2, Committed (4e0a149)
 1732 " ✅ GPUSMI — Task 12 Complete; Task 13 (PowerMetricsRunner) Started

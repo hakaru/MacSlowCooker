@@ -1,5 +1,5 @@
 import XCTest
-@testable import GPUSMI
+@testable import MacSlowCooker
 
 final class DockIconRendererTests: XCTestCase {
 

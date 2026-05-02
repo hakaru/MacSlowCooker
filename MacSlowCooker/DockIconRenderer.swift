@@ -2,7 +2,7 @@ import AppKit
 import CoreGraphics
 import os.log
 
-private let renderLog = OSLog(subsystem: "com.gpusmi", category: "render")
+private let renderLog = OSLog(subsystem: "com.macslowcooker", category: "render")
 
 enum DockIconRenderer {
 

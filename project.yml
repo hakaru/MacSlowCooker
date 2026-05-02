@@ -1,6 +1,6 @@
-name: GPUSMI
+name: MacSlowCooker
 options:
-  bundleIdPrefix: com.gpusmi
+  bundleIdPrefix: com.macslowcooker
   xcodeVersion: "16.0"
   deploymentTarget:
     macOS: "14.0"
@@ -13,22 +13,22 @@ settings:
     CODE_SIGN_STYLE: Automatic
 
 targets:
-  GPUSMI:
+  MacSlowCooker:
     type: application
     platform: macOS
     deploymentTarget: "14.0"
     sources:
-      - path: GPUSMI
+      - path: MacSlowCooker
         excludes:
           - "Library/**"
       - path: Shared
     resources:
-      - path: GPUSMI/Library
+      - path: MacSlowCooker/Library
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.gpusmi.app
-        INFOPLIST_FILE: GPUSMI/Info.plist
-        CODE_SIGN_ENTITLEMENTS: GPUSMI/GPUSMI.entitlements
+        PRODUCT_BUNDLE_IDENTIFIER: com.macslowcooker.app
+        INFOPLIST_FILE: MacSlowCooker/Info.plist
+        CODE_SIGN_ENTITLEMENTS: MacSlowCooker/MacSlowCooker.entitlements
         COMBINE_HIDPI_IMAGES: YES
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     dependencies:
@@ -44,9 +44,9 @@ targets:
           if [ -f "${HELPER_SRC}" ]; then
             cp "${HELPER_SRC}" "${MACOS_DEST}/HelperTool"
           fi
-          PLIST_SRC="${SRCROOT}/GPUSMI/Library/LaunchDaemons/com.gpusmi.helper.plist"
+          PLIST_SRC="${SRCROOT}/MacSlowCooker/Library/LaunchDaemons/com.macslowcooker.helper.plist"
           if [ -f "${PLIST_SRC}" ]; then
-            cp "${PLIST_SRC}" "${PLIST_DEST}/com.gpusmi.helper.plist"
+            cp "${PLIST_SRC}" "${PLIST_DEST}/com.macslowcooker.helper.plist"
           fi
         basedOnDependencyAnalysis: false
 
@@ -59,19 +59,19 @@ targets:
       - path: Shared
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.gpusmi.helper
+        PRODUCT_BUNDLE_IDENTIFIER: com.macslowcooker.helper
         INFOPLIST_FILE: HelperTool/Info.plist
         CODE_SIGN_ENTITLEMENTS: HelperTool/HelperTool.entitlements
         OTHER_LDFLAGS: "-sectcreate __TEXT __info_plist $(INFOPLIST_FILE)"
 
-  GPUSMITests:
+  MacSlowCookerTests:
     type: bundle.unit-test
     platform: macOS
     deploymentTarget: "14.0"
     sources:
-      - path: GPUSMITests
+      - path: MacSlowCookerTests
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.gpusmi.tests
+        PRODUCT_BUNDLE_IDENTIFIER: com.macslowcooker.tests
     dependencies:
-      - target: GPUSMI
+      - target: MacSlowCooker

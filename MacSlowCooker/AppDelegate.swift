@@ -1,7 +1,7 @@
 import AppKit
 import os.log
 
-private let log = OSLog(subsystem: "com.gpusmi", category: "app")
+private let log = OSLog(subsystem: "com.macslowcooker", category: "app")
 
 @MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate {
@@ -60,7 +60,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showError(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "GPUSMI — セットアップエラー"
+        alert.messageText = "MacSlowCooker — セットアップエラー"
         alert.informativeText = message
         alert.alertStyle = .critical
         alert.addButton(withTitle: "OK")

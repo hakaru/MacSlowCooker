@@ -1,7 +1,7 @@
 import Foundation
 import os.log
 
-private let log = OSLog(subsystem: "com.gpusmi", category: "helper")
+private let log = OSLog(subsystem: "com.macslowcooker", category: "helper")
 
 final class PowerMetricsRunner {
 

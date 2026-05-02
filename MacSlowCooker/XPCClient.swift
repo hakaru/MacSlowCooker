@@ -1,7 +1,7 @@
 import Foundation
 import os.log
 
-private let log = OSLog(subsystem: "com.gpusmi", category: "xpc")
+private let log = OSLog(subsystem: "com.macslowcooker", category: "xpc")
 
 @MainActor
 final class XPCClient {
@@ -32,8 +32,8 @@ final class XPCClient {
     }
 
     private func makeConnection() {
-        let conn = NSXPCConnection(machServiceName: "com.gpusmi.helper", options: .privileged)
-        conn.remoteObjectInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
+        let conn = NSXPCConnection(machServiceName: "com.macslowcooker.helper", options: .privileged)
+        conn.remoteObjectInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)
 
         conn.interruptionHandler = { [weak self] in
             os_log("XPC interrupted, reconnecting immediately...", log: log, type: .info)
@@ -58,7 +58,7 @@ final class XPCClient {
 
         let proxy = conn.remoteObjectProxyWithErrorHandler { error in
             os_log("XPC error: %{public}s", log: log, type: .error, error.localizedDescription)
-        } as? GPUSMIHelperProtocol
+        } as? MacSlowCookerHelperProtocol
 
         proxy?.startSampling { [weak self] success, errorMessage in
             Task { @MainActor [weak self] in
@@ -86,7 +86,7 @@ final class XPCClient {
 
     private func fetchSample() {
         guard let conn = connection else { return }
-        let proxy = conn.remoteObjectProxyWithErrorHandler { _ in } as? GPUSMIHelperProtocol
+        let proxy = conn.remoteObjectProxyWithErrorHandler { _ in } as? MacSlowCookerHelperProtocol
         proxy?.fetchLatestSample { [weak self] data in
             guard let data else { return }
             Task { @MainActor [weak self] in

@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.gpusmi.helper</string>
+    <string>com.macslowcooker.helper</string>
     <key>MachServices</key>
     <dict>
-        <key>com.gpusmi.helper</key>
+        <key>com.macslowcooker.helper</key>
         <true/>
     </dict>
     <key>BundleProgram</key>
