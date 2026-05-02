@@ -84,6 +84,12 @@ private final class SettingsChangeTracker {
         }
     }
 
+    /// Called from `AsyncStream.onTermination`, which fires on an arbitrary executor.
+    /// We dispatch the flag write to MainActor; this means an in-flight onChange Task
+    /// may race ahead and call `continuation.yield(())` once on a finished continuation.
+    /// Yielding to a finished `AsyncStream.Continuation` is a documented no-op, so the
+    /// race is benign. The next observed mutation (if any) sees `cancelled == true`
+    /// and stops re-arming.
     nonisolated func cancel() {
         Task { @MainActor in self.cancelled = true }
     }
