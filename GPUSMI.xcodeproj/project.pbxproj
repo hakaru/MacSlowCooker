@@ -1,0 +1,567 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0EAFD6B5ABFA5B1F45DA1672 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59F6AFB7A4D5C502FE90536A /* AppDelegate.swift */; };
+		27CEF30175E707F93F3D8D75 /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */; };
+		3473092E04615DBB8AE7969B /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF86BD245048776217B7E5A /* GPUSample.swift */; };
+		3A3B3A17350E160D13338618 /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E4D77520291CF43413AA488 /* GPUSampleTests.swift */; };
+		3CB96833702DAF02BA9345F8 /* PowerMetricsParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */; };
+		4FDA1C712C851A02219F70BA /* DockIconRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */; };
+		7CD280B4E95C46C45152CAFB /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */; };
+		859B91F2AE8CAD75757C8B36 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71F1127DBD6F81F1F3229B51 /* main.swift */; };
+		8B2D8C94648F07DE41990CDF /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */; };
+		A1DB7D9EEA0AC75B8016DA56 /* GPUDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2AA6E6153101B0511D3E6B01 /* GPUDataStoreTests.swift */; };
+		A36936ACC220AC9342470915 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = B2BDA3F81AEEB551BBB8284A /* HelperInstaller.swift */; };
+		BC335288AE3F0F1C0425C17D /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDF86BD245048776217B7E5A /* GPUSample.swift */; };
+		C9837EB24EC762F208576BDA /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */; };
+		D4A89691E9FB5260DC306F11 /* XPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 316714102102F2CF6C4ABEDF /* XPCClient.swift */; };
+		DCE942D86396EC6D11118359 /* DockIconRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 959EAF4267771ED79EAE6378 /* DockIconRenderer.swift */; };
+		E62BA83AF094C5D838211353 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ACDF47A4E1F3D01716AB448 /* PopupView.swift */; };
+		FB03B3F96CEE61C4EC95296E /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683824A5ADB04C0D19CFD147 /* PowerMetricsRunner.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		5F012AB4221A21E3208D7B03 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA61CCEFE6367C10FE228D73 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6B6BDC715EB4FC00AE0B6DBE;
+			remoteInfo = GPUSMI;
+		};
+		FA84C12ACB372C38FAAB7D30 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EA61CCEFE6367C10FE228D73 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D38374FD60A738E49D98AFE7;
+			remoteInfo = HelperTool;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		042C66BFAD5EE69DFDB1B523 /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
+		0A499C057F0A5923BA849860 /* GPUSMITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = GPUSMITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		1ACDF47A4E1F3D01716AB448 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
+		20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStore.swift; sourceTree = "<group>"; };
+		2AA6E6153101B0511D3E6B01 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
+		2C105BD6A424E86F8FDB77D3 /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
+		316714102102F2CF6C4ABEDF /* XPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCClient.swift; sourceTree = "<group>"; };
+		4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconRendererTests.swift; sourceTree = "<group>"; };
+		59F6AFB7A4D5C502FE90536A /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		683824A5ADB04C0D19CFD147 /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
+		71F1127DBD6F81F1F3229B51 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
+		74808542E7D63C7F404DC17E /* GPUSMI.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPUSMI.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E4D77520291CF43413AA488 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
+		8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
+		959EAF4267771ED79EAE6378 /* DockIconRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconRenderer.swift; sourceTree = "<group>"; };
+		B2BDA3F81AEEB551BBB8284A /* HelperInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
+		B8579DF82B2FA5AF491E27E4 /* GPUSMI.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GPUSMI.entitlements; sourceTree = "<group>"; };
+		BAB6A2E0D3F2A33DFC75A8AD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		BD7F05A068418E2C0D9D9F67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
+		DDF86BD245048776217B7E5A /* GPUSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSample.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		05CBA7DFC6C89DA133B15516 = {
+			isa = PBXGroup;
+			children = (
+				F175CC617C5207E043581537 /* GPUSMI */,
+				4205CD32728011A4574AFCCC /* GPUSMITests */,
+				4D51E72D5F35BE0CFE0D8940 /* HelperTool */,
+				5518DF61FE73CF772C305166 /* Shared */,
+				E35B0D0EE3B93A1E4285B262 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		4205CD32728011A4574AFCCC /* GPUSMITests */ = {
+			isa = PBXGroup;
+			children = (
+				4D84FBBFC3B48D05B782F118 /* DockIconRendererTests.swift */,
+				2AA6E6153101B0511D3E6B01 /* GPUDataStoreTests.swift */,
+				7E4D77520291CF43413AA488 /* GPUSampleTests.swift */,
+				73780C42D15007257DD47960 /* PowerMetricsParserTests.swift */,
+			);
+			path = GPUSMITests;
+			sourceTree = "<group>";
+		};
+		4D51E72D5F35BE0CFE0D8940 /* HelperTool */ = {
+			isa = PBXGroup;
+			children = (
+				2C105BD6A424E86F8FDB77D3 /* HelperTool.entitlements */,
+				BD7F05A068418E2C0D9D9F67 /* Info.plist */,
+				71F1127DBD6F81F1F3229B51 /* main.swift */,
+				683824A5ADB04C0D19CFD147 /* PowerMetricsRunner.swift */,
+			);
+			path = HelperTool;
+			sourceTree = "<group>";
+		};
+		5518DF61FE73CF772C305166 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				DDF86BD245048776217B7E5A /* GPUSample.swift */,
+				C03E64C2AAC27AB99E85E5E9 /* XPCProtocol.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		E35B0D0EE3B93A1E4285B262 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				74808542E7D63C7F404DC17E /* GPUSMI.app */,
+				0A499C057F0A5923BA849860 /* GPUSMITests.xctest */,
+				042C66BFAD5EE69DFDB1B523 /* HelperTool */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F175CC617C5207E043581537 /* GPUSMI */ = {
+			isa = PBXGroup;
+			children = (
+				59F6AFB7A4D5C502FE90536A /* AppDelegate.swift */,
+				959EAF4267771ED79EAE6378 /* DockIconRenderer.swift */,
+				20E3DFCD9EB3A37718EC875C /* GPUDataStore.swift */,
+				B8579DF82B2FA5AF491E27E4 /* GPUSMI.entitlements */,
+				B2BDA3F81AEEB551BBB8284A /* HelperInstaller.swift */,
+				BAB6A2E0D3F2A33DFC75A8AD /* Info.plist */,
+				1ACDF47A4E1F3D01716AB448 /* PopupView.swift */,
+				8CEA12012BB6AD49A289FC8F /* PopupWindowController.swift */,
+				316714102102F2CF6C4ABEDF /* XPCClient.swift */,
+			);
+			path = GPUSMI;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		6B6BDC715EB4FC00AE0B6DBE /* GPUSMI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0C741478D8E1D02DA83DB049 /* Build configuration list for PBXNativeTarget "GPUSMI" */;
+			buildPhases = (
+				FD5CE30792135F7776DBF2E8 /* Sources */,
+				A6A75678B29B1B55CE8DDEE3 /* Copy HelperTool to LaunchDaemons */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				108010645DAA139893AF39CA /* PBXTargetDependency */,
+			);
+			name = GPUSMI;
+			packageProductDependencies = (
+			);
+			productName = GPUSMI;
+			productReference = 74808542E7D63C7F404DC17E /* GPUSMI.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D38374FD60A738E49D98AFE7 /* HelperTool */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9F124B3A997D1267DF503C93 /* Build configuration list for PBXNativeTarget "HelperTool" */;
+			buildPhases = (
+				3A239656FC73E5116640B390 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HelperTool;
+			packageProductDependencies = (
+			);
+			productName = HelperTool;
+			productReference = 042C66BFAD5EE69DFDB1B523 /* HelperTool */;
+			productType = "com.apple.product-type.tool";
+		};
+		F238F076BB5B9A471E72E446 /* GPUSMITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F0EB62856E1799EC28330F84 /* Build configuration list for PBXNativeTarget "GPUSMITests" */;
+			buildPhases = (
+				4D8530934F6D8D5BFF6FF842 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				DAFA8F9FC20138224217D24B /* PBXTargetDependency */,
+			);
+			name = GPUSMITests;
+			packageProductDependencies = (
+			);
+			productName = GPUSMITests;
+			productReference = 0A499C057F0A5923BA849860 /* GPUSMITests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EA61CCEFE6367C10FE228D73 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = D9E3F2FB85245B48E6882D26 /* Build configuration list for PBXProject "GPUSMI" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 05CBA7DFC6C89DA133B15516;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = E35B0D0EE3B93A1E4285B262 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				6B6BDC715EB4FC00AE0B6DBE /* GPUSMI */,
+				F238F076BB5B9A471E72E446 /* GPUSMITests */,
+				D38374FD60A738E49D98AFE7 /* HelperTool */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		A6A75678B29B1B55CE8DDEE3 /* Copy HelperTool to LaunchDaemons */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy HelperTool to LaunchDaemons";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "HELPER_SRC=\"${BUILT_PRODUCTS_DIR}/HelperTool\"\nDEST=\"${CODESIGNING_FOLDER_PATH}/Contents/Library/LaunchDaemons\"\nmkdir -p \"${DEST}\"\nif [ -f \"${HELPER_SRC}\" ]; then\n  cp \"${HELPER_SRC}\" \"${DEST}/HelperTool\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3A239656FC73E5116640B390 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BC335288AE3F0F1C0425C17D /* GPUSample.swift in Sources */,
+				FB03B3F96CEE61C4EC95296E /* PowerMetricsRunner.swift in Sources */,
+				C9837EB24EC762F208576BDA /* XPCProtocol.swift in Sources */,
+				859B91F2AE8CAD75757C8B36 /* main.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4D8530934F6D8D5BFF6FF842 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4FDA1C712C851A02219F70BA /* DockIconRendererTests.swift in Sources */,
+				A1DB7D9EEA0AC75B8016DA56 /* GPUDataStoreTests.swift in Sources */,
+				3A3B3A17350E160D13338618 /* GPUSampleTests.swift in Sources */,
+				3CB96833702DAF02BA9345F8 /* PowerMetricsParserTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD5CE30792135F7776DBF2E8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0EAFD6B5ABFA5B1F45DA1672 /* AppDelegate.swift in Sources */,
+				DCE942D86396EC6D11118359 /* DockIconRenderer.swift in Sources */,
+				7CD280B4E95C46C45152CAFB /* GPUDataStore.swift in Sources */,
+				3473092E04615DBB8AE7969B /* GPUSample.swift in Sources */,
+				A36936ACC220AC9342470915 /* HelperInstaller.swift in Sources */,
+				E62BA83AF094C5D838211353 /* PopupView.swift in Sources */,
+				8B2D8C94648F07DE41990CDF /* PopupWindowController.swift in Sources */,
+				D4A89691E9FB5260DC306F11 /* XPCClient.swift in Sources */,
+				27CEF30175E707F93F3D8D75 /* XPCProtocol.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		108010645DAA139893AF39CA /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D38374FD60A738E49D98AFE7 /* HelperTool */;
+			targetProxy = FA84C12ACB372C38FAAB7D30 /* PBXContainerItemProxy */;
+		};
+		DAFA8F9FC20138224217D24B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6B6BDC715EB4FC00AE0B6DBE /* GPUSMI */;
+			targetProxy = 5F012AB4221A21E3208D7B03 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		02E5B9E81451059782BB3D84 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = GPUSMI/GPUSMI.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = GPUSMI/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.app;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		0C72AF50C474C89BF59C5271 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HelperTool/HelperTool.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HelperTool/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.helper;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		31CF1081A1A1A39C22DECCBD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		3D4E6A6053948294BCF1AF8D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GPUSMI.app/Contents/MacOS/GPUSMI";
+			};
+			name = Release;
+		};
+		60A0017852F99F7851D39E4B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		9AB5AF3BC943F835F8491AF3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = GPUSMI/GPUSMI.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = GPUSMI/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.app;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		AD8B89D9BA730CC27F19394F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.tests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/GPUSMI.app/Contents/MacOS/GPUSMI";
+			};
+			name = Debug;
+		};
+		C88A53630DC409779D37A7C0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = HelperTool/HelperTool.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = HelperTool/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.gpusmi.helper;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0C741478D8E1D02DA83DB049 /* Build configuration list for PBXNativeTarget "GPUSMI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9AB5AF3BC943F835F8491AF3 /* Debug */,
+				02E5B9E81451059782BB3D84 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		9F124B3A997D1267DF503C93 /* Build configuration list for PBXNativeTarget "HelperTool" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0C72AF50C474C89BF59C5271 /* Debug */,
+				C88A53630DC409779D37A7C0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		D9E3F2FB85245B48E6882D26 /* Build configuration list for PBXProject "GPUSMI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60A0017852F99F7851D39E4B /* Debug */,
+				31CF1081A1A1A39C22DECCBD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F0EB62856E1799EC28330F84 /* Build configuration list for PBXNativeTarget "GPUSMITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AD8B89D9BA730CC27F19394F /* Debug */,
+				3D4E6A6053948294BCF1AF8D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = EA61CCEFE6367C10FE228D73 /* Project object */;
+}
