@@ -72,4 +72,94 @@ final class DockIconAnimatorTests: XCTestCase {
         let last = CapturingRenderer.captured.last!
         XCTAssertEqual(last.displayedUsage, 0.5, accuracy: 0.01)
     }
+
+    // MARK: - Wiggle
+
+    func testWiggleAdvancesWhenEnabled() {
+        settings.flameAnimation = .wiggle
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5))
+
+        let phaseBefore = CapturingRenderer.captured.last!.flameWigglePhase
+        clock.advance(by: 0.1)
+        animator.tickForTesting()
+        let phaseAfter = CapturingRenderer.captured.last!.flameWigglePhase
+
+        XCTAssertNotEqual(phaseBefore, phaseAfter)
+        XCTAssertTrue(CapturingRenderer.captured.last!.flameWiggleEnabled)
+    }
+
+    func testWiggleStaysWhenDisabled() {
+        settings.flameAnimation = .interpolation
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5))
+
+        for _ in 0..<5 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        let last = CapturingRenderer.captured.last!
+        XCTAssertEqual(last.flameWigglePhase, 0, accuracy: 1e-9)
+        XCTAssertFalse(last.flameWiggleEnabled)
+    }
+
+    // MARK: - Boiling fade
+
+    func testBoilingFadesIn() {
+        settings.boilingTrigger = .temperature
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5, temperature: 90))
+
+        for _ in 0..<10 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+
+        let last = CapturingRenderer.captured.last!
+        XCTAssertTrue(last.isBoiling)
+        XCTAssertGreaterThan(last.boilingIntensity, 0.8)
+    }
+
+    func testBoilingFadesOut() {
+        settings.boilingTrigger = .temperature
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0.5, temperature: 90))
+        for _ in 0..<10 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        XCTAssertGreaterThan(CapturingRenderer.captured.last!.boilingIntensity, 0.8)
+
+        animator.update(sample: sample(usage: 0.5, temperature: 60))
+        for _ in 0..<15 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        let last = CapturingRenderer.captured.last!
+        XCTAssertFalse(last.isBoiling)
+        XCTAssertLessThan(last.boilingIntensity, 0.2)
+    }
+
+    func testCombinedTrigger5sPersistence() {
+        settings.boilingTrigger = .combined
+        let animator = makeAnimator()
+        animator.setConnected(true)
+
+        // 4.9s of high usage → not boiling
+        animator.update(sample: sample(usage: 0.95))
+        clock.advance(by: 4.9)
+        animator.update(sample: sample(usage: 0.95))
+        animator.tickForTesting()
+        XCTAssertFalse(CapturingRenderer.captured.last!.isBoiling)
+
+        // Push past 5s
+        clock.advance(by: 0.3)
+        animator.update(sample: sample(usage: 0.95))
+        animator.tickForTesting()
+        XCTAssertTrue(CapturingRenderer.captured.last!.isBoiling)
+    }
 }

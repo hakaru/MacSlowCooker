@@ -58,8 +58,22 @@ final class DockIconAnimator {
     func update(sample: GPUSample) {
         latestSample = sample
         targetUsage = sample.gpuUsage
-        // Boiling/wiggle wiring lands in later tasks.
-        ensureTimerRunning()
+        evaluateBoiling(sample: sample)
+        if autostartTimer {
+            ensureTimerRunning()
+        } else {
+            tick(dt: 0)
+        }
+    }
+
+    private func evaluateBoiling(sample: GPUSample) {
+        let result = Self.computeBoiling(
+            trigger: settings.boilingTrigger,
+            sample: sample,
+            aboveThresholdSince: aboveThresholdSince,
+            now: clock.now)
+        isBoiling = result.isBoiling
+        aboveThresholdSince = result.newAboveThresholdSince
     }
 
     func setConnected(_ connected: Bool) {
@@ -94,12 +108,24 @@ final class DockIconAnimator {
         let α = 1 - exp(-dt / Self.interpolationTimeConstant)
         displayedUsage += (targetUsage - displayedUsage) * α
 
+        // Wiggle
+        let wiggleEnabled = settings.flameAnimation.hasWiggle
+        if wiggleEnabled {
+            wigglePhase = (wigglePhase + dt * Self.wiggleSpeed)
+                .truncatingRemainder(dividingBy: .pi * 2)
+        }
+
+        // Boiling fade
+        let βb = 1 - exp(-dt / Self.boilingFadeTimeConstant)
+        let boilingTarget: Double = isBoiling ? 1.0 : 0.0
+        boilingIntensity += (boilingTarget - boilingIntensity) * βb
+
         let state = IconState(
             displayedUsage:    displayedUsage,
             temperature:       latestSample?.temperature,
             isConnected:       isConnected,
             flameWigglePhase:  wigglePhase,
-            flameWiggleEnabled: false,         // wired in Task 7
+            flameWiggleEnabled: wiggleEnabled,
             isBoiling:         isBoiling,
             boilingIntensity:  boilingIntensity)
 
