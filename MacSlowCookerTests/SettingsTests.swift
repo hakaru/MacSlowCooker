@@ -9,7 +9,7 @@ final class SettingsTests: XCTestCase {
 
     override func setUp() async throws {
         try await super.setUp()
-        UserDefaults().removePersistentDomain(forName: suiteName)
+        UserDefaults.standard.removePersistentDomain(forName: suiteName)
         defaults = UserDefaults(suiteName: suiteName)!
     }
 
@@ -37,8 +37,8 @@ final class SettingsTests: XCTestCase {
     }
 
     func testFallsBackOnInvalidRawValue() {
-        defaults.set("nonsense", forKey: "flameAnimation")
-        defaults.set("",         forKey: "boilingTrigger")
+        defaults.set("nonsense", forKey: Settings.Keys.flameAnimation)
+        defaults.set("",         forKey: Settings.Keys.boilingTrigger)
 
         let s = Settings(defaults: defaults)
         XCTAssertEqual(s.flameAnimation, .both)
@@ -51,8 +51,8 @@ final class SettingsTests: XCTestCase {
         s.flameAnimation = .interpolation
         s.boilingTrigger = .thermalPressure
 
-        XCTAssertEqual(defaults.string(forKey: "potStyle"),       "dutchOven")
-        XCTAssertEqual(defaults.string(forKey: "flameAnimation"), "interpolation")
-        XCTAssertEqual(defaults.string(forKey: "boilingTrigger"), "thermalPressure")
+        XCTAssertEqual(defaults.string(forKey: Settings.Keys.potStyle),       "dutchOven")
+        XCTAssertEqual(defaults.string(forKey: Settings.Keys.flameAnimation), "interpolation")
+        XCTAssertEqual(defaults.string(forKey: Settings.Keys.boilingTrigger), "thermalPressure")
     }
 }

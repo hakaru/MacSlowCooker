@@ -28,6 +28,10 @@ final class Settings {
 
     static let shared = Settings()
 
+    /// Assignments below fire `didSet`, re-writing the just-loaded value back to
+    /// `UserDefaults`. Harmless and accepted as the tradeoff for keeping persistence
+    /// declarative. `Settings.changes` (Task 4) starts tracking after init, so these
+    /// init-time writes are not observed by consumers.
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         self.potStyle       = PotStyle(rawValue: defaults.string(forKey: Keys.potStyle) ?? "")        ?? .dutchOven
