@@ -23,6 +23,7 @@
 		AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
 		BB2103C829016BA8059FF165 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB505FEF4C5660E59EB3CEAA /* main.swift */; };
+		C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC5135696164D72811AE540 /* PotRenderer.swift */; };
 		E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947C59473F2C40EDC54468E3 /* XPCProtocol.swift */; };
 		E54A062997B05114D2A6C735 /* DockIconRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D24283AB9DD1952DBD81E23 /* DockIconRenderer.swift */; };
 		E944B2BB2290F4D191F404BF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6845F2B35F7FD152E9F7AE /* main.swift */; };
@@ -57,6 +58,7 @@
 		36464BD999D5385543BA7023 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
 		3A3F7901E7ECC5583D7607FA /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
+		5DC5135696164D72811AE540 /* PotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotRenderer.swift; sourceTree = "<group>"; };
 		73FF777792F4238DEEF4F99A /* HelperInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
 		78D676208B045B062E261378 /* XPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCClient.swift; sourceTree = "<group>"; };
 		79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
@@ -132,6 +134,7 @@
 				FB505FEF4C5660E59EB3CEAA /* main.swift */,
 				1FBE4FF29F56752B038056F5 /* PopupView.swift */,
 				90386A8D8287F8D6433DA49A /* PopupWindowController.swift */,
+				5DC5135696164D72811AE540 /* PotRenderer.swift */,
 				78D676208B045B062E261378 /* XPCClient.swift */,
 			);
 			path = MacSlowCooker;
@@ -282,6 +285,7 @@
 				615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */,
 				0B75C45876F33514001EBF69 /* PopupView.swift in Sources */,
 				7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */,
+				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
 				9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */,
 				E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */,
