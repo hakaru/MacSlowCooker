@@ -8,8 +8,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private let store = GPUDataStore()
     private let xpcClient = XPCClient()
+    private let settings = Settings.shared
+    private let animator = DockIconAnimator()
+
     private lazy var popupController = PopupWindowController(store: store)
     private var preferencesController: PreferencesWindowController?
+    private var settingsObservationTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Skip helper-daemon setup when running under XCTest. Otherwise a failed
@@ -20,7 +24,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         buildMainMenu()
-        updateDockIcon()
+        observeSettings()
+        observeSystemSleep()
+        animator.setConnected(false)   // initial Disconnected paint
+
         Task {
             do {
                 try await HelperInstaller.installIfNeeded()
@@ -81,34 +88,26 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenuItem.submenu = appMenu
         mainMenu.addItem(appMenuItem)
 
-        // Edit menu — required for Cmd-C/V/X/A in Preferences
         let editItem = NSMenuItem()
         let editMenu = NSMenu(title: "編集")
-        editMenu.addItem(NSMenuItem(title: "取り消す",  action: Selector(("undo:")),       keyEquivalent: "z"))
+        editMenu.addItem(NSMenuItem(title: "取り消す", action: Selector(("undo:")), keyEquivalent: "z"))
         let redo = NSMenuItem(title: "やり直す", action: Selector(("redo:")), keyEquivalent: "z")
         redo.keyEquivalentModifierMask = [.command, .shift]
         editMenu.addItem(redo)
         editMenu.addItem(.separator())
-        editMenu.addItem(NSMenuItem(title: "カット", action: #selector(NSText.cut(_:)),    keyEquivalent: "x"))
-        editMenu.addItem(NSMenuItem(title: "コピー", action: #selector(NSText.copy(_:)),   keyEquivalent: "c"))
-        editMenu.addItem(NSMenuItem(title: "ペースト", action: #selector(NSText.paste(_:)), keyEquivalent: "v"))
+        editMenu.addItem(NSMenuItem(title: "カット",   action: #selector(NSText.cut(_:)),    keyEquivalent: "x"))
+        editMenu.addItem(NSMenuItem(title: "コピー",   action: #selector(NSText.copy(_:)),   keyEquivalent: "c"))
+        editMenu.addItem(NSMenuItem(title: "ペースト", action: #selector(NSText.paste(_:)),  keyEquivalent: "v"))
         editMenu.addItem(NSMenuItem(title: "すべて選択", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
         editItem.submenu = editMenu
         mainMenu.addItem(editItem)
 
-        // Window menu
         let windowItem = NSMenuItem()
         let windowMenu = NSMenu(title: "ウィンドウ")
-        windowMenu.addItem(NSMenuItem(title: "しまう",
-                                      action: #selector(NSWindow.performMiniaturize(_:)),
-                                      keyEquivalent: "m"))
-        windowMenu.addItem(NSMenuItem(title: "拡大/縮小",
-                                      action: #selector(NSWindow.performZoom(_:)),
-                                      keyEquivalent: ""))
+        windowMenu.addItem(NSMenuItem(title: "しまう", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
+        windowMenu.addItem(NSMenuItem(title: "拡大/縮小", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""))
         windowMenu.addItem(.separator())
-        windowMenu.addItem(NSMenuItem(title: "すべてを手前に移動",
-                                      action: #selector(NSApplication.arrangeInFront(_:)),
-                                      keyEquivalent: ""))
+        windowMenu.addItem(NSMenuItem(title: "すべてを手前に移動", action: #selector(NSApplication.arrangeInFront(_:)), keyEquivalent: ""))
         windowItem.submenu = windowMenu
         mainMenu.addItem(windowItem)
 
@@ -123,36 +122,48 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         preferencesController?.showWindow()
     }
 
-    // MARK: - XPC (kept from previous version, will be replaced in Task 13)
+    // MARK: - XPC
 
     private func connectXPC() {
         xpcClient.onSample = { [weak self] sample in
             guard let self else { return }
             store.addSample(sample)
-            updateDockIcon()
+            animator.update(sample: sample)
         }
         xpcClient.onConnected = { [weak self] in
             self?.store.setConnected(true)
+            self?.animator.setConnected(true)
             os_log("XPC connected", log: log, type: .info)
         }
         xpcClient.onDisconnected = { [weak self] in
             self?.store.setConnected(false)
-            self?.updateDockIcon()
+            self?.animator.setConnected(false)
             os_log("XPC disconnected", log: log, type: .info)
         }
         xpcClient.connect()
     }
 
-    private func updateDockIcon() {
-        let usage = store.latestSample?.gpuUsage ?? 0
-        let connected = store.isConnected
-        DispatchQueue.global(qos: .userInteractive).async {
-            let image = DockIconRenderer.render(usage: usage, isConnected: connected)
-            DispatchQueue.main.async {
-                NSApp.applicationIconImage = image
+    // MARK: - Settings observation
+
+    private func observeSettings() {
+        settingsObservationTask = Task { @MainActor [animator, settings] in
+            for await _ in settings.changes {
+                animator.settingsDidChange()
             }
         }
     }
+
+    // MARK: - System sleep
+
+    private func observeSystemSleep() {
+        let nc = NSWorkspace.shared.notificationCenter
+        nc.addObserver(forName: NSWorkspace.willSleepNotification,        object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(true)  }
+        nc.addObserver(forName: NSWorkspace.didWakeNotification,          object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(false) }
+        nc.addObserver(forName: NSWorkspace.screensDidSleepNotification,  object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(true)  }
+        nc.addObserver(forName: NSWorkspace.screensDidWakeNotification,   object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(false) }
+    }
+
+    // MARK: - Error UI
 
     private func showError(_ message: String) {
         let alert = NSAlert()
