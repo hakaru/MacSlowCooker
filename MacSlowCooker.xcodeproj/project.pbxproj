@@ -20,6 +20,7 @@
 		5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */; };
 		55920E4448E396122E2C94B2 /* DockIconAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */; };
 		5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36464BD999D5385543BA7023 /* AppDelegate.swift */; };
+		5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */; };
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
@@ -82,6 +83,7 @@
 		9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
 		A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoilingTriggerTests.swift; sourceTree = "<group>"; };
 		A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRenderer.swift; sourceTree = "<group>"; };
+		B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRendererTests.swift; sourceTree = "<group>"; };
 		BAB3F838CEAED7F8769AD2D2 /* MacSlowCookerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSlowCookerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
 		C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimatorTests.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */,
 				C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */,
 				8F1E5ECB3CDA548DAB73D63C /* DockIconRendererTests.swift */,
+				B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */,
 				06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */,
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
 				1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */,
@@ -341,6 +344,7 @@
 				43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */,
 				11C55A0CA8A92D0ECF01FD4F /* DockIconAnimatorTests.swift in Sources */,
 				ACEBEE43C33FC44699687E55 /* DockIconRendererTests.swift in Sources */,
+				5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */,
 				33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */,
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
 				F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */,
