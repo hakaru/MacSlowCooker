@@ -36,10 +36,11 @@ final class XPCClient {
         conn.remoteObjectInterface = NSXPCInterface(with: GPUSMIHelperProtocol.self)
 
         conn.interruptionHandler = { [weak self] in
-            os_log("XPC interrupted, reconnecting...", log: log, type: .info)
+            os_log("XPC interrupted, reconnecting immediately...", log: log, type: .info)
             Task { @MainActor [weak self] in
+                self?.connection = nil
                 self?.handleDisconnection()
-                self?.scheduleReconnect()
+                self?.makeConnection()
             }
         }
 

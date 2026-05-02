@@ -8,10 +8,28 @@ final class PowerMetricsRunner {
     private var process: Process?
     private var stdoutPipe: Pipe?
     private var buffer = Data()
+    private var failureCount = 0
+    private let maxFailures = 3
+    private let restartDelay: TimeInterval = 5.0
+
     var onSample: ((GPUSample) -> Void)?
     var onError: ((String) -> Void)?
 
     func start() throws {
+        failureCount = 0
+        try launchProcess()
+    }
+
+    func stop() {
+        stdoutPipe?.fileHandleForReading.readabilityHandler = nil
+        process?.terminate()
+        process = nil
+        stdoutPipe = nil
+        buffer.removeAll()
+        os_log("powermetrics stopped", log: log, type: .info)
+    }
+
+    private func launchProcess() throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/powermetrics")
         p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist"]
@@ -22,7 +40,7 @@ final class PowerMetricsRunner {
 
         p.terminationHandler = { [weak self] _ in
             os_log("powermetrics terminated", log: log, type: .error)
-            self?.onError?("powermetrics process terminated unexpectedly")
+            self?.handleCrash()
         }
 
         try p.run()
@@ -40,13 +58,23 @@ final class PowerMetricsRunner {
         os_log("powermetrics started (pid: %d)", log: log, type: .info, p.processIdentifier)
     }
 
-    func stop() {
-        stdoutPipe?.fileHandleForReading.readabilityHandler = nil
-        process?.terminate()
-        process = nil
-        stdoutPipe = nil
-        buffer.removeAll()
-        os_log("powermetrics stopped", log: log, type: .info)
+    private func handleCrash() {
+        failureCount += 1
+        if failureCount >= maxFailures {
+            os_log("powermetrics failed %d times, giving up", log: log, type: .fault, failureCount)
+            onError?("powermetrics crashed \(failureCount) times — GPU monitoring unavailable")
+            return
+        }
+        os_log("powermetrics crash #%d, restarting in 5s", log: log, type: .error, failureCount)
+        DispatchQueue.global().asyncAfter(deadline: .now() + restartDelay) { [weak self] in
+            guard let self else { return }
+            do {
+                try self.launchProcess()
+            } catch {
+                os_log("powermetrics restart failed: %{public}s", log: log, type: .fault, error.localizedDescription)
+                self.onError?("powermetrics restart failed: \(error.localizedDescription)")
+            }
+        }
     }
 
     private func flushSamples() {

@@ -5,6 +5,7 @@ import SwiftUI
 final class PopupWindowController: NSWindowController {
 
     private weak var store: GPUDataStore?
+    private var globalEventMonitor: Any?
 
     convenience init(store: GPUDataStore) {
         let panel = NSPanel(
@@ -37,6 +38,10 @@ final class PopupWindowController: NSWindowController {
     }
 
     override func close() {
+        if let monitor = globalEventMonitor {
+            NSEvent.removeMonitor(monitor)
+            globalEventMonitor = nil
+        }
         window?.orderOut(nil)
     }
 
@@ -45,16 +50,18 @@ final class PopupWindowController: NSWindowController {
         let screenFrame = screen.visibleFrame
         let windowSize = window!.frame.size
 
+        // Position above Dock (bottom-center of visible frame)
         let x = screenFrame.midX - windowSize.width / 2
         let y = screenFrame.minY + 8
         window?.setFrameOrigin(NSPoint(x: x, y: y))
         window?.makeKeyAndOrderFront(nil)
 
-        NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: [.leftMouseDown, .rightMouseDown]
+        ) { [weak self] _ in
             guard let self, let win = self.window, win.isVisible else { return }
-            let loc = event.locationInWindow
-            let winFrame = win.frame
-            if !winFrame.contains(loc) {
+            // Use screen coordinates (NSEvent.mouseLocation) to test containment
+            if !win.frame.contains(NSEvent.mouseLocation) {
                 DispatchQueue.main.async { self.close() }
             }
         }

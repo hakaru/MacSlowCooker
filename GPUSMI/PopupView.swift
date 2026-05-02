@@ -106,7 +106,13 @@ struct PopupView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private var gpuName: String { "M3 Ultra" }
+    private var gpuName: String {
+        var size = 0
+        sysctlbyname("hw.model", nil, &size, nil, 0)
+        var model = [CChar](repeating: 0, count: size)
+        sysctlbyname("hw.model", &model, &size, nil, 0)
+        return String(cString: model)
+    }
     private var latest: GPUSample? { store.latestSample }
 
     private var gpuText: String {

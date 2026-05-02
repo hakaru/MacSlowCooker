@@ -1,5 +1,8 @@
 import AppKit
 import CoreGraphics
+import os.log
+
+private let renderLog = OSLog(subsystem: "com.gpusmi", category: "render")
 
 enum DockIconRenderer {
 
@@ -15,12 +18,18 @@ enum DockIconRenderer {
             bytesPerRow: 0,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
-        ) else { return NSImage(size: size) }
+        ) else {
+            os_log("CGContext creation failed", log: renderLog, type: .error)
+            return NSImage(size: size)
+        }
 
         let rect = CGRect(origin: .zero, size: size)
         draw(in: ctx, rect: rect, usage: usage, isConnected: isConnected)
 
-        guard let cgImage = ctx.makeImage() else { return NSImage(size: size) }
+        guard let cgImage = ctx.makeImage() else {
+            os_log("CGContext makeImage failed", log: renderLog, type: .error)
+            return NSImage(size: size)
+        }
         return NSImage(cgImage: cgImage, size: size)
     }
 
@@ -65,11 +74,11 @@ enum DockIconRenderer {
     private static func color(for usage: Double) -> CGColor {
         switch usage {
         case ..<0.6:
-            return NSColor.systemGreen.cgColor
+            return NSColor(srgbRed: 0x4C/255, green: 0xAF/255, blue: 0x50/255, alpha: 1).cgColor
         case ..<0.85:
-            return NSColor.systemYellow.cgColor
+            return NSColor(srgbRed: 0xFF/255, green: 0xC1/255, blue: 0x07/255, alpha: 1).cgColor
         default:
-            return NSColor.systemRed.cgColor
+            return NSColor(srgbRed: 0xF4/255, green: 0x43/255, blue: 0x36/255, alpha: 1).cgColor
         }
     }
 
