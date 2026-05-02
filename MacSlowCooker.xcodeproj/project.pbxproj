@@ -11,6 +11,7 @@
 		0B75C45876F33514001EBF69 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE4FF29F56752B038056F5 /* PopupView.swift */; };
 		16596D0D42204EC72E657A65 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B160393A833FD4D1952BEF /* Clock.swift */; };
 		194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */; };
+		224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495D61085AE6A59E664ACBF0 /* SettingsTests.swift */; };
 		273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */; };
 		357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
@@ -19,6 +20,7 @@
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
+		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D676208B045B062E261378 /* XPCClient.swift */; };
 		AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */; };
 		ACEBEE43C33FC44699687E55 /* DockIconRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F1E5ECB3CDA548DAB73D63C /* DockIconRendererTests.swift */; };
@@ -60,6 +62,7 @@
 		36464BD999D5385543BA7023 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
 		3A3F7901E7ECC5583D7607FA /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
+		495D61085AE6A59E664ACBF0 /* SettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
 		4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClock.swift; sourceTree = "<group>"; };
 		50B160393A833FD4D1952BEF /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		5DC5135696164D72811AE540 /* PotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotRenderer.swift; sourceTree = "<group>"; };
@@ -67,6 +70,7 @@
 		78D676208B045B062E261378 /* XPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCClient.swift; sourceTree = "<group>"; };
 		79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
 		7B0E01379C7F34814B84799B /* GPUSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSample.swift; sourceTree = "<group>"; };
+		81A7139D20C2519CF55ABAFB /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		8F1E5ECB3CDA548DAB73D63C /* DockIconRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconRendererTests.swift; sourceTree = "<group>"; };
 		90386A8D8287F8D6433DA49A /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
 		947C59473F2C40EDC54468E3 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
@@ -100,6 +104,7 @@
 				06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */,
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
 				1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */,
+				495D61085AE6A59E664ACBF0 /* SettingsTests.swift */,
 				4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */,
 			);
 			path = MacSlowCookerTests;
@@ -141,6 +146,7 @@
 				1FBE4FF29F56752B038056F5 /* PopupView.swift */,
 				90386A8D8287F8D6433DA49A /* PopupWindowController.swift */,
 				5DC5135696164D72811AE540 /* PotRenderer.swift */,
+				81A7139D20C2519CF55ABAFB /* Settings.swift */,
 				78D676208B045B062E261378 /* XPCClient.swift */,
 			);
 			path = MacSlowCooker;
@@ -294,6 +300,7 @@
 				7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */,
 				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
+				7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */,
 				9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */,
 				E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */,
 				BB2103C829016BA8059FF165 /* main.swift in Sources */,
@@ -321,6 +328,7 @@
 				33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */,
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
 				F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */,
+				224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */,
 				5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
