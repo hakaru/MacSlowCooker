@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		05BABEEFFD83B72E1B3D46D6 /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947C59473F2C40EDC54468E3 /* XPCProtocol.swift */; };
+		081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */; };
 		0B75C45876F33514001EBF69 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE4FF29F56752B038056F5 /* PopupView.swift */; };
 		11C55A0CA8A92D0ECF01FD4F /* DockIconAnimatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */; };
 		16596D0D42204EC72E657A65 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B160393A833FD4D1952BEF /* Clock.swift */; };
@@ -91,6 +92,7 @@
 		C929AEEF3850949F5C500F9E /* MacSlowCooker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSlowCooker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacSlowCooker.entitlements; sourceTree = "<group>"; };
 		D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureReader.swift; sourceTree = "<group>"; };
+		D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
 		F1526E4C501E999A7FB17583 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		FB505FEF4C5660E59EB3CEAA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -161,6 +163,7 @@
 				1FBE4FF29F56752B038056F5 /* PopupView.swift */,
 				90386A8D8287F8D6433DA49A /* PopupWindowController.swift */,
 				5DC5135696164D72811AE540 /* PotRenderer.swift */,
+				D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */,
 				81A7139D20C2519CF55ABAFB /* Settings.swift */,
 				78D676208B045B062E261378 /* XPCClient.swift */,
 			);
@@ -317,6 +320,7 @@
 				7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */,
 				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
+				081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */,
 				7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */,
 				9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */,
 				E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */,
