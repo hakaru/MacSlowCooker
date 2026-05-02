@@ -55,4 +55,28 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: Settings.Keys.flameAnimation), "interpolation")
         XCTAssertEqual(defaults.string(forKey: Settings.Keys.boilingTrigger), "thermalPressure")
     }
+
+    func testChangesStreamYieldsOnEachMutation() async {
+        let s = Settings(defaults: defaults)
+
+        // Settings is @MainActor — Task body must be too.
+        let task = Task<Int, Never> { @MainActor [s] in
+            var count = 0
+            for await _ in s.changes {
+                count += 1
+                if count == 2 { break }
+            }
+            return count
+        }
+
+        // Give the tracker time to arm
+        try? await Task.sleep(nanoseconds: 50_000_000)
+
+        s.flameAnimation = .wiggle
+        try? await Task.sleep(nanoseconds: 20_000_000)
+        s.boilingTrigger = .temperature
+
+        let count = await task.value
+        XCTAssertEqual(count, 2)
+    }
 }
