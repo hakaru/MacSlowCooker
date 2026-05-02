@@ -164,7 +164,12 @@ final class DockIconAnimator {
             isBoiling:         isBoiling,
             boilingIntensity:  boilingIntensity)
 
-        _ = renderer.render(state: state)
+        let hash = state.visualHash
+        if hash != lastRenderedHash {
+            let image = renderer.render(state: state)
+            NSApp.applicationIconImage = image
+            lastRenderedHash = hash
+        }
 
         if !needsAnimation() {
             timer?.invalidate()

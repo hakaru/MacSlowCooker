@@ -274,4 +274,29 @@ final class DockIconAnimatorTests: XCTestCase {
         animator.settingsDidChange()
         XCTAssertNil(animator.aboveThresholdSinceForTesting)
     }
+
+    // MARK: - Visual hash dedup
+
+    func testNoRenderWhenStateUnchanged() {
+        settings.flameAnimation = .none
+        let animator = makeAnimator()
+        animator.setConnected(true)
+        animator.update(sample: sample(usage: 0))
+
+        // Drive ticks until convergence
+        for _ in 0..<60 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        let calls1 = CapturingRenderer.captured.count
+
+        // Several more ticks at the same steady state
+        for _ in 0..<10 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        let calls2 = CapturingRenderer.captured.count
+
+        XCTAssertEqual(calls1, calls2, "renderer should be skipped when state is unchanged")
+    }
 }
