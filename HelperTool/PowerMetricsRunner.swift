@@ -3,8 +3,19 @@ import os.log
 
 private let log = OSLog(subsystem: "com.macslowcooker", category: "helper")
 
+/// Owns the long-running `/usr/bin/powermetrics` process and turns its
+/// NUL-separated plist stream into `GPUSample` callbacks.
+///
+/// Threading model: every mutation of the runner's internal state
+/// (`process`, `stdoutPipe`, `buffer`, `failureCount`, `isStopping`) happens
+/// on the private serial `queue`. The `Process.terminationHandler` and
+/// `Pipe.readabilityHandler` callbacks Foundation delivers from arbitrary
+/// background queues hop onto this queue before touching state. `onSample` is
+/// invoked from the queue (callers must tolerate that — `HelperService`
+/// already does CPU work + actor hop and is fine with serial dispatch).
 final class PowerMetricsRunner {
 
+    private let queue = DispatchQueue(label: "com.macslowcooker.helper.runner")
     private var process: Process?
     private var stdoutPipe: Pipe?
     private var buffer = Data()
@@ -17,22 +28,33 @@ final class PowerMetricsRunner {
     var onError: ((String) -> Void)?
 
     func start() throws {
-        failureCount = 0
-        isStopping = false
-        try launchProcess()
+        var caughtError: Error?
+        queue.sync {
+            failureCount = 0
+            isStopping = false
+            do {
+                try launchProcessLocked()
+            } catch {
+                caughtError = error
+            }
+        }
+        if let caughtError { throw caughtError }
     }
 
     func stop() {
-        isStopping = true
-        stdoutPipe?.fileHandleForReading.readabilityHandler = nil
-        process?.terminate()
-        process = nil
-        stdoutPipe = nil
-        buffer.removeAll()
+        queue.sync {
+            isStopping = true
+            stdoutPipe?.fileHandleForReading.readabilityHandler = nil
+            process?.terminate()
+            process = nil
+            stdoutPipe = nil
+            buffer.removeAll()
+        }
         os_log("powermetrics stopped", log: log, type: .info)
     }
 
-    private func launchProcess() throws {
+    /// Must be called on `queue`.
+    private func launchProcessLocked() throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/powermetrics")
         // --show-all is required on macOS 26 to surface processor.ane_power; drop it
@@ -50,9 +72,14 @@ final class PowerMetricsRunner {
         p.standardError = FileHandle.nullDevice
 
         p.terminationHandler = { [weak self] _ in
-            guard let self, !self.isStopping else { return }
-            os_log("powermetrics terminated unexpectedly", log: log, type: .error)
-            self.handleCrash()
+            // Foundation may invoke this on any thread — hop to our queue
+            // before reading isStopping or scheduling a restart.
+            guard let self else { return }
+            self.queue.async {
+                guard !self.isStopping else { return }
+                os_log("powermetrics terminated unexpectedly", log: log, type: .error)
+                self.handleCrashLocked()
+            }
         }
 
         try p.run()
@@ -60,17 +87,21 @@ final class PowerMetricsRunner {
         self.stdoutPipe = pipe
 
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            guard let self else { return }
+            // Read off Foundation's queue, but mutate buffer on ours.
             let chunk = handle.availableData
             guard !chunk.isEmpty else { return }
-            self.buffer.append(chunk)
-            self.flushSamples()
+            self?.queue.async {
+                guard let self else { return }
+                self.buffer.append(chunk)
+                self.flushSamplesLocked()
+            }
         }
 
         os_log("powermetrics started (pid: %d)", log: log, type: .info, p.processIdentifier)
     }
 
-    private func handleCrash() {
+    /// Must be called on `queue`.
+    private func handleCrashLocked() {
         failureCount += 1
         if failureCount >= maxFailures {
             os_log("powermetrics failed %d times, giving up", log: log, type: .fault, failureCount)
@@ -78,10 +109,10 @@ final class PowerMetricsRunner {
             return
         }
         os_log("powermetrics crash #%d, restarting in 5s", log: log, type: .error, failureCount)
-        DispatchQueue.global().asyncAfter(deadline: .now() + restartDelay) { [weak self] in
+        queue.asyncAfter(deadline: .now() + restartDelay) { [weak self] in
             guard let self, !self.isStopping else { return }
             do {
-                try self.launchProcess()
+                try self.launchProcessLocked()
             } catch {
                 os_log("powermetrics restart failed: %{public}s", log: log, type: .fault, error.localizedDescription)
                 self.onError?("powermetrics restart failed: \(error.localizedDescription)")
@@ -89,7 +120,9 @@ final class PowerMetricsRunner {
         }
     }
 
-    private func flushSamples() {
+    /// Must be called on `queue`. Splits the buffered NUL-separated plist
+    /// stream into individual samples and emits each via `onSample`.
+    private func flushSamplesLocked() {
         let nul: UInt8 = 0
         while let range = buffer.range(of: Data([nul])) {
             let chunk = buffer.subdata(in: buffer.startIndex..<range.lowerBound)

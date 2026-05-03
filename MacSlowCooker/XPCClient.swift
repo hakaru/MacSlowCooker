@@ -24,42 +24,50 @@ final class XPCClient {
     /// Establish a one-shot connection, query the helper's CFBundleVersion,
     /// and tear it down. Used to detect stale helper binaries before starting
     /// long-lived sampling. Returns nil on timeout or XPC error.
+    ///
+    /// Implementation note: an earlier `withTaskGroup` + `withCheckedContinuation`
+    /// design could deadlock — `group.cancelAll()` does not unblock a task
+    /// suspended on `withCheckedContinuation`, so the function would wait for
+    /// the helper reply forever and the 2 s timeout was effectively bypassed.
+    /// Instead we run a parallel timeout task that *invalidates the
+    /// connection* on expiry. Invalidation triggers the proxy's error handler,
+    /// which resumes the continuation with nil. The `Once` guard tolerates
+    /// the race between a real reply and an invalidation-induced error.
     static func fetchHelperVersion(timeout: TimeInterval = 2.0) async -> String? {
         let conn = NSXPCConnection(machServiceName: "com.macslowcooker.helper", options: .privileged)
         conn.remoteObjectInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)
         conn.resume()
-        defer { conn.invalidate() }
 
-        return await withTaskGroup(of: String?.self) { group in
-            group.addTask {
-                await withCheckedContinuation { (cont: CheckedContinuation<String?, Never>) in
-                    final class Once { var done = false }
-                    let once = Once()
-                    let resume: (String?) -> Void = { value in
-                        DispatchQueue.main.async {
-                            guard !once.done else { return }
-                            once.done = true
-                            cont.resume(returning: value)
-                        }
-                    }
-                    let proxy = conn.remoteObjectProxyWithErrorHandler { _ in
-                        resume(nil)
-                    } as? MacSlowCookerHelperProtocol
-                    if let proxy {
-                        proxy.helperVersion { resume($0) }
-                    } else {
-                        resume(nil)
-                    }
+        let timeoutTask = Task {
+            try? await Task.sleep(for: .seconds(timeout))
+            if !Task.isCancelled {
+                conn.invalidate()
+            }
+        }
+
+        let result = await withCheckedContinuation { (cont: CheckedContinuation<String?, Never>) in
+            final class Once { var done = false }
+            let once = Once()
+            let resume: (String?) -> Void = { value in
+                DispatchQueue.main.async {
+                    guard !once.done else { return }
+                    once.done = true
+                    cont.resume(returning: value)
                 }
             }
-            group.addTask {
-                try? await Task.sleep(for: .seconds(timeout))
-                return nil
+            let proxy = conn.remoteObjectProxyWithErrorHandler { _ in
+                resume(nil)
+            } as? MacSlowCookerHelperProtocol
+            if let proxy {
+                proxy.helperVersion { resume($0) }
+            } else {
+                resume(nil)
             }
-            let result = await group.next() ?? nil
-            group.cancelAll()
-            return result
         }
+
+        timeoutTask.cancel()
+        conn.invalidate()
+        return result
     }
 
     func disconnect() {
