@@ -115,7 +115,7 @@ final class DockIconAnimator {
     }
 
     private func evaluateBoiling(sample: GPUSample) {
-        let result = Self.computeBoiling(
+        let result = CookingHeuristics.computeBoiling(
             trigger: settings.boilingTrigger,
             sample: sample,
             aboveThresholdSince: aboveThresholdSince,
@@ -240,7 +240,7 @@ final class DockIconAnimator {
         // estimate it from `thermalPressure` so the renderer's pot color still tracks
         // heat instead of staying frozen at the cool baseline.
         let effectiveTemp = latestSample?.temperature
-            ?? Self.estimatedTemperature(for: latestSample?.thermalPressure)
+            ?? CookingHeuristics.estimatedTemperature(for: latestSample?.thermalPressure)
 
         let state = IconState(
             displayedUsage:    displayedUsage,
@@ -268,44 +268,4 @@ final class DockIconAnimator {
         }
     }
 
-    // MARK: - Pure helpers
-
-    /// When the SoC temperature sensor isn't readable, derive a representative
-    /// temperature from `thermal_pressure` so the renderer's heat color still
-    /// reflects something. Numbers chosen to match the visible color stops in
-    /// `DutchOvenRenderer.potColor` (50°C white → 95°C red).
-    nonisolated static func estimatedTemperature(for thermalPressure: String?) -> Double? {
-        switch thermalPressure {
-        case "Nominal":  return 55
-        case "Fair":     return 70
-        case "Serious":  return 85
-        case "Critical": return 95
-        default:         return nil
-        }
-    }
-
-    nonisolated static func computeBoiling(
-        trigger: BoilingTrigger,
-        sample: GPUSample,
-        aboveThresholdSince: Date?,
-        now: Date
-    ) -> (isBoiling: Bool, newAboveThresholdSince: Date?) {
-
-        switch trigger {
-        case .temperature:
-            let boiling = (sample.temperature ?? 0) >= 85
-            return (isBoiling: boiling, newAboveThresholdSince: nil)
-
-        case .thermalPressure:
-            let boiling = ["Serious", "Critical"].contains(sample.thermalPressure ?? "")
-            return (isBoiling: boiling, newAboveThresholdSince: nil)
-
-        case .combined:
-            let highUsage = sample.gpuUsage >= 0.9
-            let newSince: Date? = highUsage ? (aboveThresholdSince ?? now) : nil
-            let sustained = newSince.map { now.timeIntervalSince($0) >= 5.0 } ?? false
-            let pressured = ["Serious", "Critical"].contains(sample.thermalPressure ?? "")
-            return (isBoiling: sustained || pressured, newAboveThresholdSince: newSince)
-        }
-    }
 }

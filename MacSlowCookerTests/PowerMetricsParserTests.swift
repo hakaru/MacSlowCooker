@@ -122,7 +122,7 @@ final class PowerMetricsParserTests: XCTestCase {
 
         let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
 
-        XCTAssertEqual(sample.thermalPressure, "Serious")
+        XCTAssertEqual(sample.thermalPressure, .serious)
         XCTAssertNil(sample.temperature)   // not exposed on macOS 26
     }
 
@@ -191,7 +191,7 @@ final class PowerMetricsParserTests: XCTestCase {
         XCTAssertEqual(sample.gpuUsage, 0.75, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sample.power), 12.0, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sample.anePower), 0.32, accuracy: 0.001)
-        XCTAssertEqual(sample.thermalPressure, "Fair")
+        XCTAssertEqual(sample.thermalPressure, .fair)
         XCTAssertNil(sample.temperature)
     }
 }

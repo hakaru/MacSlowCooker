@@ -280,9 +280,9 @@ struct PopupView: View {
             }
         }
         switch latest?.thermalPressure {
-        case "Serious":  return .yellow
-        case "Critical": return .red
-        default:         return .primary
+        case .serious:  return .yellow
+        case .critical: return .red
+        default:        return .primary
         }
     }
 
@@ -326,7 +326,7 @@ struct PopupView: View {
         if let t = latest?.temperature {
             return String(format: "%.0f°C", t)
         }
-        return latest?.thermalPressure ?? "--"
+        return latest?.thermalPressure?.rawValue ?? "--"
     }
 
     private var tempColor: Color {
@@ -339,11 +339,11 @@ struct PopupView: View {
             }
         }
         switch latest?.thermalPressure {
-        case "Nominal":  return .green
-        case "Fair":     return .yellow
-        case "Serious":  return .orange
-        case "Critical": return .red
-        default:         return .orange
+        case .nominal:  return .green
+        case .fair:     return .yellow
+        case .serious:  return .orange
+        case .critical: return .red
+        case .none:     return .orange
         }
     }
 

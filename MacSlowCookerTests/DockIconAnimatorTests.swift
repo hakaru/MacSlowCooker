@@ -32,7 +32,7 @@ final class DockIconAnimatorTests: XCTestCase {
 
     private func sample(usage: Double = 0,
                         temperature: Double? = nil,
-                        thermalPressure: String? = nil) -> GPUSample {
+                        thermalPressure: ThermalPressure? = nil) -> GPUSample {
         GPUSample(timestamp: clock.now,
                   gpuUsage: usage,
                   temperature: temperature,

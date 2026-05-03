@@ -8,7 +8,7 @@ final class GPUSampleTests: XCTestCase {
             timestamp: Date(timeIntervalSince1970: 1000),
             gpuUsage: 0.68,
             temperature: 47.3,
-            thermalPressure: "Nominal",
+            thermalPressure: .nominal,
             power: 8.2,
             anePower: 0.5,
             aneUsage: 0.12,
@@ -19,7 +19,7 @@ final class GPUSampleTests: XCTestCase {
 
         XCTAssertEqual(decoded.gpuUsage, 0.68, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.temperature), 47.3, accuracy: 0.001)
-        XCTAssertEqual(decoded.thermalPressure, "Nominal")
+        XCTAssertEqual(decoded.thermalPressure, .nominal)
         XCTAssertEqual(try XCTUnwrap(decoded.power), 8.2, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.anePower), 0.5, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.aneUsage), 0.12, accuracy: 0.001)

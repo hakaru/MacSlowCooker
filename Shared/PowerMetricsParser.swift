@@ -2,8 +2,10 @@ import Foundation
 
 enum PowerMetricsParser {
     /// Parse one plist sample from powermetrics into a GPUSample.
-    /// Supports both the legacy keys (capitalized "GPU", "gpu_active_residency")
-    /// and the macOS 14+/26 keys (lowercase "gpu", "idle_ratio").
+    /// Supports three schema generations:
+    ///   - legacy (capitalized "GPU", `gpu_active_residency`, `gpu_power_mW`)
+    ///   - macOS 14+/26 (lowercase "gpu", `idle_ratio`, `gpu_energy`)
+    ///   - Intel (`gpu_busy`, `busy_ns` + `elapsed_ns`)
     static func parse(plistData: Data, timestamp: Date) -> GPUSample? {
         guard let dict = try? PropertyListSerialization.propertyList(from: plistData, format: nil) as? [String: Any] else {
             return nil
@@ -12,60 +14,39 @@ enum PowerMetricsParser {
         // GPU dict — try both casings
         let gpuDict = (dict["gpu"] as? [String: Any]) ?? (dict["GPU"] as? [String: Any])
 
-        // GPU usage: prefer explicit gpu_active_residency; otherwise compute from
-        // idle_ratio (Apple Silicon / macOS 26) or gpu_busy / busy_ns (Intel
-        // Macs with discrete or integrated AMD/Intel GPUs).
-        var gpuUsage: Double?
-        if let gpu = gpuDict {
-            if let active = gpu["gpu_active_residency"] as? Double {
-                gpuUsage = active
-            } else if let idle = gpu["idle_ratio"] as? Double {
-                gpuUsage = max(0.0, 1.0 - idle)
-            } else if let busy = gpu["gpu_busy"] as? Double {
-                // Intel powermetrics emits gpu_busy as integer percent (0–100).
-                gpuUsage = busy / 100.0
-            } else if let busyNs = gpu["busy_ns"] as? Double,
-                      let elapsedNs = (gpu["elapsed_ns"] as? Double) ?? (dict["elapsed_ns"] as? Double),
-                      elapsedNs > 0 {
-                gpuUsage = busyNs / elapsedNs
-            }
-        }
-        // If no GPU usage key is present, we can't produce a sample.
+        // GPU usage: try the schemas in priority order, mapping each to [0, 1].
+        let gpuUsage: Double? =
+            coalesceDouble(from: gpuDict, keys: ["gpu_active_residency"])
+            ?? coalesceDouble(from: gpuDict, keys: ["idle_ratio"]).map { max(0.0, 1.0 - $0) }
+            ?? coalesceDouble(from: gpuDict, keys: ["gpu_busy"]).map { $0 / 100.0 }
+            ?? busyNsRatio(in: gpuDict, topLevel: dict)
+
         guard let usage = gpuUsage else { return nil }
 
-        // Temperature: legacy keys only — not exposed in macOS 26 plist output
-        let temperature: Double? = (gpuDict?["GPU Die Temp"] as? Double)
-            ?? (gpuDict?["gpu_die_temperature"] as? Double)
+        // Temperature: legacy keys only — not exposed in macOS 26 plist output.
+        let temperature = coalesceDouble(from: gpuDict, keys: ["GPU Die Temp", "gpu_die_temperature"])
 
-        // Power: try legacy keys first, otherwise derive from gpu_energy (mJ) / elapsed_ns
-        var power: Double?
-        if let p = (gpuDict?["gpu_power_mW"] as? Double).map({ $0 / 1000.0 })
-            ?? (gpuDict?["gpu_power"] as? Double)
-            ?? (gpuDict?["GPU Power"] as? Double) {
-            power = p
-        } else if let energyMJ = gpuDict?["gpu_energy"] as? Double,
-                  let elapsedNs = dict["elapsed_ns"] as? Double, elapsedNs > 0 {
-            // gpu_energy is in mJ over the elapsed window; divide by elapsed seconds → W
-            power = (energyMJ / 1000.0) / (elapsedNs / 1_000_000_000.0)
-        }
+        // GPU power: legacy mW first (legacy_mW / 1000 → W), legacy W keys, then
+        // derive from gpu_energy (mJ) / elapsed_ns (ns) on macOS 26.
+        let power = coalesceDouble(from: gpuDict, keys: ["gpu_power_mW"]).map { $0 / 1000.0 }
+            ?? coalesceDouble(from: gpuDict, keys: ["gpu_power", "GPU Power"])
+            ?? energyToWatts(energyMJ: coalesceDouble(from: gpuDict, keys: ["gpu_energy"]),
+                             elapsedNs: dict["elapsed_ns"] as? Double)
 
-        // ANE usage (legacy): try both casings — usually nil on macOS 26
+        // ANE usage (legacy on macOS 14, nil on macOS 26).
         let aneDict = (dict["ane"] as? [String: Any]) ?? (dict["ANE"] as? [String: Any])
-        let aneUsage: Double? = (aneDict?["ane_active_residency"] as? Double)
-            ?? (aneDict?["idle_ratio"] as? Double).map { max(0.0, 1.0 - $0) }
+        let aneUsage = coalesceDouble(from: aneDict, keys: ["ane_active_residency"])
+            ?? coalesceDouble(from: aneDict, keys: ["idle_ratio"]).map { max(0.0, 1.0 - $0) }
 
-        // ANE power on macOS 26: in dict["processor"]["ane_power"] (mW)
-        var anePower: Double?
-        if let processor = dict["processor"] as? [String: Any],
-           let aneMW = processor["ane_power"] as? Double {
-            anePower = aneMW / 1000.0
-        } else if let energyMJ = (aneDict?["ane_energy"] as? Double),
-                  let elapsedNs = dict["elapsed_ns"] as? Double, elapsedNs > 0 {
-            anePower = (energyMJ / 1000.0) / (elapsedNs / 1_000_000_000.0)
-        }
+        // ANE power: macOS 26 puts it under processor.ane_power in mW.
+        let processorDict = dict["processor"] as? [String: Any]
+        let anePower = coalesceDouble(from: processorDict, keys: ["ane_power"]).map { $0 / 1000.0 }
+            ?? energyToWatts(energyMJ: coalesceDouble(from: aneDict, keys: ["ane_energy"]),
+                             elapsedNs: dict["elapsed_ns"] as? Double)
 
-        // Thermal pressure: top-level categorical value
-        let thermalPressure = dict["thermal_pressure"] as? String
+        // Thermal pressure: top-level categorical value. Unknown future states
+        // surface as nil rather than crashing the parse.
+        let thermalPressure = (dict["thermal_pressure"] as? String).flatMap(ThermalPressure.init(rawValue:))
 
         return GPUSample(
             timestamp: timestamp,
@@ -77,5 +58,33 @@ enum PowerMetricsParser {
             aneUsage: aneUsage.map { min(max($0, 0.0), 1.0) },
             fanRPM: nil   // augmented by HelperTool's SMCReader before XPC delivery
         )
+    }
+
+    /// Try each key in order and return the first one that decodes as a
+    /// `Double` (or as an `NSNumber` that we can convert to one).
+    private static func coalesceDouble(from dict: [String: Any]?, keys: [String]) -> Double? {
+        guard let dict else { return nil }
+        for key in keys {
+            if let v = dict[key] as? Double { return v }
+            if let n = dict[key] as? NSNumber { return n.doubleValue }
+        }
+        return nil
+    }
+
+    /// busy_ns lives inside the gpu dict (Intel discrete GPU schema) but the
+    /// elapsed_ns it should be divided by may live alongside it or at the
+    /// plist's top level depending on macOS / GPU vendor.
+    private static func busyNsRatio(in gpuDict: [String: Any]?, topLevel: [String: Any]) -> Double? {
+        guard let busyNs = coalesceDouble(from: gpuDict, keys: ["busy_ns"]) else { return nil }
+        let elapsed = coalesceDouble(from: gpuDict, keys: ["elapsed_ns"])
+            ?? (topLevel["elapsed_ns"] as? Double)
+        guard let elapsedNs = elapsed, elapsedNs > 0 else { return nil }
+        return busyNs / elapsedNs
+    }
+
+    /// Convert energy (mJ) over an elapsed window (ns) into average watts.
+    private static func energyToWatts(energyMJ: Double?, elapsedNs: Double?) -> Double? {
+        guard let energyMJ, let elapsedNs, elapsedNs > 0 else { return nil }
+        return (energyMJ / 1000.0) / (elapsedNs / 1_000_000_000.0)
     }
 }

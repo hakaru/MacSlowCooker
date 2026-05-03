@@ -7,7 +7,7 @@ final class BoilingTriggerTests: XCTestCase {
 
     private func sample(usage: Double = 0,
                         temperature: Double? = nil,
-                        thermalPressure: String? = nil) -> GPUSample {
+                        thermalPressure: ThermalPressure? = nil) -> GPUSample {
         GPUSample(timestamp: Date(),
                   gpuUsage: usage,
                   temperature: temperature,
@@ -21,7 +21,7 @@ final class BoilingTriggerTests: XCTestCase {
     // MARK: - .temperature mode
 
     func testTemperatureNilIsNotBoiling() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .temperature, sample: sample(temperature: nil),
             aboveThresholdSince: nil, now: now)
         XCTAssertFalse(r.isBoiling)
@@ -29,21 +29,21 @@ final class BoilingTriggerTests: XCTestCase {
     }
 
     func testTemperatureBelowThresholdIsNotBoiling() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .temperature, sample: sample(temperature: 84.9),
             aboveThresholdSince: nil, now: now)
         XCTAssertFalse(r.isBoiling)
     }
 
     func testTemperatureAtThresholdIsBoiling() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .temperature, sample: sample(temperature: 85),
             aboveThresholdSince: nil, now: now)
         XCTAssertTrue(r.isBoiling)
     }
 
     func testTemperatureAboveThresholdIsBoiling() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .temperature, sample: sample(temperature: 92),
             aboveThresholdSince: nil, now: now)
         XCTAssertTrue(r.isBoiling)
@@ -52,29 +52,29 @@ final class BoilingTriggerTests: XCTestCase {
     // MARK: - .thermalPressure mode
 
     func testThermalPressureNominalIsNotBoiling() {
-        let r = DockIconAnimator.computeBoiling(
-            trigger: .thermalPressure, sample: sample(thermalPressure: "Nominal"),
+        let r = CookingHeuristics.computeBoiling(
+            trigger: .thermalPressure, sample: sample(thermalPressure: .nominal),
             aboveThresholdSince: nil, now: now)
         XCTAssertFalse(r.isBoiling)
     }
 
     func testThermalPressureFairIsNotBoiling() {
-        let r = DockIconAnimator.computeBoiling(
-            trigger: .thermalPressure, sample: sample(thermalPressure: "Fair"),
+        let r = CookingHeuristics.computeBoiling(
+            trigger: .thermalPressure, sample: sample(thermalPressure: .fair),
             aboveThresholdSince: nil, now: now)
         XCTAssertFalse(r.isBoiling)
     }
 
     func testThermalPressureSeriousIsBoiling() {
-        let r = DockIconAnimator.computeBoiling(
-            trigger: .thermalPressure, sample: sample(thermalPressure: "Serious"),
+        let r = CookingHeuristics.computeBoiling(
+            trigger: .thermalPressure, sample: sample(thermalPressure: .serious),
             aboveThresholdSince: nil, now: now)
         XCTAssertTrue(r.isBoiling)
     }
 
     func testThermalPressureCriticalIsBoiling() {
-        let r = DockIconAnimator.computeBoiling(
-            trigger: .thermalPressure, sample: sample(thermalPressure: "Critical"),
+        let r = CookingHeuristics.computeBoiling(
+            trigger: .thermalPressure, sample: sample(thermalPressure: .critical),
             aboveThresholdSince: nil, now: now)
         XCTAssertTrue(r.isBoiling)
     }
@@ -82,7 +82,7 @@ final class BoilingTriggerTests: XCTestCase {
     // MARK: - .combined mode
 
     func testCombinedHighUsageStartsTimer() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .combined, sample: sample(usage: 0.95),
             aboveThresholdSince: nil, now: now)
         XCTAssertFalse(r.isBoiling)                      // Not yet 5s
@@ -91,7 +91,7 @@ final class BoilingTriggerTests: XCTestCase {
 
     func testCombinedHighUsageBefore5sIsNotBoiling() {
         let started = now.addingTimeInterval(-4.9)
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .combined, sample: sample(usage: 0.95),
             aboveThresholdSince: started, now: now)
         XCTAssertFalse(r.isBoiling)
@@ -99,7 +99,7 @@ final class BoilingTriggerTests: XCTestCase {
 
     func testCombinedHighUsageAfter5sIsBoiling() {
         let started = now.addingTimeInterval(-5.1)
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .combined, sample: sample(usage: 0.95),
             aboveThresholdSince: started, now: now)
         XCTAssertTrue(r.isBoiling)
@@ -107,7 +107,7 @@ final class BoilingTriggerTests: XCTestCase {
 
     func testCombinedDropResetsTimer() {
         let started = now.addingTimeInterval(-3.0)
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .combined, sample: sample(usage: 0.4),
             aboveThresholdSince: started, now: now)
         XCTAssertFalse(r.isBoiling)
@@ -115,9 +115,9 @@ final class BoilingTriggerTests: XCTestCase {
     }
 
     func testCombinedThermalPressureSeriousImmediatelyBoils() {
-        let r = DockIconAnimator.computeBoiling(
+        let r = CookingHeuristics.computeBoiling(
             trigger: .combined,
-            sample: sample(usage: 0.1, thermalPressure: "Serious"),
+            sample: sample(usage: 0.1, thermalPressure: .serious),
             aboveThresholdSince: nil, now: now)
         XCTAssertTrue(r.isBoiling)
     }
