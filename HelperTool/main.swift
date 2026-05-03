@@ -11,6 +11,7 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     private let runner = PowerMetricsRunner()
     private let temperatureReader = TemperatureReader()
     private let smcReader = SMCReader()
+    private let ioaReader = IOAcceleratorReader()
     private let queue = DispatchQueue(label: "com.macslowcooker.helper.sample")
     private var latestSampleData: Data?
     private var sampling = false
@@ -21,9 +22,12 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
             guard let self else { return }
             let temp = self.temperatureReader.readGPUTemperature()
             let fans = self.smcReader?.readFanRPMs()
+            // Prefer IOAccelerator's Device Utilization % (matches Activity Monitor).
+            // Fall back to powermetrics' idle_ratio derivation if IOKit read fails.
+            let usage = self.ioaReader.readGPUUsage() ?? sample.gpuUsage
             let augmented = GPUSample(
                 timestamp: sample.timestamp,
-                gpuUsage: sample.gpuUsage,
+                gpuUsage: usage,
                 temperature: temp ?? sample.temperature,
                 thermalPressure: sample.thermalPressure,
                 power: sample.power,

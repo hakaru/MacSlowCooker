@@ -28,6 +28,7 @@
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D676208B045B062E261378 /* XPCClient.swift */; };
+		97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */; };
 		AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */; };
 		AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
@@ -78,6 +79,7 @@
 		81A7139D20C2519CF55ABAFB /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		90386A8D8287F8D6433DA49A /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
 		947C59473F2C40EDC54468E3 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
+		94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorReader.swift; sourceTree = "<group>"; };
 		9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
 		A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoilingTriggerTests.swift; sourceTree = "<group>"; };
 		A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRenderer.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 			children = (
 				BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */,
 				05A9EF7E1C735A467AD710EA /* Info.plist */,
+				94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */,
 				0A6845F2B35F7FD152E9F7AE /* main.swift */,
 				9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */,
 				BB01D55A43D433F0DB854F7C /* SMCReader.swift */,
@@ -329,6 +332,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
+				97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */,
 				357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */,
 				77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */,
 				6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */,
