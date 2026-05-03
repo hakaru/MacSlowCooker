@@ -14,29 +14,41 @@
 		16596D0D42204EC72E657A65 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B160393A833FD4D1952BEF /* Clock.swift */; };
 		194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */; };
 		224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495D61085AE6A59E664ACBF0 /* SettingsTests.swift */; };
+		25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */; };
 		273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */; };
 		357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
+		3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
 		43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */; };
+		44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */; };
 		55920E4448E396122E2C94B2 /* DockIconAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */; };
 		5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36464BD999D5385543BA7023 /* AppDelegate.swift */; };
 		5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */; };
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
+		6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */; };
 		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
+		8F2558172004E9EECBC1DD6F /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D676208B045B062E261378 /* XPCClient.swift */; };
 		97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */; };
+		A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */; };
 		AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */; };
 		AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
+		AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
 		B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
+		B7966580AB33ED760BE514D2 /* SMCFanDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */; };
+		BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */; };
 		BB2103C829016BA8059FF165 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB505FEF4C5660E59EB3CEAA /* main.swift */; };
 		BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
 		C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC5135696164D72811AE540 /* PotRenderer.swift */; };
 		C7683C66966DFF255A795402 /* DutchOvenRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */; };
 		C9A77AD58066B63A688D390A /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
+		D0E44CBA71ACE5AD74AE423D /* PlistStreamSplitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */; };
+		D80B10C0C617AD41F5BA4257 /* PlistStreamSplitter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */; };
+		DAB315CD66ED5297D43BD725 /* SensorNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */; };
 		E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947C59473F2C40EDC54468E3 /* XPCProtocol.swift */; };
 		E944B2BB2290F4D191F404BF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6845F2B35F7FD152E9F7AE /* main.swift */; };
 		F0BB23CF05F11DA7B3E5C488 /* TemperatureReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */; };
@@ -61,16 +73,21 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCFanDecoderTests.swift; sourceTree = "<group>"; };
 		05A9EF7E1C735A467AD710EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
 		0A6845F2B35F7FD152E9F7AE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcher.swift; sourceTree = "<group>"; };
 		1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
+		1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorSelection.swift; sourceTree = "<group>"; };
 		1FBE4FF29F56752B038056F5 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimator.swift; sourceTree = "<group>"; };
 		36464BD999D5385543BA7023 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
 		3A3F7901E7ECC5583D7607FA /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
+		41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistStreamSplitterTests.swift; sourceTree = "<group>"; };
 		495D61085AE6A59E664ACBF0 /* SettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
+		4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCFanDecoder.swift; sourceTree = "<group>"; };
 		4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClock.swift; sourceTree = "<group>"; };
 		50B160393A833FD4D1952BEF /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		5DC5135696164D72811AE540 /* PotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotRenderer.swift; sourceTree = "<group>"; };
@@ -79,11 +96,14 @@
 		79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
 		7B0E01379C7F34814B84799B /* GPUSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSample.swift; sourceTree = "<group>"; };
 		81A7139D20C2519CF55ABAFB /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistStreamSplitter.swift; sourceTree = "<group>"; };
 		90386A8D8287F8D6433DA49A /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
 		947C59473F2C40EDC54468E3 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
 		94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorReader.swift; sourceTree = "<group>"; };
 		9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
+		A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorSelectionTests.swift; sourceTree = "<group>"; };
 		A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoilingTriggerTests.swift; sourceTree = "<group>"; };
+		A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcherTests.swift; sourceTree = "<group>"; };
 		A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRenderer.swift; sourceTree = "<group>"; };
 		B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRendererTests.swift; sourceTree = "<group>"; };
 		BAB3F838CEAED7F8769AD2D2 /* MacSlowCookerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSlowCookerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -120,8 +140,12 @@
 				B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */,
 				06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */,
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
+				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
+				41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */,
 				1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */,
+				A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */,
 				495D61085AE6A59E664ACBF0 /* SettingsTests.swift */,
+				00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */,
 				4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */,
 			);
 			path = MacSlowCookerTests;
@@ -146,7 +170,11 @@
 			children = (
 				F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */,
 				7B0E01379C7F34814B84799B /* GPUSample.swift */,
+				1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */,
+				89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */,
 				79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */,
+				11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */,
+				4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */,
 				947C59473F2C40EDC54468E3 /* XPCProtocol.swift */,
 			);
 			path = Shared;
@@ -320,11 +348,15 @@
 				194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */,
 				273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */,
 				615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */,
+				AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */,
+				D80B10C0C617AD41F5BA4257 /* PlistStreamSplitter.swift in Sources */,
 				0B75C45876F33514001EBF69 /* PopupView.swift in Sources */,
 				7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */,
 				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
 				081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */,
+				44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */,
+				DAB315CD66ED5297D43BD725 /* SensorNameMatcher.swift in Sources */,
 				7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */,
 				9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */,
 				E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */,
@@ -339,9 +371,13 @@
 				BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */,
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
 				97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */,
+				3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */,
+				D0E44CBA71ACE5AD74AE423D /* PlistStreamSplitter.swift in Sources */,
 				357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */,
 				77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */,
+				8F2558172004E9EECBC1DD6F /* SMCFanDecoder.swift in Sources */,
 				6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */,
+				6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */,
 				F0BB23CF05F11DA7B3E5C488 /* TemperatureReader.swift in Sources */,
 				05BABEEFFD83B72E1B3D46D6 /* XPCProtocol.swift in Sources */,
 				E944B2BB2290F4D191F404BF /* main.swift in Sources */,
@@ -357,7 +393,11 @@
 				5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */,
 				33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */,
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
+				BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */,
+				A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */,
 				F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */,
+				B7966580AB33ED760BE514D2 /* SMCFanDecoderTests.swift in Sources */,
+				25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */,
 				224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */,
 				5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */,
 			);

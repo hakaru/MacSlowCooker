@@ -135,30 +135,17 @@ final class SMCReader {
         return bytes.first
     }
 
-    /// Reads an SMC key whose value represents a number. Handles both `fpe2`
-    /// (16-bit big-endian fixed point, 14-int + 2-frac) and `flt ` (32-bit
-    /// big-endian IEEE 754 float). Returns the decoded value or nil.
+    /// Reads an SMC key whose value represents a number. Decoding is
+    /// delegated to `SMCFanDecoder` so it can be unit-tested without going
+    /// through `IOServiceOpen`. Logs on unknown dataType for diagnosability.
     private func readFloat(key: String) -> Double? {
         guard let (bytes, dataType) = readKey(key) else { return nil }
-        switch dataType {
-        case "fpe2":
-            guard bytes.count >= 2 else { return nil }
-            let raw = (UInt16(bytes[0]) << 8) | UInt16(bytes[1])
-            return Double(raw) / 4.0
-        case "flt ":
-            // Apple Silicon SMC returns 32-bit floats in little-endian byte order
-            // (despite SMC's legacy of big-endian fixed-point types).
-            guard bytes.count >= 4 else { return nil }
-            let raw =  UInt32(bytes[0])
-                    | (UInt32(bytes[1]) <<  8)
-                    | (UInt32(bytes[2]) << 16)
-                    | (UInt32(bytes[3]) << 24)
-            return Double(Float(bitPattern: raw))
-        default:
-            os_log("SMC unknown dataType for %{public}s: %{public}s",
-                   log: smcLog, type: .error, key, dataType)
-            return nil
+        if let value = SMCFanDecoder.decode(bytes: bytes, dataType: dataType) {
+            return value
         }
+        os_log("SMC unknown dataType for %{public}s: %{public}s",
+               log: smcLog, type: .error, key, dataType)
+        return nil
     }
 
     /// Returns the raw bytes plus the SMC dataType code (e.g., "fpe2", "flt ").

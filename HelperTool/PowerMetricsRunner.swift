@@ -18,7 +18,7 @@ final class PowerMetricsRunner {
     private let queue = DispatchQueue(label: "com.macslowcooker.helper.runner")
     private var process: Process?
     private var stdoutPipe: Pipe?
-    private var buffer = Data()
+    private let splitter = PlistStreamSplitter()
     private var failureCount = 0
     private var isStopping = false
     private let maxFailures = 3
@@ -48,7 +48,7 @@ final class PowerMetricsRunner {
             process?.terminate()
             process = nil
             stdoutPipe = nil
-            buffer.removeAll()
+            splitter.reset()
         }
         os_log("powermetrics stopped", log: log, type: .info)
     }
@@ -87,13 +87,12 @@ final class PowerMetricsRunner {
         self.stdoutPipe = pipe
 
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
-            // Read off Foundation's queue, but mutate buffer on ours.
+            // Read off Foundation's queue, but mutate splitter buffer on ours.
             let chunk = handle.availableData
             guard !chunk.isEmpty else { return }
             self?.queue.async {
                 guard let self else { return }
-                self.buffer.append(chunk)
-                self.flushSamplesLocked()
+                self.flushSamplesLocked(chunk: chunk)
             }
         }
 
@@ -120,15 +119,11 @@ final class PowerMetricsRunner {
         }
     }
 
-    /// Must be called on `queue`. Splits the buffered NUL-separated plist
-    /// stream into individual samples and emits each via `onSample`.
-    private func flushSamplesLocked() {
-        let nul: UInt8 = 0
-        while let range = buffer.range(of: Data([nul])) {
-            let chunk = buffer.subdata(in: buffer.startIndex..<range.lowerBound)
-            buffer.removeSubrange(buffer.startIndex...range.lowerBound)
-            guard !chunk.isEmpty else { continue }
-            if let sample = PowerMetricsParser.parse(plistData: chunk, timestamp: Date()) {
+    /// Must be called on `queue`. Feeds the new chunk into the splitter and
+    /// emits a sample for each complete plist payload.
+    private func flushSamplesLocked(chunk: Data) {
+        for plist in splitter.append(chunk) {
+            if let sample = PowerMetricsParser.parse(plistData: plist, timestamp: Date()) {
                 onSample?(sample)
             }
         }

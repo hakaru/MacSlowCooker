@@ -7,17 +7,10 @@ private let ioaLog = OSLog(subsystem: "com.macslowcooker", category: "ioaccel")
 /// Reads GPU utilization from `IOAccelerator`'s `PerformanceStatistics` dictionary,
 /// which is the same source Activity Monitor uses for its "GPU History" graph.
 ///
-/// `Device Utilization %` is integer percent (0–100). We pick a single service
-/// deterministically (sorted by IORegistry entry name, first one with a usable
-/// percentage) so reads do not jitter across reboots when service iteration
-/// order changes. On first read, all detected services are logged for diagnosis.
+/// Pure selection logic (sort by name, take first usable) lives in
+/// `IOAcceleratorSelection` so it can be unit-tested. This class wraps the
+/// IOKit iteration and per-service property reads.
 final class IOAcceleratorReader {
-
-    private struct Reading {
-        let name: String
-        let className: String
-        let utilization: Double?
-    }
 
     private let lock = NSLock()
     private var hasLogged = false
@@ -36,21 +29,24 @@ final class IOAcceleratorReader {
         }
         defer { IOObjectRelease(iterator) }
 
-        var readings: [Reading] = []
+        var readings: [IOAcceleratorSelection.Reading] = []
         while case let service = IOIteratorNext(iterator), service != 0 {
             defer { IOObjectRelease(service) }
             readings.append(makeReading(service: service))
         }
 
-        let sorted = readings.sorted { $0.name < $1.name }
-        logServicesIfFirstRead(sorted)
+        guard let result = IOAcceleratorSelection.choose(from: readings) else {
+            // Still log services on first read even when no usable percentage,
+            // so the user can see why the icon stays disconnected.
+            logServicesIfFirstRead(readings.sorted { $0.name < $1.name })
+            return nil
+        }
 
-        guard let chosen = sorted.first(where: { $0.utilization != nil }),
-              let util = chosen.utilization else { return nil }
-        return min(1.0, max(0.0, util / 100.0))
+        logServicesIfFirstRead(result.sorted)
+        return IOAcceleratorSelection.normalize(percent: result.chosen.utilization!)
     }
 
-    private func makeReading(service: io_object_t) -> Reading {
+    private func makeReading(service: io_object_t) -> IOAcceleratorSelection.Reading {
         var nameBuf = [CChar](repeating: 0, count: 128)
         IORegistryEntryGetName(service, &nameBuf)
         let name = String(cString: nameBuf)
@@ -72,10 +68,10 @@ final class IOAcceleratorReader {
             ?? (cf?["Device Utilization"]   as? NSNumber)?.doubleValue
             ?? (cf?["GPU Activity(%)"]      as? NSNumber)?.doubleValue
 
-        return Reading(name: name, className: className, utilization: raw)
+        return IOAcceleratorSelection.Reading(name: name, className: className, utilization: raw)
     }
 
-    private func logServicesIfFirstRead(_ readings: [Reading]) {
+    private func logServicesIfFirstRead(_ readings: [IOAcceleratorSelection.Reading]) {
         lock.lock()
         let shouldLog = !hasLogged
         hasLogged = true
