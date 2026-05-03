@@ -6,7 +6,9 @@ final class GPUDataStoreTests: XCTestCase {
 
     func testAddSampleAppendsToBuffer() {
         let store = GPUDataStore()
-        let sample = GPUSample(timestamp: Date(), gpuUsage: 0.5, temperature: 45.0, power: 6.0, aneUsage: 0.1)
+        let sample = GPUSample(timestamp: Date(), gpuUsage: 0.5, temperature: 45.0,
+                               thermalPressure: nil, power: 6.0, anePower: nil, aneUsage: 0.1,
+                               fanRPM: nil)
         store.addSample(sample)
 
         XCTAssertEqual(store.samples.count, 1)
@@ -16,7 +18,9 @@ final class GPUDataStoreTests: XCTestCase {
     func testBufferCapAt60Elements() throws {
         let store = GPUDataStore()
         for i in 0..<70 {
-            let sample = GPUSample(timestamp: Date(), gpuUsage: Double(i) / 100.0, temperature: nil, power: nil, aneUsage: nil)
+            let sample = GPUSample(timestamp: Date(), gpuUsage: Double(i) / 100.0, temperature: nil,
+                                   thermalPressure: nil, power: nil, anePower: nil, aneUsage: nil,
+                                   fanRPM: nil)
             store.addSample(sample)
         }
 

@@ -21,6 +21,47 @@ final class XPCClient {
         makeConnection()
     }
 
+    /// Establish a one-shot connection, query the helper's CFBundleVersion,
+    /// and tear it down. Used to detect stale helper binaries before starting
+    /// long-lived sampling. Returns nil on timeout or XPC error.
+    static func fetchHelperVersion(timeout: TimeInterval = 2.0) async -> String? {
+        let conn = NSXPCConnection(machServiceName: "com.macslowcooker.helper", options: .privileged)
+        conn.remoteObjectInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)
+        conn.resume()
+        defer { conn.invalidate() }
+
+        return await withTaskGroup(of: String?.self) { group in
+            group.addTask {
+                await withCheckedContinuation { (cont: CheckedContinuation<String?, Never>) in
+                    final class Once { var done = false }
+                    let once = Once()
+                    let resume: (String?) -> Void = { value in
+                        DispatchQueue.main.async {
+                            guard !once.done else { return }
+                            once.done = true
+                            cont.resume(returning: value)
+                        }
+                    }
+                    let proxy = conn.remoteObjectProxyWithErrorHandler { _ in
+                        resume(nil)
+                    } as? MacSlowCookerHelperProtocol
+                    if let proxy {
+                        proxy.helperVersion { resume($0) }
+                    } else {
+                        resume(nil)
+                    }
+                }
+            }
+            group.addTask {
+                try? await Task.sleep(for: .seconds(timeout))
+                return nil
+            }
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
+    }
+
     func disconnect() {
         reconnectTask?.cancel()
         reconnectTask = nil
@@ -77,11 +118,17 @@ final class XPCClient {
 
     private func startPollingTimer() {
         samplingTimer?.invalidate()
-        samplingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Poll at 2 Hz so the helper's synthetic primer sample (filled in
+        // immediately on startSampling) reaches the UI within ~500 ms instead
+        // of the 1 s the legacy 1 Hz cadence required.
+        samplingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.fetchSample()
             }
         }
+        // Kick a fetch right away so the primer lands without waiting for the
+        // first timer tick.
+        fetchSample()
     }
 
     private func fetchSample() {
