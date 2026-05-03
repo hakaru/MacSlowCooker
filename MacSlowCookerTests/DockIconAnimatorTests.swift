@@ -37,7 +37,7 @@ final class DockIconAnimatorTests: XCTestCase {
                   gpuUsage: usage,
                   temperature: temperature,
                   thermalPressure: thermalPressure,
-                  power: nil, anePower: nil, aneUsage: nil)
+                  power: nil, anePower: nil, aneUsage: nil, fanRPM: nil)
     }
 
     // MARK: - Interpolation

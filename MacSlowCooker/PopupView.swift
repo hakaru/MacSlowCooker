@@ -42,7 +42,8 @@ struct PopupView: View {
                 value: \.gpuUsage,
                 color: .cyan,
                 format: "%.0f%%",
-                scale: 100
+                scale: 100,
+                yDomain: 0...100
             )
             chartView(
                 title: "Temp",
@@ -50,7 +51,8 @@ struct PopupView: View {
                 value: { $0.temperature ?? 0 },
                 color: .orange,
                 format: "%.0f°C",
-                scale: 1
+                scale: 1,
+                yDomain: 30...100
             )
         }
     }
@@ -61,12 +63,19 @@ struct PopupView: View {
         value: @escaping (GPUSample) -> Double,
         color: Color,
         format: String,
-        scale: Double
+        scale: Double,
+        yDomain: ClosedRange<Double>
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(.secondary)
+            HStack {
+                Text(title)
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int(yDomain.lowerBound))–\(Int(yDomain.upperBound))")
+                    .font(.system(size: 10))
+                    .foregroundStyle(.tertiary)
+            }
             Chart(samples.indices, id: \.self) { i in
                 let v = value(samples[i])
                 AreaMark(
@@ -83,6 +92,7 @@ struct PopupView: View {
             }
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
+            .chartYScale(domain: yDomain)
             .frame(height: 130)
             .opacity(store.isConnected ? 1.0 : 0.4)
         }
@@ -92,9 +102,16 @@ struct PopupView: View {
         HStack(spacing: 8) {
             metricItem(label: "GPU使用率", value: gpuText, color: .cyan)
             metricItem(label: "SoC 温度", value: tempText, color: tempColor)
+            metricItem(label: "ファン", value: fanText, color: Color(red: 0.4, green: 0.7, blue: 0.6))
             metricItem(label: "電力", value: powerText, color: Color(red: 0.7, green: 0.7, blue: 0.75))
             metricItem(label: "ANE 電力", value: anePowerText, color: .purple)
         }
+    }
+
+    private var fanText: String {
+        guard let fans = latest?.fanRPM, !fans.isEmpty else { return "--" }
+        let avg = fans.reduce(0, +) / Double(fans.count)
+        return String(format: "%.0f", avg)
     }
 
     private func metricItem(label: String, value: String, color: Color) -> some View {

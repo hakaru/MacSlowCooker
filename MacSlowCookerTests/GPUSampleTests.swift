@@ -11,7 +11,8 @@ final class GPUSampleTests: XCTestCase {
             thermalPressure: "Nominal",
             power: 8.2,
             anePower: 0.5,
-            aneUsage: 0.12
+            aneUsage: 0.12,
+            fanRPM: [1234, 1567]
         )
         let data = try JSONEncoder().encode(sample)
         let decoded = try JSONDecoder().decode(GPUSample.self, from: data)
@@ -22,6 +23,7 @@ final class GPUSampleTests: XCTestCase {
         XCTAssertEqual(try XCTUnwrap(decoded.power), 8.2, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.anePower), 0.5, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.aneUsage), 0.12, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(decoded.fanRPM), [1234, 1567])
     }
 
     func testNilFieldsEncodeDecodeRoundTrip() throws {
@@ -32,7 +34,8 @@ final class GPUSampleTests: XCTestCase {
             thermalPressure: nil,
             power: nil,
             anePower: nil,
-            aneUsage: nil
+            aneUsage: nil,
+            fanRPM: nil
         )
         let data = try JSONEncoder().encode(sample)
         let decoded = try JSONDecoder().decode(GPUSample.self, from: data)
@@ -42,5 +45,6 @@ final class GPUSampleTests: XCTestCase {
         XCTAssertNil(decoded.power)
         XCTAssertNil(decoded.anePower)
         XCTAssertNil(decoded.aneUsage)
+        XCTAssertNil(decoded.fanRPM)
     }
 }

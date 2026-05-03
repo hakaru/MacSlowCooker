@@ -14,7 +14,8 @@ final class BoilingTriggerTests: XCTestCase {
                   thermalPressure: thermalPressure,
                   power: nil,
                   anePower: nil,
-                  aneUsage: nil)
+                  aneUsage: nil,
+                  fanRPM: nil)
     }
 
     // MARK: - .temperature mode

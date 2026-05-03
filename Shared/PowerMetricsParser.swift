@@ -65,7 +65,8 @@ enum PowerMetricsParser {
             thermalPressure: thermalPressure,
             power: power,
             anePower: anePower,
-            aneUsage: aneUsage.map { min(max($0, 0.0), 1.0) }
+            aneUsage: aneUsage.map { min(max($0, 0.0), 1.0) },
+            fanRPM: nil   // augmented by HelperTool's SMCReader before XPC delivery
         )
     }
 }

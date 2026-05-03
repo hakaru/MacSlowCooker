@@ -23,6 +23,7 @@
 		5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36464BD999D5385543BA7023 /* AppDelegate.swift */; };
 		5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */; };
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
+		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
@@ -82,6 +83,7 @@
 		A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRenderer.swift; sourceTree = "<group>"; };
 		B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRendererTests.swift; sourceTree = "<group>"; };
 		BAB3F838CEAED7F8769AD2D2 /* MacSlowCookerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSlowCookerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BB01D55A43D433F0DB854F7C /* SMCReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCReader.swift; sourceTree = "<group>"; };
 		BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
 		C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimatorTests.swift; sourceTree = "<group>"; };
 		C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStore.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 				05A9EF7E1C735A467AD710EA /* Info.plist */,
 				0A6845F2B35F7FD152E9F7AE /* main.swift */,
 				9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */,
+				BB01D55A43D433F0DB854F7C /* SMCReader.swift */,
 				D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */,
 			);
 			path = HelperTool;
@@ -328,6 +331,7 @@
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
 				357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */,
 				77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */,
+				6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */,
 				F0BB23CF05F11DA7B3E5C488 /* TemperatureReader.swift in Sources */,
 				05BABEEFFD83B72E1B3D46D6 /* XPCProtocol.swift in Sources */,
 				E944B2BB2290F4D191F404BF /* main.swift in Sources */,

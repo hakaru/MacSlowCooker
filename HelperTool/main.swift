@@ -10,6 +10,7 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
 
     private let runner = PowerMetricsRunner()
     private let temperatureReader = TemperatureReader()
+    private let smcReader = SMCReader()
     private let queue = DispatchQueue(label: "com.macslowcooker.helper.sample")
     private var latestSampleData: Data?
     private var sampling = false
@@ -19,6 +20,7 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
         runner.onSample = { [weak self] sample in
             guard let self else { return }
             let temp = self.temperatureReader.readGPUTemperature()
+            let fans = self.smcReader?.readFanRPMs()
             let augmented = GPUSample(
                 timestamp: sample.timestamp,
                 gpuUsage: sample.gpuUsage,
@@ -26,7 +28,8 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
                 thermalPressure: sample.thermalPressure,
                 power: sample.power,
                 anePower: sample.anePower,
-                aneUsage: sample.aneUsage
+                aneUsage: sample.aneUsage,
+                fanRPM: (fans?.isEmpty == false) ? fans : nil
             )
             let data = try? JSONEncoder().encode(augmented)
             self.queue.async { self.latestSampleData = data }
