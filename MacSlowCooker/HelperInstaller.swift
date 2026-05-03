@@ -58,11 +58,18 @@ final class HelperInstaller {
         }
     }
 
-    /// Detect a stale helper binary (running version != bundled version) and
+    /// Detect a stale helper binary (bundled version > running version) and
     /// re-register the daemon so launchd picks up the freshly deployed binary.
     /// Without this, `SMAppService.daemon().status == .enabled` short-circuits
     /// `installIfNeeded()` and the old helper keeps running until manual
     /// `launchctl kickstart -k`.
+    ///
+    /// **Refuses downgrade** — if the running helper version is newer than
+    /// or equal to the bundled one, this is a no-op. Otherwise launching
+    /// an older but correctly-signed app bundle (a stray previous release
+    /// in Downloads, an outdated nightly) would unregister a newer running
+    /// helper. The downgrade ban was added per Codex security audit
+    /// (2026-05-04, finding #13).
     static func refreshIfStale() async {
         let expected = bundledVersion
         guard let running = await XPCClient.fetchHelperVersion() else {
@@ -70,12 +77,18 @@ final class HelperInstaller {
                    log: log, type: .info)
             return
         }
-        guard running != expected else {
+        switch compareVersions(bundled: expected, running: running) {
+        case .same:
             os_log("Helper version matches bundle (%{public}s)", log: log, type: .info, expected)
             return
+        case .bundledOlder:
+            os_log("Refusing helper downgrade: bundled=%{public}s < running=%{public}s",
+                   log: log, type: .info, expected, running)
+            return
+        case .bundledNewer:
+            os_log("Helper version stale — running=%{public}s bundled=%{public}s; re-registering",
+                   log: log, type: .info, running, expected)
         }
-        os_log("Helper version mismatch — running=%{public}s bundled=%{public}s; re-registering",
-               log: log, type: .info, running, expected)
 
         let service = SMAppService.daemon(plistName: plistName)
         do {
@@ -91,6 +104,49 @@ final class HelperInstaller {
         } catch {
             os_log("Re-register failed: %{public}s", log: log, type: .error, error.localizedDescription)
         }
+    }
+
+    enum VersionComparison {
+        case same
+        case bundledNewer    // refresh needed
+        case bundledOlder    // downgrade — refuse
+    }
+
+    /// Compare CFBundleVersion strings monotonically. Apple recommends an
+    /// integer-y build number (e.g., "1", "42") and Apple's own comparison
+    /// rules treat them numerically. We accept the recommended form plus
+    /// dotted-numeric ("1.2.3") as a fallback. Strings that parse as
+    /// neither fall back to lexicographic compare; the only safe behavior
+    /// then is to refuse refresh on inequality so we don't accidentally
+    /// downgrade.
+    static func compareVersions(bundled: String, running: String) -> VersionComparison {
+        if bundled == running { return .same }
+
+        // Integer compare path (e.g., "42" vs "41")
+        if let b = Int(bundled), let r = Int(running) {
+            return b > r ? .bundledNewer : .bundledOlder
+        }
+
+        // Dotted-numeric compare (e.g., "1.2.3" vs "1.3.0")
+        let bComponents = bundled.split(separator: ".").compactMap { Int($0) }
+        let rComponents = running.split(separator: ".").compactMap { Int($0) }
+        if !bComponents.isEmpty,
+           !rComponents.isEmpty,
+           bComponents.count == bundled.split(separator: ".").count,
+           rComponents.count == running.split(separator: ".").count {
+            for (b, r) in zip(bComponents, rComponents) {
+                if b != r { return b > r ? .bundledNewer : .bundledOlder }
+            }
+            // All shared components equal; longer string wins
+            if bComponents.count != rComponents.count {
+                return bComponents.count > rComponents.count ? .bundledNewer : .bundledOlder
+            }
+            return .same
+        }
+
+        // Unparseable — treat as downgrade so we never replace a working
+        // helper with something we can't reason about.
+        return .bundledOlder
     }
 
     private static func register(service: SMAppService) async throws {

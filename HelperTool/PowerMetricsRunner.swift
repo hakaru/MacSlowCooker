@@ -30,6 +30,10 @@ final class PowerMetricsRunner {
     func start() throws {
         var caughtError: Error?
         queue.sync {
+            // Defense in depth against the same race the actor-side
+            // tryBeginSampling guards against — return early if a process
+            // is already running rather than spawning a duplicate.
+            guard process == nil else { return }
             failureCount = 0
             isStopping = false
             do {

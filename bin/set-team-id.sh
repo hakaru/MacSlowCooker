@@ -29,8 +29,14 @@ fi
 
 NEW="$1"
 
+# Fail closed on malformed input. A typo or a string with shell-special
+# characters would otherwise corrupt the substitutions below and produce
+# a malformed code-signing requirement (Codex security audit, 2026-05-04,
+# finding #15).
 if [[ ! "$NEW" =~ ^[A-Z0-9]{10}$ ]]; then
-    echo "warning: '$NEW' does not look like a 10-character Team ID. Continuing anyway." >&2
+    echo "error: '$NEW' is not a valid 10-character uppercase-alphanumeric Team ID" >&2
+    echo "       Find yours in Xcode → Settings → Accounts, or your Apple Developer dashboard." >&2
+    exit 64
 fi
 
 # Find the current Team ID by looking at the Swift constant — that's the

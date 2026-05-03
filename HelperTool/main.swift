@@ -13,8 +13,23 @@ private actor HelperState {
     private var sampling = false
     private var latestSampleData: Data?
 
-    func isSampling() -> Bool { sampling }
-    func markSamplingStarted() { sampling = true }
+    /// Atomically check + flip the sampling flag. Returns true when the
+    /// caller should spawn the runner; false when sampling is already in
+    /// progress. Combining the check and the set in one actor call closes
+    /// the race where two correctly-signed XPC clients calling startSampling
+    /// concurrently could both observe `sampling == false` and both spawn
+    /// a powermetrics process (Codex security audit, 2026-05-04, finding #14).
+    func tryBeginSampling() -> Bool {
+        guard !sampling else { return false }
+        sampling = true
+        return true
+    }
+
+    /// Roll back the sampling flag if `runner.start()` throws after we
+    /// committed to the begin. Without this the actor would be stuck at
+    /// `sampling == true` even though no runner is alive.
+    func rollbackSamplingStart() { sampling = false }
+
     func setLatestSample(_ data: Data?) { latestSampleData = data }
     func latestSample() -> Data? { latestSampleData }
 }
@@ -67,13 +82,16 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     func startSampling(withReply reply: @escaping (Bool, String?) -> Void) {
         Task { [weak self] in
             guard let self else { reply(false, "service deallocated"); return }
-            if await self.state.isSampling() {
+            // Atomic begin: only the first concurrent caller spawns the
+            // runner. Subsequent callers receive the same success reply
+            // (idempotent) without trying to start a second powermetrics
+            // process.
+            guard await self.state.tryBeginSampling() else {
                 reply(true, nil)
                 return
             }
             do {
                 try self.runner.start()
-                await self.state.markSamplingStarted()
                 // Powermetrics takes ~1.3 s to emit its first plist after spawn,
                 // and the app polls fetchLatestSample at 2 Hz. Without a primer,
                 // the popup shows "--" for 2–3 s after every cold launch. Build
@@ -87,6 +105,9 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
                 os_log("Sampling started", log: log, type: .info)
                 reply(true, nil)
             } catch {
+                // runner.start() failed after we committed — release the
+                // begin so the next caller can retry.
+                await self.state.rollbackSamplingStart()
                 os_log("Failed to start: %{public}s", log: log, type: .error, error.localizedDescription)
                 reply(false, error.localizedDescription)
             }

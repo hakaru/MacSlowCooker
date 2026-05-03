@@ -78,11 +78,16 @@ final class IOAcceleratorReader {
         lock.unlock()
         guard shouldLog else { return }
 
+        // Service count is coarse and useful in release logs.
         os_log("IOAccelerator: %d service(s) detected", log: ioaLog, type: .info, readings.count)
+        // Per-service names / class strings are device-fingerprinting data;
+        // emit at .debug and mark %{private} so they are redacted in release
+        // logs unless private logging is explicitly enabled (Codex security
+        // audit, 2026-05-04, finding #16).
         for r in readings {
             let utilString = r.utilization.map { String(format: "%.0f%%", $0) } ?? "n/a"
-            os_log("  name=%{public}s class=%{public}s util=%{public}s",
-                   log: ioaLog, type: .info,
+            os_log("  name=%{private}s class=%{private}s util=%{public}s",
+                   log: ioaLog, type: .debug,
                    r.name, r.className, utilString)
         }
         if contributingCount > 1 {

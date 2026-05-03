@@ -92,10 +92,13 @@ final class SMCReader {
         // Log field offsets at init so a future toolchain regression that
         // shifts fields without changing total size can be diagnosed from
         // Console.app rather than guessed at from broken fan readings.
+        // Offsets are not personally-identifying but mark them debug-only
+        // to keep release logs minimal (Codex security audit, 2026-05-04,
+        // finding #16).
         let bytesOffset = MemoryLayout<SMCKeyData>.offset(of: \.bytes) ?? -1
         let resultOffset = MemoryLayout<SMCKeyData>.offset(of: \.result) ?? -1
         os_log("SMCKeyData layout: stride=%d bytes@%d result@%d",
-               log: smcLog, type: .info,
+               log: smcLog, type: .debug,
                actualStride, bytesOffset, resultOffset)
 
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
@@ -155,7 +158,9 @@ final class SMCReader {
         if let value = SMCFanDecoder.decode(bytes: bytes, dataType: dataType) {
             return value
         }
-        os_log("SMC unknown dataType for %{public}s: %{public}s",
+        // Key + dataType strings are local diagnostic data; mark private so
+        // they don't leak in release logs (Codex audit 2026-05-04, #16).
+        os_log("SMC unknown dataType for %{private}s: %{private}s",
                log: smcLog, type: .error, key, dataType)
         return nil
     }

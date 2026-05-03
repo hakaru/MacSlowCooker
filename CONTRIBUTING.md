@@ -96,6 +96,43 @@ context document for AI coding assistants used during development.)
 - Contributions are accepted under the [Apache License 2.0](LICENSE);
   submitting a PR signals agreement (Apache License Section 5).
 
+## Security model
+
+The privileged helper trusts XPC peers that satisfy this designated
+requirement:
+
+```
+identifier "com.macslowcooker.app" and anchor apple generic and certificate leaf[subject.OU] = "K38MBRNKAT"
+```
+
+In plain English: any binary signed by the same Apple Developer Team and
+shipping with bundle id `com.macslowcooker.app` can talk to the helper.
+That intentionally includes development builds on the maintainer's
+machine, which is why the requirement is Team-OU rather than a specific
+cdhash.
+
+What this means for forks and contributors:
+
+- Running a fork **requires running `bin/set-team-id.sh <YOUR_TEAM_ID>`**
+  so the helper trusts your locally-signed binary. Without that the
+  helper will install but every XPC call will be rejected.
+- The helper does **not** distinguish certificate types. A Mac App Store
+  signature and a Developer ID signature with the same Team OU are
+  treated identically. If you ever distribute a notarized release, you
+  may want to additionally pin the Developer ID Application certificate
+  OID (`1.2.840.113635.100.6.1.13`) — see
+  [issue #25](https://github.com/hakaru/MacSlowCooker/issues/25).
+- The helper exposes only four no-argument XPC methods (start/stop
+  sampling, fetch latest sample, helper version). It accepts no
+  caller-supplied paths, SMC keys, or process arguments, so the surface
+  a malicious-but-correctly-signed peer could exploit is small.
+- The helper never reads or writes user files. Sampling data lives in
+  memory and is delivered over XPC.
+
+For potential security issues, please **email the maintainer directly**
+rather than filing a public issue, so we can investigate and ship a fix
+before disclosure.
+
 ## Reporting issues
 
 Open an issue on GitHub. Useful info:
@@ -105,5 +142,4 @@ Open an issue on GitHub. Useful info:
 - Logs from `Console.app` filtered by `subsystem == "com.macslowcooker"`
 - Screenshot of the popup if relevant
 
-For potential security issues, please do **not** file a public issue —
-email the maintainer directly so we can investigate before disclosure.
+(See the "Security model" section above for security-issue reporting.)

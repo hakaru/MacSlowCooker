@@ -18,6 +18,7 @@
 		224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495D61085AE6A59E664ACBF0 /* SettingsTests.swift */; };
 		25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */; };
 		273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
+		302501165907DD4DB1F77ADD /* HelperInstallerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BDB90D732C6D0E4D1A6FC0 /* HelperInstallerTests.swift */; };
 		33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */; };
 		357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
 		3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
@@ -87,6 +88,7 @@
 		1FBE4FF29F56752B038056F5 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
 		2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimator.swift; sourceTree = "<group>"; };
 		36464BD999D5385543BA7023 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		36BDB90D732C6D0E4D1A6FC0 /* HelperInstallerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstallerTests.swift; sourceTree = "<group>"; };
 		3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
 		3A3F7901E7ECC5583D7607FA /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
 		41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistStreamSplitterTests.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 				B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */,
 				06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */,
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
+				36BDB90D732C6D0E4D1A6FC0 /* HelperInstallerTests.swift */,
 				9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */,
 				8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */,
 				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
@@ -405,6 +408,7 @@
 				5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */,
 				33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */,
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
+				302501165907DD4DB1F77ADD /* HelperInstallerTests.swift in Sources */,
 				174FF65D4FEA5DC343574588 /* HostCPUTests.swift in Sources */,
 				BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */,
 				8CCF001921C683107237C79E /* IconStateTests.swift in Sources */,
