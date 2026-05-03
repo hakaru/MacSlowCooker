@@ -40,11 +40,11 @@ final class HelperInstaller {
             throw HelperInstallerError.requiresApproval
 
         case .notFound:
-            os_log("Daemon plist not found in bundle", log: log, type: .fault)
-            throw HelperInstallerError.registrationFailed(
-                NSError(domain: "com.macslowcooker", code: -1,
-                        userInfo: [NSLocalizedDescriptionKey: "Daemon plist not found"])
-            )
+            // macOS 14+ sometimes reports .notFound even with a properly placed plist
+            // until register() is actually attempted. Try registering and let the
+            // framework surface the real error if any.
+            os_log("Status .notFound — attempting register() anyway", log: log, type: .info)
+            try await register(service: service)
 
         @unknown default:
             break
