@@ -19,13 +19,26 @@ final class PowerMetricsParserTests: XCTestCase {
         let sample = PowerMetricsParser.parse(plistData: plistData, timestamp: Date(timeIntervalSince1970: 1000))
 
         XCTAssertNotNil(sample)
-        XCTAssertEqual(sample!.gpuUsage, 0.68, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(sample?.gpuUsage), 0.68, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sample?.power), 8.2, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(sample?.aneUsage), 0.12, accuracy: 0.001)
     }
 
+    /// The pot-icon-poc parser still requires a parseable GPU usage value
+    /// to emit a sample — thermal_pressure alone is not enough. (main's
+    /// Optional gpuUsage refactor was not adopted on this branch; see PR
+    /// description for rationale.)
     func testParseMissingGPUReturnsNil() throws {
         let dict: [String: Any] = ["thermal_pressure": "Nominal"]
+        let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+
+        let sample = PowerMetricsParser.parse(plistData: plistData, timestamp: Date())
+
+        XCTAssertNil(sample)
+    }
+
+    func testParseEmptyDictReturnsNil() throws {
+        let dict: [String: Any] = [:]
         let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
 
         let sample = PowerMetricsParser.parse(plistData: plistData, timestamp: Date())
@@ -42,11 +55,15 @@ final class PowerMetricsParserTests: XCTestCase {
         let sample = PowerMetricsParser.parse(plistData: plistData, timestamp: Date())
 
         XCTAssertNotNil(sample)
-        XCTAssertEqual(sample!.gpuUsage, 0.5, accuracy: 0.001)
-        XCTAssertNil(sample!.temperature)
-        XCTAssertNil(sample!.power)
-        XCTAssertNil(sample!.aneUsage)
+        XCTAssertEqual(try XCTUnwrap(sample?.gpuUsage), 0.5, accuracy: 0.001)
+        XCTAssertNil(sample?.temperature)
+        XCTAssertNil(sample?.power)
+        XCTAssertNil(sample?.aneUsage)
     }
+
+    // (Intel gpu_busy / busy_ns coverage lives in the "Intel powermetrics
+    // schema" section below — the duplicate testParseGpuBusyKey /
+    // testParseBusyNsKey from origin/main were removed during the merge.)
 
     // MARK: - macOS 26 (Tahoe) schema
 

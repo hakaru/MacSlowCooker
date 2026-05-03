@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-MacSlowCooker は Apple Silicon Mac の GPU 使用率と SoC 温度・電力を Dock アイコンとポップアップに表示する macOS デスクトップアプリ。`powermetrics` を root 権限で常駐実行する LaunchDaemon と XPC で通信する。
+MacSlowCooker は Mac の GPU 使用率と温度・電力を Dock アイコンとポップアップに表示する macOS デスクトップアプリ。`powermetrics` を root 権限で常駐実行する LaunchDaemon と XPC で通信する。Universal Binary (arm64 + x86_64) で Apple Silicon と Intel Mac の両方に対応。
 
 ## 開発コマンド
 
@@ -75,7 +75,7 @@ Shared（両ターゲットでコンパイルされる）
 ```
 
 サンプル取得の流れ：
-1. HelperService が起動時に PowerMetricsRunner.start() で `powermetrics --samplers gpu_power,ane_power,thermal -i 1000 --format plist --show-all` を spawn
+1. HelperService が起動時に PowerMetricsRunner.start() で powermetrics を spawn（Apple Silicon: `--samplers gpu_power,ane_power,thermal --show-all`、Intel: `--samplers gpu_power,thermal`）
 2. NUL 区切りで届く plist を PowerMetricsParser がパース、TemperatureReader で温度を補強して JSON 化
 3. XPCClient が 1 秒間隔で `fetchLatestSample` を呼び、GPUDataStore に積んで Dock アイコンを再描画
 
@@ -93,7 +93,9 @@ Shared（両ターゲットでコンパイルされる）
 
 **Fan RPM の取得**: `HelperTool/SMCReader.swift` が `IOServiceMatching("AppleSMC")` 経由で AppleSMC ユーザクライアントに接続、`IOConnectCallStructMethod(connection, kSMCHandleYPCEvent=2, ...)` で `FNum` (UInt8) と `F[i]Ac` (fpe2: 16-bit big-endian, 14-int + 2-frac → `raw / 4.0` で RPM) を読む。Mac Studio (Mac15,14, M3 Ultra) で 2 fan 検出。Helper は root なので IOConnect は無条件で成功する。
 
-**温度センサー（M3 Ultra で確認）**: IOHIDEventSystem に「GPU MTR Temp Sensor」は存在しない。M3 Ultra では `PMU tdie*` / `PMU tdev*` のみ 77 個露出。`TemperatureReader` は `name.contains("die") || name.contains("gpu")` で広めに拾って平均する（GPU 専用ではないため UI ラベルは「SoC 温度」）。GPU 専用温度は SMC `Tg05` / `Tg0D` 経由でしか取れず、未実装。
+**温度センサー**: IOHIDEventSystem に「GPU MTR Temp Sensor」は Apple Silicon に存在しない。M3 Ultra では `PMU tdie*` / `PMU tdev*` のみ 77 個露出。Intel Mac では「GPU Proximity」「Graphics」系が見える。`TemperatureReader` は `name.contains("die") || name.contains("gpu") || name.contains("proximity") || name.contains("graphics")` で広めに拾って平均する（GPU 専用ではないため UI ラベルは Apple Silicon では「SoC 温度」、Intel では「温度」）。GPU 専用温度は SMC `Tg05` / `Tg0D` 経由でしか取れず、未実装。
+
+**Intel powermetrics キー**: Intel Mac の powermetrics は `gpu.gpu_busy`（integer percent）または `gpu.busy_ns` + `(gpu|top).elapsed_ns` を出す。Apple Silicon の `gpu_active_residency` / `idle_ratio` キーは出ない。`PowerMetricsParser` は両系統を順に試す。
 
 **`@main` AppDelegate の罠**: macOS 26 で `@main` を `NSApplicationDelegate` 適合クラスにつけても、`NSApp.delegate` がセットされず `applicationDidFinishLaunching` が呼ばれない。`MacSlowCooker/main.swift` で `MainActor.assumeIsolated { NSApplication.shared.delegate = AppDelegate(); NSApplication.shared.run() }` と明示的にセットしている。
 
@@ -146,8 +148,19 @@ Shared ターゲット型（`GPUSample`, `MacSlowCookerHelperProtocol`, `GPUData
   ```
 - powermetrics の生 plist を捕まえる: `PowerMetricsRunner.flushSamples` で受信した chunk を `/tmp` に書き出すデバッグコードを一時的に追加（macOS 26 のキーが想定と違ったら必須）
 
+## Intel Mac 対応
+
+Universal Binary (`ARCHS: "arm64 x86_64"`) で両アーキテクチャに対応。`#if arch(x86_64)` でコンパイル時分岐：
+
+- **powermetrics サンプラー**: Intel では `ane_power` サンプラーと `--show-all` を除外（ANE 非搭載）
+- **PowerMetricsParser**: `gpuUsage` は `Double` 非 Optional のまま。Intel AMD GPU の `gpu_busy`（%）や `busy_ns/elapsed_ns` キーから値を計算するので、Intel でも parseable な usage を取得できる前提
+- **TemperatureReader**: Intel 系センサー名 (`proximity`, `graphics`) にもマッチ
+- **PopupView**: 4 chart レイアウトは Apple Silicon / Intel 共通（pot-icon-poc で統一）。ANE 電力は metric tile では露出しない
+
+**Intel GPU (AMD Radeon) での powermetrics 出力**: 実際のキー名は macOS バージョンと GPU ベンダーで異なる。初回デプロイ時に `/tmp` への plist ダンプで確認し、`PowerMetricsParser` のキーを調整すること。
+
 ## 環境
 
 - macOS 14 Sonoma 以降。**macOS 26 (Tahoe) で powermetrics 出力が大幅変更されている**ことに注意。
-- Apple Silicon (M1〜M4) のみ。Intel 非対応。
+- Universal Binary: Apple Silicon (M1〜M4) + Intel Mac 対応。
 - 自動署名、Team `K38MBRNKAT`。
