@@ -59,7 +59,7 @@ struct PopupView: View {
                 title: "GPU",
                 systemImage: "cpu.fill",
                 samples: store.samples,
-                value: \.gpuUsage,
+                value: { sample -> Double? in sample.gpuUsage },
                 color: .cyan,
                 scale: 100,
                 yDomain: 0...100,
@@ -69,7 +69,7 @@ struct PopupView: View {
                 title: "Temperature",
                 systemImage: "thermometer.medium",
                 samples: store.samples,
-                value: { $0.temperature ?? 0 },
+                value: { $0.temperature },
                 color: .orange,
                 scale: 1,
                 yDomain: 30...100,
@@ -79,7 +79,7 @@ struct PopupView: View {
                 title: "Fan",
                 systemImage: "fan.fill",
                 samples: store.samples,
-                value: { ($0.fanRPM?.max() ?? 0) },
+                value: { $0.fanRPM?.max() },
                 color: .mint,
                 scale: 1,
                 yDomain: 0...4000,
@@ -89,7 +89,7 @@ struct PopupView: View {
                 title: "Power",
                 systemImage: "bolt.fill",
                 samples: store.samples,
-                value: { $0.power ?? 0 },
+                value: { $0.power },
                 color: .yellow,
                 scale: 1,
                 yDomain: 0...150,
@@ -102,7 +102,7 @@ struct PopupView: View {
         title: String,
         systemImage: String,
         samples: [GPUSample],
-        value: @escaping (GPUSample) -> Double,
+        value: @escaping (GPUSample) -> Double?,
         color: Color,
         scale: Double,
         yDomain: ClosedRange<Double>,
@@ -121,15 +121,10 @@ struct PopupView: View {
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundStyle(.tertiary)
             }
-            Chart(samples.indices, id: \.self) { i in
-                let v = value(samples[i])
-                AreaMark(x: .value("t", i), y: .value("v", v * scale))
-                    .foregroundStyle(color.opacity(0.30).gradient)
-                    .interpolationMethod(.monotone)
-                LineMark(x: .value("t", i), y: .value("v", v * scale))
-                    .foregroundStyle(color)
-                    .lineStyle(StrokeStyle(lineWidth: 1.6))
-                    .interpolationMethod(.monotone)
+            Chart {
+                ForEach(samples.indices, id: \.self) { i in
+                    chartMarks(at: i, value: value(samples[i]), scale: scale, color: color)
+                }
             }
             .chartXAxis(.hidden)
             .chartYAxis(.hidden)
@@ -157,6 +152,19 @@ struct PopupView: View {
                         .strokeBorder(.white.opacity(0.12), lineWidth: 1)
                 )
         )
+    }
+
+    @ChartContentBuilder
+    private func chartMarks(at i: Int, value: Double?, scale: Double, color: Color) -> some ChartContent {
+        if let v = value {
+            AreaMark(x: .value("t", i), y: .value("v", v * scale))
+                .foregroundStyle(color.opacity(0.30).gradient)
+                .interpolationMethod(.monotone)
+            LineMark(x: .value("t", i), y: .value("v", v * scale))
+                .foregroundStyle(color)
+                .lineStyle(StrokeStyle(lineWidth: 1.6))
+                .interpolationMethod(.monotone)
+        }
     }
 
     // MARK: - Metric tiles (fixed height)
