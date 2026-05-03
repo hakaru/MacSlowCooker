@@ -65,7 +65,8 @@ MacSlowCooker.app（非特権、ユーザーログインセッション）
 HelperTool（root LaunchDaemon、Contents/MacOS/HelperTool）
   ├── main.swift                — NSXPCListener、HelperService.shared をすべての接続で共有
   ├── PowerMetricsRunner        — /usr/bin/powermetrics 常駐、NUL 区切り plist ストリームパース
-  └── TemperatureReader         — IOHIDEventSystem 経由で SoC 温度センサー読み取り
+  ├── TemperatureReader         — IOHIDEventSystem 経由で SoC 温度センサー読み取り
+  └── SMCReader                 — AppleSMC 直叩き、fan RPM (F0Ac/F1Ac, fpe2 形式) を読み出し
 
 Shared（両ターゲットでコンパイルされる）
   ├── GPUSample                 — Codable データモデル
@@ -87,6 +88,10 @@ Shared（両ターゲットでコンパイルされる）
 - GPU 温度: 露出なし（`thermal_pressure: "Nominal"` の段階値のみ）
 
 `PowerMetricsParser` は新旧両キーを試すフォールバック設計になっている。
+
+**`smc` sampler は macOS 26 で削除されている**: `powermetrics --help` の Available samplers は `tasks/battery/network/disk/interrupts/cpu_power/thermal/sfi/gpu_power/ane_power` のみ。`--samplers smc` を渡すと powermetrics が即クラッシュ → `PowerMetricsRunner.handleCrash()` の指数バックオフが 3 回発動して "GPU monitoring unavailable" でエラー UI が出る。fan RPM が欲しい場合は SMC を直叩きする。
+
+**Fan RPM の取得**: `HelperTool/SMCReader.swift` が `IOServiceMatching("AppleSMC")` 経由で AppleSMC ユーザクライアントに接続、`IOConnectCallStructMethod(connection, kSMCHandleYPCEvent=2, ...)` で `FNum` (UInt8) と `F[i]Ac` (fpe2: 16-bit big-endian, 14-int + 2-frac → `raw / 4.0` で RPM) を読む。Mac Studio (Mac15,14, M3 Ultra) で 2 fan 検出。Helper は root なので IOConnect は無条件で成功する。
 
 **温度センサー（M3 Ultra で確認）**: IOHIDEventSystem に「GPU MTR Temp Sensor」は存在しない。M3 Ultra では `PMU tdie*` / `PMU tdev*` のみ 77 個露出。`TemperatureReader` は `name.contains("die") || name.contains("gpu")` で広めに拾って平均する（GPU 専用ではないため UI ラベルは「SoC 温度」）。GPU 専用温度は SMC `Tg05` / `Tg0D` 経由でしか取れず、未実装。
 
