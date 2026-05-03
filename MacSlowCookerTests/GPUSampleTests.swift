@@ -14,7 +14,7 @@ final class GPUSampleTests: XCTestCase {
         let data = try JSONEncoder().encode(sample)
         let decoded = try JSONDecoder().decode(GPUSample.self, from: data)
 
-        XCTAssertEqual(decoded.gpuUsage, 0.68, accuracy: 0.001)
+        XCTAssertEqual(try XCTUnwrap(decoded.gpuUsage), 0.68, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.temperature), 47.3, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.power), 8.2, accuracy: 0.001)
         XCTAssertEqual(try XCTUnwrap(decoded.aneUsage), 0.12, accuracy: 0.001)
@@ -23,7 +23,7 @@ final class GPUSampleTests: XCTestCase {
     func testNilFieldsEncodeDecodeRoundTrip() throws {
         let sample = GPUSample(
             timestamp: Date(),
-            gpuUsage: 0.5,
+            gpuUsage: nil,
             temperature: nil,
             power: nil,
             aneUsage: nil
@@ -31,6 +31,7 @@ final class GPUSampleTests: XCTestCase {
         let data = try JSONEncoder().encode(sample)
         let decoded = try JSONDecoder().decode(GPUSample.self, from: data)
 
+        XCTAssertNil(decoded.gpuUsage)
         XCTAssertNil(decoded.temperature)
         XCTAssertNil(decoded.power)
         XCTAssertNil(decoded.aneUsage)

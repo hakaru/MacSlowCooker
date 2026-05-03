@@ -39,7 +39,7 @@ struct PopupView: View {
             chartView(
                 title: "GPU",
                 samples: store.samples,
-                value: \.gpuUsage,
+                value: { $0.gpuUsage ?? 0 },
                 color: .cyan,
                 format: "%.0f%%",
                 scale: 100
@@ -91,9 +91,15 @@ struct PopupView: View {
     private var metrics: some View {
         HStack(spacing: 8) {
             metricItem(label: "GPU使用率", value: gpuText, color: .cyan)
+            #if arch(arm64)
             metricItem(label: "SoC 温度", value: tempText, color: tempColor)
+            #else
+            metricItem(label: "温度", value: tempText, color: tempColor)
+            #endif
             metricItem(label: "電力", value: powerText, color: Color(red: 0.7, green: 0.7, blue: 0.75))
+            #if arch(arm64)
             metricItem(label: "ANE 電力", value: anePowerText, color: .purple)
+            #endif
         }
     }
 
@@ -124,7 +130,7 @@ struct PopupView: View {
     private var latest: GPUSample? { store.latestSample }
 
     private var gpuText: String {
-        latest.map { String(format: "%.0f%%", $0.gpuUsage * 100) } ?? "--"
+        latest?.gpuUsage.map { String(format: "%.0f%%", $0 * 100) } ?? "--"
     }
     private var tempText: String {
         if let t = latest?.temperature {

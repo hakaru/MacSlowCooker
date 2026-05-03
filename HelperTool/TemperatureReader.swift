@@ -65,9 +65,8 @@ final class TemperatureReader {
                 guard let nameRef = IOHIDServiceClientCopyProperty(service, "Product" as CFString) else { continue }
                 guard let name = nameRef.takeRetainedValue() as? String else { continue }
                 let lower = name.lowercased()
-                // Match SoC die sensors. M3 Ultra exposes PMU tdie/tdev and no
-                // dedicated GPU MTR sensor, so we accept all die/gpu names.
-                if lower.contains("die") || lower.contains("gpu") {
+                if lower.contains("die") || lower.contains("gpu")
+                    || lower.contains("proximity") || lower.contains("graphics") {
                     found.append(service)
                 }
             }

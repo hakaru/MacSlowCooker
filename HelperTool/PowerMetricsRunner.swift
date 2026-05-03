@@ -35,9 +35,11 @@ final class PowerMetricsRunner {
     private func launchProcess() throws {
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/powermetrics")
-        // --show-all is required on macOS 26 to surface processor.ane_power; drop it
-        // if/when powermetrics regains that field under the bare ane_power sampler.
+        #if arch(arm64)
         p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist", "--show-all"]
+        #else
+        p.arguments = ["--samplers", "gpu_power,thermal", "-i", "1000", "--format", "plist"]
+        #endif
 
         let pipe = Pipe()
         p.standardOutput = pipe

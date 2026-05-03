@@ -48,7 +48,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     private func updateDockIcon() {
-        let usage = store.latestSample?.gpuUsage ?? 0
+        let usage = store.latestSample?.gpuUsage ?? 0.0
         let connected = store.isConnected
         DispatchQueue.global(qos: .userInteractive).async {
             let image = DockIconRenderer.render(usage: usage, isConnected: connected)
