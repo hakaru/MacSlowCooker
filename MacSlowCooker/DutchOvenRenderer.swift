@@ -26,7 +26,7 @@ enum DutchOvenRenderer: PotRenderer {
         let rect = CGRect(origin: .zero, size: size)
         if state.isConnected {
             drawFlame(in: ctx, rect: rect, state: state)
-            drawPotBody(in: ctx, rect: rect)
+            drawPotBody(in: ctx, rect: rect, state: state)
             drawSteamAndLid(in: ctx, rect: rect, state: state)
         } else {
             drawDisconnectedPot(in: ctx, rect: rect)
@@ -42,19 +42,66 @@ enum DutchOvenRenderer: PotRenderer {
     // MARK: - Disconnected pot (gray, no flame)
 
     private static func drawDisconnectedPot(in ctx: CGContext, rect: CGRect) {
+        let bodyColor = NSColor(white: 0.55, alpha: 1).cgColor
+        drawHandles(in: ctx, rect: rect, color: bodyColor)
         let body = CGPath(roundedRect:
-            CGRect(x: rect.width * 0.14, y: rect.height * 0.20,
-                   width: rect.width * 0.72, height: rect.height * 0.32),
-            cornerWidth: 24, cornerHeight: 24, transform: nil)
-        ctx.setFillColor(NSColor(white: 0.22, alpha: 1).cgColor)
+            CGRect(x: rect.width * 0.16, y: rect.height * 0.42,
+                   width: rect.width * 0.68, height: rect.height * 0.28),
+            cornerWidth: 28, cornerHeight: 28, transform: nil)
+        ctx.setFillColor(bodyColor)
         ctx.addPath(body); ctx.fillPath()
 
         // Lid
-        ctx.setFillColor(NSColor(white: 0.30, alpha: 1).cgColor)
-        ctx.fillEllipse(in: CGRect(x: rect.width * 0.16, y: rect.height * 0.50,
-                                   width: rect.width * 0.68, height: rect.height * 0.06))
+        ctx.setFillColor(NSColor(white: 0.42, alpha: 1).cgColor)
+        ctx.fillEllipse(in: CGRect(x: rect.width * 0.18, y: rect.height * 0.68,
+                                   width: rect.width * 0.64, height: rect.height * 0.06))
 
         drawCenteredLabel("--", in: ctx, rect: rect, color: .gray, fontSize: 96)
+    }
+
+    /// Pot color: white when cool, blends through orange to red as temperature rises.
+    /// Cool baseline = 50°C, full red at >= 95°C.
+    private static func potColor(for temperature: Double?) -> CGColor {
+        let t = temperature ?? 50
+        let blend = max(0, min(1, (t - 50) / 45))   // 0 at 50°C, 1 at 95°C
+        let b = CGFloat(blend)
+        // White (0.97, 0.97, 0.95) → red-orange (0.92, 0.25, 0.15)
+        let red:   CGFloat = 0.97 - 0.05 * b
+        let green: CGFloat = 0.97 - 0.72 * b
+        let blue:  CGFloat = 0.95 - 0.80 * b
+        return CGColor(red: red, green: green, blue: blue, alpha: 1)
+    }
+
+    /// Lid is slightly darker than the pot for depth.
+    private static func lidColor(for temperature: Double?) -> CGColor {
+        let pot = potColor(for: temperature).components ?? [0.85, 0.85, 0.83, 1]
+        return CGColor(red: pot[0] * 0.85, green: pot[1] * 0.82, blue: pot[2] * 0.80, alpha: 1)
+    }
+
+    /// Loop handles on either side of the pot. Drawn before the body so they appear
+    /// to attach behind the pot rim.
+    private static func drawHandles(in ctx: CGContext, rect: CGRect, color: CGColor) {
+        ctx.setStrokeColor(color)
+        ctx.setLineWidth(rect.width * 0.045)
+        ctx.setLineCap(.round)
+
+        // Left handle: D-shaped loop
+        let leftPath = CGMutablePath()
+        leftPath.move(to: CGPoint(x: rect.width * 0.18, y: rect.height * 0.52))
+        leftPath.addCurve(
+            to:        CGPoint(x: rect.width * 0.18, y: rect.height * 0.62),
+            control1:  CGPoint(x: rect.width * 0.02, y: rect.height * 0.54),
+            control2:  CGPoint(x: rect.width * 0.02, y: rect.height * 0.60))
+        ctx.addPath(leftPath); ctx.strokePath()
+
+        // Right handle: mirror
+        let rightPath = CGMutablePath()
+        rightPath.move(to: CGPoint(x: rect.width * 0.82, y: rect.height * 0.52))
+        rightPath.addCurve(
+            to:        CGPoint(x: rect.width * 0.82, y: rect.height * 0.62),
+            control1:  CGPoint(x: rect.width * 0.98, y: rect.height * 0.54),
+            control2:  CGPoint(x: rect.width * 0.98, y: rect.height * 0.60))
+        ctx.addPath(rightPath); ctx.strokePath()
     }
 
     // MARK: - Flame
@@ -64,9 +111,12 @@ enum DutchOvenRenderer: PotRenderer {
         guard usage > 0.01 else { return }
 
         let cx = rect.width / 2
-        let baseY = rect.height * 0.18
-        let height = rect.height * 0.18 * usage
-        let halfWidth = rect.width * 0.18 * sqrt(usage)
+        let baseY = rect.height * 0.04
+        // Min height so the flame stays visible at idle; scales up to ~38% at full load
+        // so the flame and pot have comparable visual weight.
+        let minHeight = rect.height * 0.08
+        let height = max(minHeight, rect.height * 0.38 * usage)
+        let halfWidth = rect.width * 0.24 * sqrt(max(0.25, usage))
 
         // Optional wiggle distortion of bezier control points
         let phase = state.flameWiggleEnabled ? state.flameWigglePhase : 0
@@ -107,68 +157,53 @@ enum DutchOvenRenderer: PotRenderer {
 
     // MARK: - Pot body + handles
 
-    private static func drawPotBody(in ctx: CGContext, rect: CGRect) {
+    private static func drawPotBody(in ctx: CGContext, rect: CGRect, state: IconState) {
+        let bodyColor = potColor(for: state.temperature)
+        // Draw handles first so they sit behind the body
+        drawHandles(in: ctx, rect: rect, color: bodyColor)
+
         let body = CGPath(
-            roundedRect: CGRect(x: rect.width * 0.14,
-                                y: rect.height * 0.20,
-                                width: rect.width * 0.72,
-                                height: rect.height * 0.32),
-            cornerWidth: 24, cornerHeight: 24, transform: nil)
-        ctx.setFillColor(NSColor(white: 0.10, alpha: 1).cgColor)
+            roundedRect: CGRect(x: rect.width * 0.16,
+                                y: rect.height * 0.42,
+                                width: rect.width * 0.68,
+                                height: rect.height * 0.28),
+            cornerWidth: 28, cornerHeight: 28, transform: nil)
+        ctx.setFillColor(bodyColor)
         ctx.addPath(body); ctx.fillPath()
-
-        // Handles
-        ctx.setStrokeColor(NSColor(white: 0.10, alpha: 1).cgColor)
-        ctx.setLineWidth(rect.width * 0.018)
-        ctx.setLineCap(.round)
-
-        ctx.move(to: CGPoint(x: rect.width * 0.10, y: rect.height * 0.46))
-        ctx.addLine(to: CGPoint(x: rect.width * 0.06, y: rect.height * 0.48))
-        ctx.addLine(to: CGPoint(x: rect.width * 0.10, y: rect.height * 0.50))
-        ctx.strokePath()
-
-        ctx.move(to: CGPoint(x: rect.width * 0.90, y: rect.height * 0.46))
-        ctx.addLine(to: CGPoint(x: rect.width * 0.94, y: rect.height * 0.48))
-        ctx.addLine(to: CGPoint(x: rect.width * 0.90, y: rect.height * 0.50))
-        ctx.strokePath()
     }
 
     // MARK: - Steam + lid (with bounce when boiling)
 
     private static func drawSteamAndLid(in ctx: CGContext, rect: CGRect, state: IconState) {
-        let lidY = rect.height * 0.50
+        let lidY = rect.height * 0.68
         let lidOffset = state.boilingIntensity *
             sin(state.flameWigglePhase * 8) * rect.height * 0.012
 
-        // Lid base
-        ctx.setFillColor(NSColor(white: 0.05, alpha: 1).cgColor)
-        ctx.fillEllipse(in: CGRect(x: rect.width * 0.16, y: lidY + lidOffset,
-                                   width: rect.width * 0.68, height: rect.height * 0.05))
-        // Lid top accent
-        ctx.setFillColor(NSColor(white: 0.18, alpha: 1).cgColor)
-        ctx.fillEllipse(in: CGRect(x: rect.width * 0.20, y: lidY + lidOffset + rect.height * 0.008,
-                                   width: rect.width * 0.60, height: rect.height * 0.03))
-        // Knob
-        ctx.setFillColor(NSColor(red: 0.32, green: 0.24, blue: 0.16, alpha: 1).cgColor)
-        ctx.fillEllipse(in: CGRect(x: rect.width / 2 - rect.width * 0.025,
+        // Lid base — slightly darker than the body for depth
+        ctx.setFillColor(lidColor(for: state.temperature))
+        ctx.fillEllipse(in: CGRect(x: rect.width * 0.18, y: lidY + lidOffset,
+                                   width: rect.width * 0.64, height: rect.height * 0.06))
+        // Knob (always dark for contrast)
+        ctx.setFillColor(NSColor(red: 0.20, green: 0.14, blue: 0.10, alpha: 1).cgColor)
+        ctx.fillEllipse(in: CGRect(x: rect.width / 2 - rect.width * 0.035,
                                    y: lidY + lidOffset + rect.height * 0.04,
-                                   width: rect.width * 0.05, height: rect.height * 0.025))
+                                   width: rect.width * 0.07, height: rect.height * 0.035))
 
         // Steam
         let count = steamStrandCount(state: state)
         if count == 0 { return }
 
-        ctx.setLineWidth(rect.width * 0.012)
+        ctx.setLineWidth(rect.width * 0.014)
         ctx.setLineCap(.round)
-        let steamColor = lerpColor(from: CGColor(red: 1, green: 1, blue: 1, alpha: 0.5),
-                                   to:   CGColor(red: 1, green: 0.6, blue: 0.4, alpha: 0.8),
+        let steamColor = lerpColor(from: CGColor(red: 1, green: 1, blue: 1, alpha: 0.6),
+                                   to:   CGColor(red: 1, green: 0.5, blue: 0.3, alpha: 0.9),
                                    t: state.boilingIntensity)
         ctx.setStrokeColor(steamColor)
 
         let baseX = rect.width * 0.50
         let stride = rect.width * 0.10
-        let topY  = rect.height * 0.78
-        let bottomY = rect.height * 0.55
+        let topY  = rect.height * 0.96
+        let bottomY = rect.height * 0.76
 
         let strands: [(CGFloat, CGFloat)] = [
             (baseX,            0),
@@ -221,7 +256,7 @@ enum DutchOvenRenderer: PotRenderer {
         let line = CTLineCreateWithAttributedString(NSAttributedString(string: text, attributes: attrs))
         let bounds = CTLineGetImageBounds(line, ctx)
         ctx.textPosition = CGPoint(x: (rect.width - bounds.width) / 2,
-                                   y: rect.height * 0.30)
+                                   y: rect.height * 0.50)
         CTLineDraw(line, ctx)
     }
 }
