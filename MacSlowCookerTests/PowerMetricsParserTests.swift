@@ -109,6 +109,49 @@ final class PowerMetricsParserTests: XCTestCase {
         XCTAssertNil(sample.temperature)   // not exposed on macOS 26
     }
 
+    // MARK: - Intel powermetrics schema
+
+    /// Intel Macs running powermetrics emit gpu_busy as integer percent.
+    func testParseIntelGpuBusy() throws {
+        let dict: [String: Any] = [
+            "gpu": ["gpu_busy": 42.5] as [String: Any]
+        ]
+        let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+
+        let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
+
+        XCTAssertEqual(sample.gpuUsage, 0.425, accuracy: 0.001)
+    }
+
+    /// Intel discrete-GPU samples (rdar/AMD path) carry busy_ns + elapsed_ns
+    /// inside the gpu dict instead of at the top level.
+    func testParseIntelBusyNsInGpuDict() throws {
+        let dict: [String: Any] = [
+            "gpu": [
+                "busy_ns": 750_000_000.0,
+                "elapsed_ns": 1_000_000_000.0
+            ] as [String: Any]
+        ]
+        let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+
+        let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
+
+        XCTAssertEqual(sample.gpuUsage, 0.75, accuracy: 0.001)
+    }
+
+    /// busy_ns inside the gpu dict + elapsed_ns at top level — older Intel layouts.
+    func testParseIntelBusyNsTopLevelElapsed() throws {
+        let dict: [String: Any] = [
+            "gpu": ["busy_ns": 250_000_000.0] as [String: Any],
+            "elapsed_ns": 1_000_000_000.0
+        ]
+        let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+
+        let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
+
+        XCTAssertEqual(sample.gpuUsage, 0.25, accuracy: 0.001)
+    }
+
     /// Full Tahoe-shaped plist exercising all four fields the parser produces
     /// on macOS 26. Mimics what /usr/bin/powermetrics --samplers
     /// gpu_power,ane_power,thermal --show-all emits on M3 Ultra.

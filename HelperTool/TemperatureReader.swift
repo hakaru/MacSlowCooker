@@ -67,7 +67,9 @@ final class TemperatureReader {
                 let lower = name.lowercased()
                 // Match SoC die sensors. M3 Ultra exposes PMU tdie/tdev and no
                 // dedicated GPU MTR sensor, so we accept all die/gpu names.
-                if lower.contains("die") || lower.contains("gpu") {
+                // Intel Macs surface heat as "GPU Proximity" / "Graphics" too.
+                if lower.contains("die") || lower.contains("gpu")
+                    || lower.contains("proximity") || lower.contains("graphics") {
                     found.append(service)
                 }
             }

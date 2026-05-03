@@ -12,16 +12,25 @@ enum PowerMetricsParser {
         // GPU dict — try both casings
         let gpuDict = (dict["gpu"] as? [String: Any]) ?? (dict["GPU"] as? [String: Any])
 
-        // GPU usage: prefer explicit gpu_active_residency; otherwise compute from idle_ratio
+        // GPU usage: prefer explicit gpu_active_residency; otherwise compute from
+        // idle_ratio (Apple Silicon / macOS 26) or gpu_busy / busy_ns (Intel
+        // Macs with discrete or integrated AMD/Intel GPUs).
         var gpuUsage: Double?
         if let gpu = gpuDict {
             if let active = gpu["gpu_active_residency"] as? Double {
                 gpuUsage = active
             } else if let idle = gpu["idle_ratio"] as? Double {
                 gpuUsage = max(0.0, 1.0 - idle)
+            } else if let busy = gpu["gpu_busy"] as? Double {
+                // Intel powermetrics emits gpu_busy as integer percent (0–100).
+                gpuUsage = busy / 100.0
+            } else if let busyNs = gpu["busy_ns"] as? Double,
+                      let elapsedNs = (gpu["elapsed_ns"] as? Double) ?? (dict["elapsed_ns"] as? Double),
+                      elapsedNs > 0 {
+                gpuUsage = busyNs / elapsedNs
             }
         }
-        // If neither key is present, we can't produce a sample
+        // If no GPU usage key is present, we can't produce a sample.
         guard let usage = gpuUsage else { return nil }
 
         // Temperature: legacy keys only — not exposed in macOS 26 plist output
