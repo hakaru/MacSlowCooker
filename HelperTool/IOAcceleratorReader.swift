@@ -35,15 +35,15 @@ final class IOAcceleratorReader {
             readings.append(makeReading(service: service))
         }
 
-        guard let result = IOAcceleratorSelection.choose(from: readings) else {
+        guard let result = IOAcceleratorSelection.aggregate(from: readings) else {
             // Still log services on first read even when no usable percentage,
             // so the user can see why the icon stays disconnected.
-            logServicesIfFirstRead(readings.sorted { $0.name < $1.name })
+            logServicesIfFirstRead(readings.sorted { $0.name < $1.name }, contributingCount: 0)
             return nil
         }
 
-        logServicesIfFirstRead(result.sorted)
-        return IOAcceleratorSelection.normalize(percent: result.chosen.utilization!)
+        logServicesIfFirstRead(result.sortedReadings, contributingCount: result.contributingCount)
+        return IOAcceleratorSelection.normalize(percent: result.utilization)
     }
 
     private func makeReading(service: io_object_t) -> IOAcceleratorSelection.Reading {
@@ -71,7 +71,7 @@ final class IOAcceleratorReader {
         return IOAcceleratorSelection.Reading(name: name, className: className, utilization: raw)
     }
 
-    private func logServicesIfFirstRead(_ readings: [IOAcceleratorSelection.Reading]) {
+    private func logServicesIfFirstRead(_ readings: [IOAcceleratorSelection.Reading], contributingCount: Int) {
         lock.lock()
         let shouldLog = !hasLogged
         hasLogged = true
@@ -85,9 +85,9 @@ final class IOAcceleratorReader {
                    log: ioaLog, type: .info,
                    r.name, r.className, utilString)
         }
-        if readings.filter({ $0.utilization != nil }).count > 1 {
-            os_log("Multiple services report utilization — picking first by sorted name (multi-GPU aggregation TODO #10)",
-                   log: ioaLog, type: .info)
+        if contributingCount > 1 {
+            os_log("Multi-GPU detected: aggregating %d services by max utilization",
+                   log: ioaLog, type: .info, contributingCount)
         }
     }
 }

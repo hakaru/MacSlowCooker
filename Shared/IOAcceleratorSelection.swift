@@ -1,9 +1,9 @@
 import Foundation
 
 /// Pure selection logic for `IOAcceleratorReader`. Given a list of accelerator
-/// service readings, pick the one whose utilization should drive the dock
-/// icon. Extracted so the policy (sort by name, take first usable) can be
-/// unit-tested without iterating real IORegistry services.
+/// service readings, decide what utilization the dock icon should display.
+/// Extracted so the policy can be unit-tested without iterating real
+/// IORegistry services.
 enum IOAcceleratorSelection {
 
     struct Reading: Equatable {
@@ -18,19 +18,37 @@ enum IOAcceleratorSelection {
         }
     }
 
-    /// Sort the readings by IORegistry entry name and return the first one
-    /// that reports a usable percentage. Sorting + first-match makes the
-    /// choice deterministic across reboots, where iteration order from
-    /// `IOServiceGetMatchingServices` is otherwise undefined.
+    /// Outcome of aggregating across all reporting services.
+    struct Selection: Equatable {
+        /// Aggregated utilization in [0, 100]. Use `normalize(percent:)` to
+        /// convert to a [0, 1] fraction.
+        let utilization: Double
+        /// All readings sorted by name. Useful for first-read logging so the
+        /// user can see which services were detected, in a deterministic
+        /// order across reboots.
+        let sortedReadings: [Reading]
+        /// Number of services that contributed a usable percentage. > 1
+        /// indicates a multi-GPU machine (eGPU + iGPU, dual GPU, etc.).
+        let contributingCount: Int
+    }
+
+    /// Aggregate utilization across reporting services by taking the maximum.
     ///
-    /// Returns the chosen reading and the full sorted list (for logging),
-    /// or nil if none of the services reports a percentage.
-    static func choose(from readings: [Reading]) -> (chosen: Reading, sorted: [Reading])? {
+    /// On multi-GPU machines (eGPU + iGPU, Mac Pro with multiple discrete
+    /// GPUs) the most useful single metric for "is my GPU busy" is the
+    /// max of all reported percentages — it captures the worst-case load
+    /// without averaging away the real bottleneck. Sum would over-count
+    /// parallel work, average would understate the busy GPU.
+    ///
+    /// Returns nil if no service reports a usable percentage.
+    static func aggregate(from readings: [Reading]) -> Selection? {
         let sorted = readings.sorted { $0.name < $1.name }
-        guard let chosen = sorted.first(where: { $0.utilization != nil }) else {
-            return nil
-        }
-        return (chosen, sorted)
+        let usable = sorted.compactMap { $0.utilization }
+        guard let maxUtil = usable.max() else { return nil }
+        return Selection(
+            utilization: maxUtil,
+            sortedReadings: sorted,
+            contributingCount: usable.count)
     }
 
     /// Normalize a percentage in [0, 100] to a fraction in [0, 1], clamping

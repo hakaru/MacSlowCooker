@@ -94,17 +94,18 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     }
 
     /// Synthesize a GPUSample from in-process IOKit/SMC sources without waiting
-    /// for a powermetrics plist. Returns nil if every source failed (no GPU
-    /// utilization, no temp, no fan), in which case the caller leaves the
-    /// existing latestSampleData alone.
+    /// for a powermetrics plist. Requires a real GPU usage reading: emitting a
+    /// primer with `gpuUsage: 0` would show the user a misleading "idle" GPU
+    /// for ~1 s on cold launch even when the GPU is busy. Returns nil when
+    /// IOAccelerator is unreadable so the caller waits for powermetrics
+    /// instead.
     private func makeIOKitOnlySample() -> GPUSample? {
-        let usage = ioaReader.readGPUUsage()
+        guard let usage = ioaReader.readGPUUsage() else { return nil }
         let temp = temperatureReader.readGPUTemperature()
         let fans = smcReader?.readFanRPMs()
-        guard usage != nil || temp != nil || (fans?.isEmpty == false) else { return nil }
         return GPUSample(
             timestamp: Date(),
-            gpuUsage: usage ?? 0,
+            gpuUsage: usage,
             temperature: temp,
             thermalPressure: nil,
             power: nil,

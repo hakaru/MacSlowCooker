@@ -74,7 +74,10 @@ final class SMCReader {
     /// Total stride AppleSMC's user-client expects for the parameter struct.
     /// Hard-coded so future Swift compiler optimizations or struct edits that
     /// shift offsets are caught immediately rather than producing garbled
-    /// kernel reads.
+    /// kernel reads. The `bytes` and `result` field offsets are also logged
+    /// at init for diagnosability — when SMC reads start returning garbage
+    /// after a Swift toolchain bump, comparing logged offsets against a
+    /// known-good baseline pinpoints which field shifted.
     static let expectedKeyDataStride: Int = 80
 
     init?() {
@@ -85,6 +88,15 @@ final class SMCReader {
                    actualStride, Self.expectedKeyDataStride)
             return nil
         }
+
+        // Log field offsets at init so a future toolchain regression that
+        // shifts fields without changing total size can be diagnosed from
+        // Console.app rather than guessed at from broken fan readings.
+        let bytesOffset = MemoryLayout<SMCKeyData>.offset(of: \.bytes) ?? -1
+        let resultOffset = MemoryLayout<SMCKeyData>.offset(of: \.result) ?? -1
+        os_log("SMCKeyData layout: stride=%d bytes@%d result@%d",
+               log: smcLog, type: .info,
+               actualStride, bytesOffset, resultOffset)
 
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
         guard service != 0 else {
