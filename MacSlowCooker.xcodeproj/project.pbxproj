@@ -33,8 +33,10 @@
 		AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
 		BB2103C829016BA8059FF165 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB505FEF4C5660E59EB3CEAA /* main.swift */; };
+		BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
 		C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC5135696164D72811AE540 /* PotRenderer.swift */; };
 		C7683C66966DFF255A795402 /* DutchOvenRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */; };
+		C9A77AD58066B63A688D390A /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
 		E1106F041EBE0E211C18E04A /* XPCProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 947C59473F2C40EDC54468E3 /* XPCProtocol.swift */; };
 		E944B2BB2290F4D191F404BF /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A6845F2B35F7FD152E9F7AE /* main.swift */; };
 		F0BB23CF05F11DA7B3E5C488 /* TemperatureReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */; };
@@ -94,6 +96,7 @@
 		D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureReader.swift; sourceTree = "<group>"; };
 		D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesWindowController.swift; sourceTree = "<group>"; };
 		F1526E4C501E999A7FB17583 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeSigningConfig.swift; sourceTree = "<group>"; };
 		FB505FEF4C5660E59EB3CEAA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -141,6 +144,7 @@
 		5E9A950B1AB17BB7E355B449 /* Shared */ = {
 			isa = PBXGroup;
 			children = (
+				F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */,
 				7B0E01379C7F34814B84799B /* GPUSample.swift */,
 				79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */,
 				947C59473F2C40EDC54468E3 /* XPCProtocol.swift */,
@@ -261,7 +265,6 @@
 				};
 			};
 			buildConfigurationList = D7937C51210456A8F12E1E25 /* Build configuration list for PBXProject "MacSlowCooker" */;
-			compatibilityVersion = "Xcode 14.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -271,6 +274,7 @@
 			mainGroup = 13A733869CC4ED420DE44C9F;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
+			productRefGroup = 80EC7ECBBC3C7734D6518E7C /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -310,6 +314,7 @@
 			files = (
 				5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */,
 				16596D0D42204EC72E657A65 /* Clock.swift in Sources */,
+				C9A77AD58066B63A688D390A /* CodeSigningConfig.swift in Sources */,
 				55920E4448E396122E2C94B2 /* DockIconAnimator.swift in Sources */,
 				C7683C66966DFF255A795402 /* DutchOvenRenderer.swift in Sources */,
 				194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */,
@@ -331,6 +336,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */,
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
 				97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */,
 				357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */,

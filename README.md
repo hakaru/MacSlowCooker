@@ -81,6 +81,23 @@ Shared (compiled into both targets)
 - Universal Binary: **Apple Silicon (M1–M4) and Intel Macs**
 - Automatic code signing, Team `K38MBRNKAT`
 
+## Forking / re-signing
+
+The repository ships pinned to my Apple Developer Team ID (`K38MBRNKAT`) in
+five places: `Shared/CodeSigningConfig.swift`, `HelperTool/Info.plist`,
+`project.yml`, and a couple of doc references. The privileged helper will
+refuse XPC connections from a binary signed with a different Team, so
+forks must swap them in lockstep:
+
+```bash
+bin/set-team-id.sh ABC1234XYZ   # your 10-character Team ID
+xcodegen generate
+```
+
+After that you can build and run normally. If you skip the swap, the helper
+will install but every XPC call will fail with a code-signing requirement
+mismatch.
+
 ## Build
 
 ```bash

@@ -137,12 +137,9 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
 
 final class ServiceDelegate: NSObject, NSXPCListenerDelegate {
 
-    private static let appRequirement =
-        "identifier \"com.macslowcooker.app\" and anchor apple generic and certificate leaf[subject.OU] = \"K38MBRNKAT\""
-
     func listener(_ listener: NSXPCListener, shouldAcceptNewConnection connection: NSXPCConnection) -> Bool {
         if #available(macOS 13.0, *) {
-            connection.setCodeSigningRequirement(Self.appRequirement)
+            connection.setCodeSigningRequirement(CodeSigningConfig.xpcClientRequirement)
         }
         connection.exportedInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)
         connection.exportedObject = HelperService.shared
