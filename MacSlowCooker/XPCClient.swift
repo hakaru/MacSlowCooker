@@ -118,11 +118,17 @@ final class XPCClient {
 
     private func startPollingTimer() {
         samplingTimer?.invalidate()
-        samplingTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+        // Poll at 2 Hz so the helper's synthetic primer sample (filled in
+        // immediately on startSampling) reaches the UI within ~500 ms instead
+        // of the 1 s the legacy 1 Hz cadence required.
+        samplingTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             Task { @MainActor [weak self] in
                 self?.fetchSample()
             }
         }
+        // Kick a fetch right away so the primer lands without waiting for the
+        // first timer tick.
+        fetchSample()
     }
 
     private func fetchSample() {

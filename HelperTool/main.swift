@@ -53,6 +53,15 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
             do {
                 try self.runner.start()
                 self.sampling = true
+                // Powermetrics takes ~1.3 s to emit its first plist after spawn,
+                // and the app polls fetchLatestSample at 2 Hz. Without a primer,
+                // the popup shows "--" for 2–3 s after every cold launch. Build
+                // a sample from IOAccelerator + SMC + temp readers (everything
+                // except powermetrics-derived power) so the popup fills within
+                // the first poll. Power fills in once powermetrics catches up.
+                if let primer = self.makeIOKitOnlySample(), let data = try? JSONEncoder().encode(primer) {
+                    self.latestSampleData = data
+                }
                 os_log("Sampling started", log: log, type: .info)
                 reply(true, nil)
             } catch {
@@ -60,6 +69,27 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
                 reply(false, error.localizedDescription)
             }
         }
+    }
+
+    /// Synthesize a GPUSample from in-process IOKit/SMC sources without waiting
+    /// for a powermetrics plist. Returns nil if every source failed (no GPU
+    /// utilization, no temp, no fan), in which case the caller leaves the
+    /// existing latestSampleData alone.
+    private func makeIOKitOnlySample() -> GPUSample? {
+        let usage = ioaReader.readGPUUsage()
+        let temp = temperatureReader.readGPUTemperature()
+        let fans = smcReader?.readFanRPMs()
+        guard usage != nil || temp != nil || (fans?.isEmpty == false) else { return nil }
+        return GPUSample(
+            timestamp: Date(),
+            gpuUsage: usage ?? 0,
+            temperature: temp,
+            thermalPressure: nil,
+            power: nil,
+            anePower: nil,
+            aneUsage: nil,
+            fanRPM: (fans?.isEmpty == false) ? fans : nil
+        )
     }
 
     func stopSampling(withReply reply: @escaping () -> Void) {
