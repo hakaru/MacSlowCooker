@@ -53,15 +53,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // App menu
         let appMenuItem = NSMenuItem()
         let appMenu = NSMenu()
-        appMenu.addItem(NSMenuItem(title: "MacSlowCooker について",
+        appMenu.addItem(NSMenuItem(title: "About MacSlowCooker",
                                    action: #selector(NSApplication.orderFrontStandardAboutPanel(_:)),
                                    keyEquivalent: ""))
         appMenu.addItem(.separator())
-        appMenu.addItem(NSMenuItem(title: "設定…",
+        appMenu.addItem(NSMenuItem(title: "Preferences…",
                                    action: #selector(showPreferences),
                                    keyEquivalent: ","))
 
-        let services = NSMenuItem(title: "サービス", action: nil, keyEquivalent: "")
+        let services = NSMenuItem(title: "Services", action: nil, keyEquivalent: "")
         let servicesMenu = NSMenu()
         services.submenu = servicesMenu
         NSApp.servicesMenu = servicesMenu
@@ -69,45 +69,45 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(services)
 
         appMenu.addItem(.separator())
-        let hide = NSMenuItem(title: "MacSlowCooker を隠す",
+        let hide = NSMenuItem(title: "Hide MacSlowCooker",
                               action: #selector(NSApplication.hide(_:)),
                               keyEquivalent: "h")
         appMenu.addItem(hide)
-        let hideOthers = NSMenuItem(title: "ほかを隠す",
+        let hideOthers = NSMenuItem(title: "Hide Others",
                                     action: #selector(NSApplication.hideOtherApplications(_:)),
                                     keyEquivalent: "h")
         hideOthers.keyEquivalentModifierMask = [.command, .option]
         appMenu.addItem(hideOthers)
-        appMenu.addItem(NSMenuItem(title: "すべてを表示",
+        appMenu.addItem(NSMenuItem(title: "Show All",
                                    action: #selector(NSApplication.unhideAllApplications(_:)),
                                    keyEquivalent: ""))
         appMenu.addItem(.separator())
-        appMenu.addItem(NSMenuItem(title: "MacSlowCooker を終了",
+        appMenu.addItem(NSMenuItem(title: "Quit MacSlowCooker",
                                    action: #selector(NSApplication.terminate(_:)),
                                    keyEquivalent: "q"))
         appMenuItem.submenu = appMenu
         mainMenu.addItem(appMenuItem)
 
         let editItem = NSMenuItem()
-        let editMenu = NSMenu(title: "編集")
-        editMenu.addItem(NSMenuItem(title: "取り消す", action: Selector(("undo:")), keyEquivalent: "z"))
-        let redo = NSMenuItem(title: "やり直す", action: Selector(("redo:")), keyEquivalent: "z")
+        let editMenu = NSMenu(title: "Edit")
+        editMenu.addItem(NSMenuItem(title: "Undo", action: Selector(("undo:")), keyEquivalent: "z"))
+        let redo = NSMenuItem(title: "Redo", action: Selector(("redo:")), keyEquivalent: "z")
         redo.keyEquivalentModifierMask = [.command, .shift]
         editMenu.addItem(redo)
         editMenu.addItem(.separator())
-        editMenu.addItem(NSMenuItem(title: "カット",   action: #selector(NSText.cut(_:)),    keyEquivalent: "x"))
-        editMenu.addItem(NSMenuItem(title: "コピー",   action: #selector(NSText.copy(_:)),   keyEquivalent: "c"))
-        editMenu.addItem(NSMenuItem(title: "ペースト", action: #selector(NSText.paste(_:)),  keyEquivalent: "v"))
-        editMenu.addItem(NSMenuItem(title: "すべて選択", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
+        editMenu.addItem(NSMenuItem(title: "Cut",        action: #selector(NSText.cut(_:)),       keyEquivalent: "x"))
+        editMenu.addItem(NSMenuItem(title: "Copy",       action: #selector(NSText.copy(_:)),      keyEquivalent: "c"))
+        editMenu.addItem(NSMenuItem(title: "Paste",      action: #selector(NSText.paste(_:)),     keyEquivalent: "v"))
+        editMenu.addItem(NSMenuItem(title: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a"))
         editItem.submenu = editMenu
         mainMenu.addItem(editItem)
 
         let windowItem = NSMenuItem()
-        let windowMenu = NSMenu(title: "ウィンドウ")
-        windowMenu.addItem(NSMenuItem(title: "しまう", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
-        windowMenu.addItem(NSMenuItem(title: "拡大/縮小", action: #selector(NSWindow.performZoom(_:)), keyEquivalent: ""))
+        let windowMenu = NSMenu(title: "Window")
+        windowMenu.addItem(NSMenuItem(title: "Minimize", action: #selector(NSWindow.performMiniaturize(_:)), keyEquivalent: "m"))
+        windowMenu.addItem(NSMenuItem(title: "Zoom",     action: #selector(NSWindow.performZoom(_:)),        keyEquivalent: ""))
         windowMenu.addItem(.separator())
-        windowMenu.addItem(NSMenuItem(title: "すべてを手前に移動", action: #selector(NSApplication.arrangeInFront(_:)), keyEquivalent: ""))
+        windowMenu.addItem(NSMenuItem(title: "Bring All to Front", action: #selector(NSApplication.arrangeInFront(_:)), keyEquivalent: ""))
         windowItem.submenu = windowMenu
         mainMenu.addItem(windowItem)
 
@@ -167,7 +167,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func showError(_ message: String) {
         let alert = NSAlert()
-        alert.messageText = "MacSlowCooker — セットアップエラー"
+        alert.messageText = "MacSlowCooker — Setup Error"
         alert.informativeText = message
         alert.alertStyle = .critical
         alert.addButton(withTitle: "OK")

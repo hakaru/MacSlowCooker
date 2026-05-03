@@ -11,9 +11,9 @@ final class PreferencesWindowController: NSWindowController {
         let view = PreferencesView(settings: settings)
         let host = NSHostingController(rootView: view)
         let window = NSWindow(contentViewController: host)
-        window.title = "MacSlowCooker 設定"
+        window.title = "Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 380, height: 220))
+        window.setContentSize(NSSize(width: 420, height: 240))
         window.center()
         super.init(window: window)
     }
@@ -32,24 +32,28 @@ struct PreferencesView: View {
 
     var body: some View {
         Form {
-            Picker("鍋スタイル", selection: $settings.potStyle) {
-                Text("ダッチオーブン").tag(PotStyle.dutchOven)
+            Section("Appearance") {
+                Picker("Pot Style", selection: $settings.potStyle) {
+                    Text("Dutch Oven").tag(PotStyle.dutchOven)
+                }
+
+                Picker("Flame Animation", selection: $settings.flameAnimation) {
+                    Text("Off").tag(FlameAnimation.none)
+                    Text("Interpolation").tag(FlameAnimation.interpolation)
+                    Text("Wiggle").tag(FlameAnimation.wiggle)
+                    Text("Both").tag(FlameAnimation.both)
+                }
             }
 
-            Picker("炎アニメーション", selection: $settings.flameAnimation) {
-                Text("なし").tag(FlameAnimation.none)
-                Text("補間のみ").tag(FlameAnimation.interpolation)
-                Text("ゆらぎのみ").tag(FlameAnimation.wiggle)
-                Text("両方").tag(FlameAnimation.both)
-            }
-
-            Picker("沸騰トリガー", selection: $settings.boilingTrigger) {
-                Text("温度 ≥ 85°C").tag(BoilingTrigger.temperature)
-                Text("熱ストレス ≥ Serious").tag(BoilingTrigger.thermalPressure)
-                Text("組み合わせ（推奨）").tag(BoilingTrigger.combined)
+            Section("Boiling Effect") {
+                Picker("Trigger", selection: $settings.boilingTrigger) {
+                    Text("Temperature ≥ 85°C").tag(BoilingTrigger.temperature)
+                    Text("Thermal Pressure ≥ Serious").tag(BoilingTrigger.thermalPressure)
+                    Text("Combined (Recommended)").tag(BoilingTrigger.combined)
+                }
             }
         }
-        .padding(20)
         .formStyle(.grouped)
+        .scrollDisabled(true)
     }
 }

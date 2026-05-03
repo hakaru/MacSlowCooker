@@ -11,9 +11,9 @@ enum HelperInstallerError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .requiresApproval:
-            return "System Settings でMacSlowCookerの実行を許可してください"
+            return "Please allow MacSlowCooker to run in System Settings → Login Items."
         case .registrationFailed(let e):
-            return "HelperToolのインストールに失敗しました: \(e.localizedDescription)"
+            return "Failed to install the helper tool: \(e.localizedDescription)"
         }
     }
 }

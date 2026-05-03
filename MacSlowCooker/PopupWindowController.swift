@@ -1,32 +1,40 @@
 import AppKit
 import SwiftUI
 
+/// Activity Monitor's "GPU の履歴" style window: a regular activatable
+/// NSWindow with a title bar, movable and resizable, that floats above
+/// other apps. Clicking the Dock icon toggles its visibility; once open,
+/// the user can move/resize it freely. Closing returns to hidden state.
 @MainActor
-final class PopupWindowController: NSWindowController {
+final class PopupWindowController: NSWindowController, NSWindowDelegate {
 
     private weak var store: GPUDataStore?
-    private var globalEventMonitor: Any?
 
     convenience init(store: GPUDataStore) {
-        let panel = NSPanel(
-            contentRect: NSRect(x: 0, y: 0, width: 520, height: 480),
-            styleMask: [.borderless, .nonactivatingPanel],
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 760, height: 320),
+            styleMask: [.titled, .closable, .miniaturizable, .resizable],
             backing: .buffered,
             defer: false
         )
-        panel.isOpaque = false
-        panel.backgroundColor = .clear
-        panel.level = .floating
-        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        panel.hasShadow = true
+        window.title = "MacSlowCooker"
+        window.isMovableByWindowBackground = true
+        window.level = .floating
+        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        // Use contentMinSize so the title bar isn't part of the constraint —
+        // window.minSize includes the title bar and lets content shrink below
+        // the SwiftUI minimum.
+        window.contentMinSize = NSSize(width: 760, height: 320)
+        window.isReleasedWhenClosed = false
 
-        self.init(window: panel)
+        self.init(window: window)
         self.store = store
+        window.delegate = self
 
         let hostingView = NSHostingView(rootView: PopupView(store: store))
-        hostingView.frame = panel.contentView!.bounds
+        hostingView.frame = window.contentView!.bounds
         hostingView.autoresizingMask = [.width, .height]
-        panel.contentView?.addSubview(hostingView)
+        window.contentView?.addSubview(hostingView)
     }
 
     func toggle() {
@@ -37,33 +45,29 @@ final class PopupWindowController: NSWindowController {
         }
     }
 
-    override func close() {
-        if let monitor = globalEventMonitor {
-            NSEvent.removeMonitor(monitor)
-            globalEventMonitor = nil
-        }
-        window?.orderOut(nil)
-    }
-
     private func showPopup() {
-        guard let screen = NSScreen.main else { return }
-        let screenFrame = screen.visibleFrame
-        let windowSize = window!.frame.size
+        guard let win = window else { return }
 
-        // Position above Dock (bottom-center of visible frame)
-        let x = screenFrame.midX - windowSize.width / 2
-        let y = screenFrame.minY + 8
-        window?.setFrameOrigin(NSPoint(x: x, y: y))
-        window?.makeKeyAndOrderFront(nil)
-
-        globalEventMonitor = NSEvent.addGlobalMonitorForEvents(
-            matching: [.leftMouseDown, .rightMouseDown]
-        ) { [weak self] _ in
-            guard let self, let win = self.window, win.isVisible else { return }
-            // Use screen coordinates (NSEvent.mouseLocation) to test containment
-            if !win.frame.contains(NSEvent.mouseLocation) {
-                DispatchQueue.main.async { self.close() }
+        // Position above the Dock on first show; subsequent shows reuse the
+        // user's last position.
+        if !win.isOnActiveSpace || win.frame.origin == .zero {
+            if let screen = NSScreen.main {
+                let frame = screen.visibleFrame
+                let size = win.frame.size
+                win.setFrameOrigin(NSPoint(
+                    x: frame.midX - size.width / 2,
+                    y: frame.minY + 8))
             }
         }
+        NSApp.activate(ignoringOtherApps: true)
+        win.makeKeyAndOrderFront(nil)
+    }
+
+    // MARK: - NSWindowDelegate
+
+    /// Hide rather than destroy on close so we can reopen with state preserved.
+    func windowShouldClose(_ sender: NSWindow) -> Bool {
+        sender.orderOut(nil)
+        return false
     }
 }
