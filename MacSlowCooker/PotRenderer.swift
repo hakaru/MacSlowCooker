@@ -36,6 +36,10 @@ struct IconState: Equatable {
 
     let isBoiling: Bool
     let boilingIntensity: Double    // [0, 1] faded value
+
+    /// Representative fan speed (max across fans) in RPM. Drives steam intensity.
+    /// nil on fanless machines.
+    let fanRPM: Double?
 }
 
 extension IconState {
@@ -53,6 +57,9 @@ extension IconState {
         }
         if let temperature {
             hasher.combine(Int(temperature.rounded()))             // 1°C step
+        }
+        if let fanRPM {
+            hasher.combine(Int((fanRPM / 50.0).rounded()))          // 50 RPM step
         }
         return hasher.finalize()
     }

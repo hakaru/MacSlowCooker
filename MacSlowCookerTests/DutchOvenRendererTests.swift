@@ -14,7 +14,8 @@ final class DutchOvenRendererTests: XCTestCase {
                   flameWigglePhase: 1.23,
                   flameWiggleEnabled: wiggleEnabled,
                   isBoiling: boilingIntensity > 0,
-                  boilingIntensity: boilingIntensity)
+                  boilingIntensity: boilingIntensity,
+                  fanRPM: nil)
     }
 
     func testProducesNonEmptyImageForRepresentativeStates() {
