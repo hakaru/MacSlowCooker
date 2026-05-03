@@ -28,6 +28,7 @@
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
 		6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */; };
 		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
+		74B3A68C750F7B9F3BADB894 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C878830CDD219E5804F2CC /* HostCPU.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
@@ -79,6 +80,7 @@
 		06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
 		0A6845F2B35F7FD152E9F7AE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcher.swift; sourceTree = "<group>"; };
+		18C878830CDD219E5804F2CC /* HostCPU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCPU.swift; sourceTree = "<group>"; };
 		1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
 		1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorSelection.swift; sourceTree = "<group>"; };
 		1FBE4FF29F56752B038056F5 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */,
+				18C878830CDD219E5804F2CC /* HostCPU.swift */,
 				05A9EF7E1C735A467AD710EA /* Info.plist */,
 				94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */,
 				0A6845F2B35F7FD152E9F7AE /* main.swift */,
@@ -373,6 +376,7 @@
 			files = (
 				BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */,
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
+				74B3A68C750F7B9F3BADB894 /* HostCPU.swift in Sources */,
 				97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */,
 				3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */,
 				D0E44CBA71ACE5AD74AE423D /* PlistStreamSplitter.swift in Sources */,

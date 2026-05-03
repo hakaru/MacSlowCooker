@@ -61,11 +61,16 @@ final class PowerMetricsRunner {
         // if/when powermetrics regains that field under the bare ane_power sampler.
         // Intel Macs have no Apple Neural Engine, so the ane_power sampler is
         // dropped and --show-all becomes redundant there.
-        #if arch(arm64)
-        p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist", "--show-all"]
-        #else
-        p.arguments = ["--samplers", "gpu_power,thermal", "-i", "1000", "--format", "plist"]
-        #endif
+        //
+        // Sampler choice keys off the *host* CPU, not the running slice.
+        // A Universal Binary's x86_64 slice running under Rosetta on
+        // Apple Silicon should still ask for ane_power because the kernel
+        // exposes the ANE regardless of process arch.
+        if HostCPU.isAppleSilicon {
+            p.arguments = ["--samplers", "gpu_power,ane_power,thermal", "-i", "1000", "--format", "plist", "--show-all"]
+        } else {
+            p.arguments = ["--samplers", "gpu_power,thermal", "-i", "1000", "--format", "plist"]
+        }
 
         let pipe = Pipe()
         p.standardOutput = pipe

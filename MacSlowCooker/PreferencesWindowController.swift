@@ -60,6 +60,14 @@ struct PreferencesView: View {
             Section("Energy") {
                 LowPowerStatusRow()
             }
+
+            Section {
+                HStack {
+                    Spacer()
+                    Button("Reset to defaults") { settings.resetToDefaults() }
+                        .controlSize(.small)
+                }
+            }
         }
         .formStyle(.grouped)
         .scrollDisabled(true)

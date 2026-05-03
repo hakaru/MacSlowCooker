@@ -31,6 +31,16 @@ final class Settings {
         didSet { defaults.set(floatAboveOtherWindows, forKey: Keys.floatAboveOtherWindows) }
     }
 
+    /// Restore every tracked property to its default value. didSet on each
+    /// property handles persistence; downstream observers see one yield per
+    /// changed field through `Settings.changes`.
+    func resetToDefaults() {
+        potStyle = .dutchOven
+        flameAnimation = .both
+        boilingTrigger = .combined
+        floatAboveOtherWindows = true
+    }
+
     static let shared = Settings()
 
     /// Assignments below fire `didSet`, re-writing the just-loaded value back to

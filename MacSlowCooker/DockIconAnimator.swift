@@ -37,6 +37,14 @@ final class DockIconAnimator {
     private var lastRenderedHash: Int = 0
 
     private var timer: Timer?
+    /// Wall-clock time of the previous tick. nil before the first tick or
+    /// after the timer is invalidated; the next tick measures dt against it.
+    private var lastTickDate: Date?
+    /// Cap on the measured dt so a long sleep / runloop stall doesn't
+    /// explode interpolation in a single jarring jump. 1 s is much longer
+    /// than any nominal tick (10 fps = 0.1 s) but short enough that the
+    /// boiling fade still reaches equilibrium quickly after wake.
+    private static let maxMeasuredDt: TimeInterval = 1.0
     private let autostartTimer: Bool
     private var lpmObserver: NSObjectProtocol?
 
@@ -80,9 +88,12 @@ final class DockIconAnimator {
         let now = ProcessInfo.processInfo.isLowPowerModeEnabled
         guard now != isLowPowerMode else { return }
         isLowPowerMode = now
-        // Restart timer with the new cadence.
+        // Restart timer with the new cadence. Reset lastTickDate so the
+        // post-restart tick uses the new configured interval rather than
+        // measuring against pre-mode-change wall time.
         timer?.invalidate()
         timer = nil
+        lastTickDate = nil
         ensureTimerRunning()
     }
 
@@ -128,6 +139,9 @@ final class DockIconAnimator {
         if asleep {
             timer?.invalidate()
             timer = nil
+            // Reset so the first tick after wake doesn't measure dt against
+            // a wall-time gap that could span hours and clamp at maxMeasuredDt.
+            lastTickDate = nil
         } else {
             ensureTimerRunning()
         }
@@ -172,12 +186,29 @@ final class DockIconAnimator {
             let interval = currentTickInterval
             timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
                 Task { @MainActor in
-                    guard let self else { return }
-                    self.tick(dt: self.currentTickInterval)
+                    self?.tickWithMeasuredDt()
                 }
             }
-            tick(dt: interval)
+            tickWithMeasuredDt()
         }
+    }
+
+    /// Wrapper used by the timer path. Measures dt against `lastTickDate`
+    /// (capped at `maxMeasuredDt`) so animations reach equilibrium quickly
+    /// after a runloop stall or sleep/wake transition. Falls back to the
+    /// configured nominal interval on the first tick after the timer is
+    /// (re)started, when `lastTickDate` is nil.
+    private func tickWithMeasuredDt() {
+        let now = clock.now
+        let dt: TimeInterval
+        if let last = lastTickDate {
+            let measured = now.timeIntervalSince(last)
+            dt = max(0.001, min(measured, Self.maxMeasuredDt))
+        } else {
+            dt = currentTickInterval
+        }
+        lastTickDate = now
+        tick(dt: dt)
     }
 
     // MARK: - Tick
@@ -231,6 +262,9 @@ final class DockIconAnimator {
         if !needsAnimation() {
             timer?.invalidate()
             timer = nil
+            // Idle period coming up — reset so the next ensureTimerRunning
+            // starts fresh rather than measuring dt across the idle gap.
+            lastTickDate = nil
         }
     }
 
