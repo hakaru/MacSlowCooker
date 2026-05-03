@@ -137,8 +137,8 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     }
 
     func stopSampling(withReply reply: @escaping () -> Void) {
-        // Multi-client daemon: keep runner alive while daemon is loaded.
-        // launchd will idle the process out when no clients remain connected.
+        // Intentional no-op. See `MacSlowCookerHelperProtocol.stopSampling`
+        // for the lifecycle rationale.
         reply()
     }
 

@@ -33,6 +33,12 @@ final class XPCClient {
     /// connection* on expiry. Invalidation triggers the proxy's error handler,
     /// which resumes the continuation with nil. The `Once` guard tolerates
     /// the race between a real reply and an invalidation-induced error.
+    ///
+    /// If a second XPC method ever needs the same timeout treatment, this
+    /// pattern (timeout-task-invalidates-connection + Once-guarded
+    /// continuation) generalizes cleanly into a `withXPCTimeout(seconds:
+    /// on:operation:)` helper. Deferred until there's an actual second
+    /// caller (issue #24).
     static func fetchHelperVersion(timeout: TimeInterval = 2.0) async -> String? {
         let conn = NSXPCConnection(machServiceName: "com.macslowcooker.helper", options: .privileged)
         conn.remoteObjectInterface = NSXPCInterface(with: MacSlowCookerHelperProtocol.self)

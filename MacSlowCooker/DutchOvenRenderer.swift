@@ -71,6 +71,12 @@ enum DutchOvenRenderer: PotRenderer {
                 lidApexY:         rect.height * 0.70
             )
         }
+
+        /// The icon is rendered at a fixed `iconSize` (512×512), so the
+        /// standard geometry never varies between renders. Cache it here so
+        /// every draw method doesn't recompute the same six CGFloats.
+        static let standardForIconSize: PotGeometry =
+            standard(in: CGRect(origin: .zero, size: DutchOvenRenderer.iconSize))
     }
 
     // MARK: - Background (rounded blue squircle, macOS app-icon style)
@@ -117,7 +123,7 @@ enum DutchOvenRenderer: PotRenderer {
     // MARK: - Disconnected pot (gray, no flame)
 
     private static func drawDisconnectedPot(in ctx: CGContext, rect: CGRect) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let bodyColor = NSColor(white: 0.55, alpha: 1).cgColor
         drawHandles(in: ctx, rect: rect, color: NSColor(white: 0.42, alpha: 1).cgColor)
         // Solid drum silhouette
@@ -256,7 +262,7 @@ enum DutchOvenRenderer: PotRenderer {
     // MARK: - Pot back rim (drawn before body, behind lid)
 
     private static func drawPotBackRim(in ctx: CGContext, rect: CGRect, state: IconState) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let rimColor = rimShadowColor(for: state.temperature)
         ctx.setFillColor(rimColor)
         ctx.addPath(potBackRimPath(g: g))
@@ -266,7 +272,7 @@ enum DutchOvenRenderer: PotRenderer {
     // MARK: - Pot body (drum silhouette with shading)
 
     private static func drawPotBody(in ctx: CGContext, rect: CGRect, state: IconState) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let bodyColor = potColor(for: state.temperature)
         let bodyDark  = scaleBrightness(bodyColor, by: 0.55)
         let bodyLight = scaleBrightness(bodyColor, by: 1.10, clamp: true)
@@ -340,7 +346,7 @@ enum DutchOvenRenderer: PotRenderer {
     // MARK: - Lid (dome with knob)
 
     private static func drawLid(in ctx: CGContext, rect: CGRect, state: IconState) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let lidOffset = state.boilingIntensity *
             sin(state.flameWigglePhase * 8) * rect.height * 0.012
 
@@ -415,7 +421,7 @@ enum DutchOvenRenderer: PotRenderer {
     /// Loop handles attached at the rim sides, behind the body so they appear
     /// to ride on the back of the pot. Repositioned for the drum geometry.
     private static func drawHandles(in ctx: CGContext, rect: CGRect, color: CGColor) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         ctx.setStrokeColor(color)
         ctx.setLineWidth(rect.width * 0.080)        // chunky stroke
         ctx.setLineCap(.round)
@@ -450,7 +456,7 @@ enum DutchOvenRenderer: PotRenderer {
     private static func drawFlameHalo(in ctx: CGContext, rect: CGRect, state: IconState) {
         let usage = max(0, min(1, state.displayedUsage))
         guard usage > 0.05 else { return }
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let center = CGPoint(x: g.centerX, y: rect.height * 0.22)
         let radius = rect.width * (0.18 + 0.14 * usage)
         ctx.saveGState()
@@ -569,7 +575,7 @@ enum DutchOvenRenderer: PotRenderer {
     /// with low alpha read as a fluffy column of vapor instead of the older
     /// stroked-line look. Hot boiling tints the puffs warm.
     private static func drawSteam(in ctx: CGContext, rect: CGRect, state: IconState) {
-        let g = PotGeometry.standard(in: rect)
+        let g = PotGeometry.standardForIconSize
         let fanIntensity = fanIntensity(state: state)
         let count = steamStrandCount(state: state, fanIntensity: fanIntensity)
         if count == 0 { return }

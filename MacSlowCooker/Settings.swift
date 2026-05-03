@@ -60,38 +60,24 @@ final class Settings {
 
 extension Settings {
 
-    /// Yields once per mutation of any tracked property.
-    /// Re-arms `withObservationTracking` automatically after each yield.
+    /// Yields once per mutation of any tracked property. Re-arms
+    /// `withObservationTracking` automatically after each yield.
     ///
-    /// Lifetime: the tracker's `onChange` closure and the continuation's
-    /// `onTermination` closure both reference a shared lifetime box rather
-    /// than each other directly. A naive design where `onChange` captures
-    /// `continuation` and `onTermination` captures `tracker` forms a cycle
-    /// that survives stream cancellation — `tracker → continuation → tracker`.
-    /// Routing through the box lets `onTermination` nil out both sides so the
-    /// tracker and the continuation can deallocate.
+    /// Lifetime: the tracker is captured by the continuation's
+    /// `onTermination`, so it lives as long as a consumer is iterating
+    /// the stream. When the consumer breaks the loop AsyncStream invokes
+    /// `onTermination`, which cancels the tracker; AsyncStream then
+    /// releases the closure (and the tracker with it). The tracker's
+    /// `onChange` captures `continuation` directly — `Continuation` is
+    /// a value type, so no real strong cycle forms.
     var changes: AsyncStream<Void> {
         AsyncStream { continuation in
-            final class LifetimeBox {
-                var tracker: SettingsChangeTracker?
-                var continuation: AsyncStream<Void>.Continuation?
+            let tracker = SettingsChangeTracker(settings: self) {
+                continuation.yield(())
             }
-            let box = LifetimeBox()
-            let tracker = SettingsChangeTracker(settings: self) { [weak box] in
-                box?.continuation?.yield(())
-            }
-            box.tracker = tracker
-            box.continuation = continuation
             Task { @MainActor in tracker.start() }
-            continuation.onTermination = { [box] _ in
-                // Snapshot the tracker so we can cancel it on MainActor after
-                // dropping our references. Once `box.tracker` is nil the only
-                // remaining reference to the tracker is this `toCancel` local,
-                // which the closure releases when it returns.
-                let toCancel = box.tracker
-                box.tracker = nil
-                box.continuation = nil
-                Task { @MainActor in toCancel?.cancel() }
+            continuation.onTermination = { _ in
+                Task { @MainActor in tracker.cancel() }
             }
         }
     }
