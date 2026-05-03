@@ -12,7 +12,9 @@
 		0B75C45876F33514001EBF69 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE4FF29F56752B038056F5 /* PopupView.swift */; };
 		11C55A0CA8A92D0ECF01FD4F /* DockIconAnimatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */; };
 		16596D0D42204EC72E657A65 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B160393A833FD4D1952BEF /* Clock.swift */; };
+		174FF65D4FEA5DC343574588 /* HostCPUTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */; };
 		194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */; };
+		1DD3C572DD4FEAF2BCD9A9A7 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893FAA89E50A101FCB8B0C01 /* HostCPU.swift */; };
 		224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495D61085AE6A59E664ACBF0 /* SettingsTests.swift */; };
 		25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */; };
 		273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
@@ -28,12 +30,12 @@
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
 		6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */; };
 		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
-		74B3A68C750F7B9F3BADB894 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 18C878830CDD219E5804F2CC /* HostCPU.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		8CCF001921C683107237C79E /* IconStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */; };
 		8F2558172004E9EECBC1DD6F /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
+		92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893FAA89E50A101FCB8B0C01 /* HostCPU.swift */; };
 		9666D7B08B28F56E3B581F12 /* XPCClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78D676208B045B062E261378 /* XPCClient.swift */; };
 		97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */; };
 		A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */; };
@@ -80,7 +82,6 @@
 		06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
 		0A6845F2B35F7FD152E9F7AE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcher.swift; sourceTree = "<group>"; };
-		18C878830CDD219E5804F2CC /* HostCPU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCPU.swift; sourceTree = "<group>"; };
 		1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
 		1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorSelection.swift; sourceTree = "<group>"; };
 		1FBE4FF29F56752B038056F5 /* PopupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupView.swift; sourceTree = "<group>"; };
@@ -99,12 +100,14 @@
 		79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
 		7B0E01379C7F34814B84799B /* GPUSample.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSample.swift; sourceTree = "<group>"; };
 		81A7139D20C2519CF55ABAFB /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
+		893FAA89E50A101FCB8B0C01 /* HostCPU.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCPU.swift; sourceTree = "<group>"; };
 		89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistStreamSplitter.swift; sourceTree = "<group>"; };
 		8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconStateTests.swift; sourceTree = "<group>"; };
 		90386A8D8287F8D6433DA49A /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
 		947C59473F2C40EDC54468E3 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
 		94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorReader.swift; sourceTree = "<group>"; };
 		9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
+		9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostCPUTests.swift; sourceTree = "<group>"; };
 		A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorSelectionTests.swift; sourceTree = "<group>"; };
 		A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoilingTriggerTests.swift; sourceTree = "<group>"; };
 		A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcherTests.swift; sourceTree = "<group>"; };
@@ -144,6 +147,7 @@
 				B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */,
 				06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */,
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
+				9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */,
 				8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */,
 				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
 				41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */,
@@ -160,7 +164,6 @@
 			isa = PBXGroup;
 			children = (
 				BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */,
-				18C878830CDD219E5804F2CC /* HostCPU.swift */,
 				05A9EF7E1C735A467AD710EA /* Info.plist */,
 				94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */,
 				0A6845F2B35F7FD152E9F7AE /* main.swift */,
@@ -176,6 +179,7 @@
 			children = (
 				F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */,
 				7B0E01379C7F34814B84799B /* GPUSample.swift */,
+				893FAA89E50A101FCB8B0C01 /* HostCPU.swift */,
 				1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */,
 				89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */,
 				79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */,
@@ -354,6 +358,7 @@
 				194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */,
 				273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */,
 				615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */,
+				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
 				AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */,
 				D80B10C0C617AD41F5BA4257 /* PlistStreamSplitter.swift in Sources */,
 				0B75C45876F33514001EBF69 /* PopupView.swift in Sources */,
@@ -376,7 +381,7 @@
 			files = (
 				BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */,
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
-				74B3A68C750F7B9F3BADB894 /* HostCPU.swift in Sources */,
+				1DD3C572DD4FEAF2BCD9A9A7 /* HostCPU.swift in Sources */,
 				97C765182F82047C56280D9A /* IOAcceleratorReader.swift in Sources */,
 				3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */,
 				D0E44CBA71ACE5AD74AE423D /* PlistStreamSplitter.swift in Sources */,
@@ -400,6 +405,7 @@
 				5866FB4382A429156A126BB5 /* DutchOvenRendererTests.swift in Sources */,
 				33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */,
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
+				174FF65D4FEA5DC343574588 /* HostCPUTests.swift in Sources */,
 				BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */,
 				8CCF001921C683107237C79E /* IconStateTests.swift in Sources */,
 				A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */,

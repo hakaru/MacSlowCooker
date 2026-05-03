@@ -56,6 +56,27 @@ final class SettingsTests: XCTestCase {
         XCTAssertEqual(defaults.string(forKey: Settings.Keys.boilingTrigger), "thermalPressure")
     }
 
+    func testResetToDefaults() {
+        let s = Settings(defaults: defaults)
+        s.flameAnimation = .none
+        s.boilingTrigger = .temperature
+        s.floatAboveOtherWindows = false
+
+        s.resetToDefaults()
+
+        XCTAssertEqual(s.potStyle, .dutchOven)
+        XCTAssertEqual(s.flameAnimation, .both)
+        XCTAssertEqual(s.boilingTrigger, .combined)
+        XCTAssertTrue(s.floatAboveOtherWindows)
+
+        // didSet wrote each default through to UserDefaults so a fresh
+        // instance built from the same store reads the reset values.
+        let s2 = Settings(defaults: defaults)
+        XCTAssertEqual(s2.flameAnimation, .both)
+        XCTAssertEqual(s2.boilingTrigger, .combined)
+        XCTAssertTrue(s2.floatAboveOtherWindows)
+    }
+
     func testChangesStreamYieldsOnEachMutation() async {
         let s = Settings(defaults: defaults)
 
