@@ -1,3 +1,17 @@
 build/
 default.profraw
 .superpowers/
+
+# Local agent / tool state — never commit
+.claude/
+AGENTS.md
+.codex/
+.gemini/
+
+# Xcode user state
+xcuserdata/
+*.xcuserstate
+DerivedData/
+
+# macOS
+.DS_Store

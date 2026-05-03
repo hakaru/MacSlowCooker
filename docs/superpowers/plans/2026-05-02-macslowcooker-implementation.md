@@ -97,7 +97,7 @@ sudo powermetrics --samplers gpu_power,thermal -i 500 -n 1 --format plist 2>/dev
 1. Xcode → File → New → Project → macOS → App
 2. Product Name: `MacSlowCooker`, Bundle Identifier: `com.macslowcooker.app`
 3. Language: Swift, Interface: SwiftUI → **変更**: Interface を `AppKit` に選択
-4. プロジェクト保存先: `/Users/hakaru/DEVELOP/MacSlowCooker/`
+4. プロジェクト保存先: `<repo-root>/`
 
 - [ ] **Step 2: HelperToolターゲットを追加**
 
@@ -150,7 +150,7 @@ Xcode Navigator でグループ `Shared` を作成（後のタスクでファイ
 - [ ] **Step 7: LaunchDaemon plistディレクトリとファイルを作成**
 
 ```bash
-mkdir -p /Users/hakaru/DEVELOP/MacSlowCooker/MacSlowCooker/Library/LaunchDaemons
+mkdir -p <repo-root>/MacSlowCooker/Library/LaunchDaemons
 ```
 
 `MacSlowCooker/Library/LaunchDaemons/com.macslowcooker.helper.plist`:
@@ -282,7 +282,7 @@ Expected: GPUSampleTests → 2 tests passed
 - [ ] **Step 6: コミット**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd <repo-root>
 git init
 git add Shared/ MacSlowCookerTests/GPUSampleTests.swift
 git commit -m "feat: add GPUSample and XPCProtocol shared types"

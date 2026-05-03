@@ -56,16 +56,21 @@ MacSlowCooker.app（非特権、ユーザーログインセッション）
   ├── main.swift                — NSApplication.shared に AppDelegate を手動セット
   ├── AppDelegate               — XPC 接続、Dock アイコン更新、エラーアラート
   ├── GPUDataStore              — @Observable 循環バッファ（60サンプル）
-  ├── XPCClient                 — NSXPCConnection (.privileged) + 指数バックオフ再接続
-  ├── HelperInstaller           — SMAppService.daemon の登録・承認誘導
-  ├── DockIconRenderer          — Core Graphics 縦バー描画（バックグラウンドキュー）
-  ├── PopupView                 — SwiftUI + Swift Charts ダッシュボード
-  └── PopupWindowController     — NSPanel（Dock アイコン直上にフロート）
+  ├── Settings                  — @Observable + UserDefaults + AsyncStream<Void>
+  ├── XPCClient                 — NSXPCConnection (.privileged) + 指数バックオフ再接続、2 Hz polling
+  ├── HelperInstaller           — SMAppService.daemon 登録 + 古い helper の自動 re-register
+  ├── DockIconAnimator          — Timer-driven state machine（補間 / wiggle / 沸騰フェード）
+  ├── DutchOvenRenderer         — Core Graphics 鍋 / 炎 / 湯気描画（PotRenderer 適合）
+  ├── PopupView                 — SwiftUI + Swift Charts ダッシュボード（4 chart + 4 metric）
+  ├── PopupWindowController     — NSWindow（titled / closable / resizable, .floating 切替可能）
+  └── PreferencesWindowController — NSWindow + SwiftUI Form
 
 HelperTool（root LaunchDaemon、Contents/MacOS/HelperTool）
-  ├── main.swift                — NSXPCListener、HelperService.shared をすべての接続で共有
+  ├── main.swift                — NSXPCListener、HelperService.shared + 内部状態は actor HelperState で隔離
   ├── PowerMetricsRunner        — /usr/bin/powermetrics 常駐、NUL 区切り plist ストリームパース
-  ├── TemperatureReader         — IOHIDEventSystem 経由で SoC 温度センサー読み取り
+  ├── IOAcceleratorReader       — IOAccelerator → "Device Utilization %"（Activity Monitor 互換）
+  ├── SMCReader                 — AppleSMC 直叩き、F0Ac/F1Ac から fan RPM
+  └── TemperatureReader         — IOHIDEventSystem 経由で SoC 温度センサー読み取り
   └── SMCReader                 — AppleSMC 直叩き、fan RPM (F0Ac/F1Ac, fpe2 形式) を読み出し
 
 Shared（両ターゲットでコンパイルされる）
@@ -77,7 +82,8 @@ Shared（両ターゲットでコンパイルされる）
 サンプル取得の流れ：
 1. HelperService が起動時に PowerMetricsRunner.start() で powermetrics を spawn（Apple Silicon: `--samplers gpu_power,ane_power,thermal --show-all`、Intel: `--samplers gpu_power,thermal`）
 2. NUL 区切りで届く plist を PowerMetricsParser がパース、TemperatureReader で温度を補強して JSON 化
-3. XPCClient が 1 秒間隔で `fetchLatestSample` を呼び、GPUDataStore に積んで Dock アイコンを再描画
+3. XPCClient が 0.5 秒間隔（2 Hz）で `fetchLatestSample` を呼び、GPUDataStore に積んで Dock アイコンを再描画
+4. 起動直後の "--" 表示を防ぐため `startSampling` で IOKit-only な primer sample（GPU% / temp / fan、power なし）を即座に格納
 
 ## macOS 26 (Tahoe) 固有の落とし穴
 
@@ -128,7 +134,7 @@ connection.setCodeSigningRequirement(
 
 **`HelperService` はシングルトン (`HelperService.shared`)**。`shouldAcceptNewConnection` で `connection.exportedObject = HelperService.shared` を渡し、すべての接続が同じ powermetrics プロセスを共有する。接続ごとに新規インスタンスを返すと powermetrics が重複起動する。
 
-`latestSampleData` は serial queue (`com.macslowcooker.helper.sample`) で保護してデータ競合回避。
+`sampling` / `latestSampleData` は private `actor HelperState` で隔離（旧 serial queue 設計から移行済み）。XPC reply 経由のすべての mutate は `Task { await state.foo() }` でホップする。
 
 `PowerMetricsRunner.stop()` は `isStopping = true` を立ててから `terminate()` を呼ぶ。terminationHandler が走るが `isStopping` を見て crash 扱いの再起動をスキップする。
 
