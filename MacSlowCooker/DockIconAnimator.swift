@@ -117,7 +117,9 @@ final class DockIconAnimator {
 
     private func needsAnimation() -> Bool {
         if isSystemAsleep { return false }
-        if settings.flameAnimation.hasWiggle { return true }
+        // Wiggle only matters when there's an active flame to wiggle —
+        // i.e., the helper is sending samples. Disconnected → no wiggle.
+        if isConnected && settings.flameAnimation.hasWiggle { return true }
         if abs(displayedUsage - targetUsage) > 0.005 { return true }
         let boilingTarget: Double = isBoiling ? 1.0 : 0.0
         if abs(boilingIntensity - boilingTarget) > 0.005 { return true }
@@ -139,12 +141,17 @@ final class DockIconAnimator {
     // MARK: - Tick
 
     private func tick(dt: TimeInterval) {
-        // Interpolation
-        let α = 1 - exp(-dt / Self.interpolationTimeConstant)
-        displayedUsage += (targetUsage - displayedUsage) * α
+        // Height interpolation — gated on `flameAnimation.hasInterpolation`
+        // so the "Off" / "Wiggle" settings really do snap to target.
+        if settings.flameAnimation.hasInterpolation {
+            let α = 1 - exp(-dt / Self.interpolationTimeConstant)
+            displayedUsage += (targetUsage - displayedUsage) * α
+        } else {
+            displayedUsage = targetUsage
+        }
 
-        // Wiggle
-        let wiggleEnabled = settings.flameAnimation.hasWiggle
+        // Wiggle — only meaningful while connected; disconnected pots are flat gray.
+        let wiggleEnabled = isConnected && settings.flameAnimation.hasWiggle
         if wiggleEnabled {
             wigglePhase = (wigglePhase + dt * Self.wiggleSpeed)
                 .truncatingRemainder(dividingBy: .pi * 2)
@@ -155,14 +162,21 @@ final class DockIconAnimator {
         let boilingTarget: Double = isBoiling ? 1.0 : 0.0
         boilingIntensity += (boilingTarget - boilingIntensity) * βb
 
+        // When the temperature sensor is unavailable (typical on macOS 26 / M3 Ultra),
+        // estimate it from `thermalPressure` so the renderer's pot color still tracks
+        // heat instead of staying frozen at the cool baseline.
+        let effectiveTemp = latestSample?.temperature
+            ?? Self.estimatedTemperature(for: latestSample?.thermalPressure)
+
         let state = IconState(
             displayedUsage:    displayedUsage,
-            temperature:       latestSample?.temperature,
+            temperature:       effectiveTemp,
             isConnected:       isConnected,
             flameWigglePhase:  wigglePhase,
             flameWiggleEnabled: wiggleEnabled,
             isBoiling:         isBoiling,
-            boilingIntensity:  boilingIntensity)
+            boilingIntensity:  boilingIntensity,
+            fanRPM:            latestSample?.fanRPM?.max())
 
         let hash = state.visualHash
         if hash != lastRenderedHash {
@@ -178,6 +192,20 @@ final class DockIconAnimator {
     }
 
     // MARK: - Pure helpers
+
+    /// When the SoC temperature sensor isn't readable, derive a representative
+    /// temperature from `thermal_pressure` so the renderer's heat color still
+    /// reflects something. Numbers chosen to match the visible color stops in
+    /// `DutchOvenRenderer.potColor` (50°C white → 95°C red).
+    nonisolated static func estimatedTemperature(for thermalPressure: String?) -> Double? {
+        switch thermalPressure {
+        case "Nominal":  return 55
+        case "Fair":     return 70
+        case "Serious":  return 85
+        case "Critical": return 95
+        default:         return nil
+        }
+    }
 
     nonisolated static func computeBoiling(
         trigger: BoilingTrigger,
