@@ -9,6 +9,7 @@ final class Settings {
         static let potStyle       = "potStyle"
         static let flameAnimation = "flameAnimation"
         static let boilingTrigger = "boilingTrigger"
+        static let floatAboveOtherWindows = "floatAboveOtherWindows"
     }
 
     @ObservationIgnored
@@ -26,6 +27,10 @@ final class Settings {
         didSet { defaults.set(boilingTrigger.rawValue, forKey: Keys.boilingTrigger) }
     }
 
+    var floatAboveOtherWindows: Bool = true {
+        didSet { defaults.set(floatAboveOtherWindows, forKey: Keys.floatAboveOtherWindows) }
+    }
+
     static let shared = Settings()
 
     /// Assignments below fire `didSet`, re-writing the just-loaded value back to
@@ -37,6 +42,9 @@ final class Settings {
         self.potStyle       = PotStyle(rawValue: defaults.string(forKey: Keys.potStyle) ?? "")        ?? .dutchOven
         self.flameAnimation = FlameAnimation(rawValue: defaults.string(forKey: Keys.flameAnimation) ?? "") ?? .both
         self.boilingTrigger = BoilingTrigger(rawValue: defaults.string(forKey: Keys.boilingTrigger) ?? "") ?? .combined
+        // .object(forKey:) returns nil when the key is missing — distinguish "never set"
+        // from "explicitly false" so the default of true holds on first launch.
+        self.floatAboveOtherWindows = (defaults.object(forKey: Keys.floatAboveOtherWindows) as? Bool) ?? true
     }
 }
 
@@ -72,6 +80,7 @@ private final class SettingsChangeTracker {
             _ = settings.potStyle
             _ = settings.flameAnimation
             _ = settings.boilingTrigger
+            _ = settings.floatAboveOtherWindows
         } onChange: { [weak self] in
             // onChange fires synchronously *before* the mutation completes.
             // Hop to a Task so the new value is observable when downstream

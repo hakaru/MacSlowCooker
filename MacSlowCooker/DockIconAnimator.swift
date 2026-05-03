@@ -6,7 +6,8 @@ final class DockIconAnimator {
 
     // MARK: - Constants
 
-    static let tickInterval: TimeInterval               = 1.0 / 10.0   // 10 fps
+    static let tickInterval: TimeInterval               = 1.0 / 10.0   // 10 fps (full power)
+    static let lowPowerTickInterval: TimeInterval       = 1.0 / 5.0    // 5 fps (low power mode)
     static let interpolationTimeConstant: TimeInterval  = 0.7
     static let boilingFadeTimeConstant: TimeInterval    = 0.6
     static let wiggleSpeed: Double                      = 4.0          // rad/s
@@ -31,11 +32,13 @@ final class DockIconAnimator {
     private var isConnected: Bool = false
     private var latestSample: GPUSample?
     private var isSystemAsleep: Bool = false
+    private var isLowPowerMode: Bool = ProcessInfo.processInfo.isLowPowerModeEnabled
 
     private var lastRenderedHash: Int = 0
 
     private var timer: Timer?
     private let autostartTimer: Bool
+    private var lpmObserver: NSObjectProtocol?
 
     // MARK: - Init
 
@@ -47,10 +50,44 @@ final class DockIconAnimator {
         self.renderer = renderer
         self.clock = clock
         self.autostartTimer = autostartTimer
+        observeLowPowerMode()
     }
 
     deinit {
         timer?.invalidate()
+        if let observer = lpmObserver {
+            NotificationCenter.default.removeObserver(observer)
+        }
+    }
+
+    /// Toggle tick rate (10→5 fps) and disable wiggle when Low Power Mode is on.
+    /// MacSlowCooker's brand promise is energy-conscious behavior — silently
+    /// burning 10 fps + flame wiggle while the OS asks everyone to slow down
+    /// would undercut that. Visible status is surfaced in Preferences.
+    private func observeLowPowerMode() {
+        lpmObserver = NotificationCenter.default.addObserver(
+            forName: .NSProcessInfoPowerStateDidChange,
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            MainActor.assumeIsolated {
+                self?.handleLowPowerModeChange()
+            }
+        }
+    }
+
+    private func handleLowPowerModeChange() {
+        let now = ProcessInfo.processInfo.isLowPowerModeEnabled
+        guard now != isLowPowerMode else { return }
+        isLowPowerMode = now
+        // Restart timer with the new cadence.
+        timer?.invalidate()
+        timer = nil
+        ensureTimerRunning()
+    }
+
+    private var currentTickInterval: TimeInterval {
+        isLowPowerMode ? Self.lowPowerTickInterval : Self.tickInterval
     }
 
     // MARK: - Public API
@@ -119,7 +156,8 @@ final class DockIconAnimator {
         if isSystemAsleep { return false }
         // Wiggle only matters when there's an active flame to wiggle —
         // i.e., the helper is sending samples. Disconnected → no wiggle.
-        if isConnected && settings.flameAnimation.hasWiggle { return true }
+        // Low Power Mode also forces wiggle off (see observeLowPowerMode).
+        if isConnected && !isLowPowerMode && settings.flameAnimation.hasWiggle { return true }
         if abs(displayedUsage - targetUsage) > 0.005 { return true }
         let boilingTarget: Double = isBoiling ? 1.0 : 0.0
         if abs(boilingIntensity - boilingTarget) > 0.005 { return true }
@@ -131,10 +169,14 @@ final class DockIconAnimator {
     private func ensureTimerRunning() {
         guard autostartTimer else { return }
         if timer == nil && !isSystemAsleep {
-            timer = Timer.scheduledTimer(withTimeInterval: Self.tickInterval, repeats: true) { [weak self] _ in
-                Task { @MainActor in self?.tick(dt: Self.tickInterval) }
+            let interval = currentTickInterval
+            timer = Timer.scheduledTimer(withTimeInterval: interval, repeats: true) { [weak self] _ in
+                Task { @MainActor in
+                    guard let self else { return }
+                    self.tick(dt: self.currentTickInterval)
+                }
             }
-            tick(dt: Self.tickInterval)
+            tick(dt: interval)
         }
     }
 
@@ -151,7 +193,8 @@ final class DockIconAnimator {
         }
 
         // Wiggle — only meaningful while connected; disconnected pots are flat gray.
-        let wiggleEnabled = isConnected && settings.flameAnimation.hasWiggle
+        // Low Power Mode disables wiggle to honor the OS energy hint.
+        let wiggleEnabled = isConnected && !isLowPowerMode && settings.flameAnimation.hasWiggle
         if wiggleEnabled {
             wigglePhase = (wigglePhase + dt * Self.wiggleSpeed)
                 .truncatingRemainder(dividingBy: .pi * 2)

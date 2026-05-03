@@ -9,8 +9,10 @@ import SwiftUI
 final class PopupWindowController: NSWindowController, NSWindowDelegate {
 
     private weak var store: GPUDataStore?
+    private var settings: Settings = .shared
+    private var settingsTask: Task<Void, Never>?
 
-    convenience init(store: GPUDataStore) {
+    convenience init(store: GPUDataStore, settings: Settings = .shared) {
         let window = NSWindow(
             contentRect: NSRect(x: 0, y: 0, width: 760, height: 320),
             styleMask: [.titled, .closable, .miniaturizable, .resizable],
@@ -19,8 +21,6 @@ final class PopupWindowController: NSWindowController, NSWindowDelegate {
         )
         window.title = "MacSlowCooker"
         window.isMovableByWindowBackground = true
-        window.level = .floating
-        window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         // Use contentMinSize so the title bar isn't part of the constraint —
         // window.minSize includes the title bar and lets content shrink below
         // the SwiftUI minimum.
@@ -29,12 +29,20 @@ final class PopupWindowController: NSWindowController, NSWindowDelegate {
 
         self.init(window: window)
         self.store = store
+        self.settings = settings
         window.delegate = self
 
         let hostingView = NSHostingView(rootView: PopupView(store: store))
         hostingView.frame = window.contentView!.bounds
         hostingView.autoresizingMask = [.width, .height]
         window.contentView?.addSubview(hostingView)
+
+        applyWindowLevel()
+        observeSettings()
+    }
+
+    deinit {
+        settingsTask?.cancel()
     }
 
     func toggle() {
@@ -61,6 +69,31 @@ final class PopupWindowController: NSWindowController, NSWindowDelegate {
         }
         NSApp.activate(ignoringOtherApps: true)
         win.makeKeyAndOrderFront(nil)
+    }
+
+    /// Apply the user's "Float above other windows" preference. When ON the
+    /// popup uses `.floating` and joins all spaces / fullscreen overlays,
+    /// matching legacy behavior. When OFF the popup acts like a normal
+    /// window — better for users who want it in the standard window order.
+    private func applyWindowLevel() {
+        guard let win = window else { return }
+        if settings.floatAboveOtherWindows {
+            win.level = .floating
+            win.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
+        } else {
+            win.level = .normal
+            win.collectionBehavior = []
+        }
+    }
+
+    private func observeSettings() {
+        settingsTask?.cancel()
+        let stream = settings.changes
+        settingsTask = Task { @MainActor [weak self] in
+            for await _ in stream {
+                self?.applyWindowLevel()
+            }
+        }
     }
 
     // MARK: - NSWindowDelegate
