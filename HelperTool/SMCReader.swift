@@ -71,7 +71,21 @@ final class SMCReader {
 
     // MARK: - Init / lifecycle
 
+    /// Total stride AppleSMC's user-client expects for the parameter struct.
+    /// Hard-coded so future Swift compiler optimizations or struct edits that
+    /// shift offsets are caught immediately rather than producing garbled
+    /// kernel reads.
+    static let expectedKeyDataStride: Int = 80
+
     init?() {
+        let actualStride = MemoryLayout<SMCKeyData>.stride
+        guard actualStride == Self.expectedKeyDataStride else {
+            os_log("SMCKeyData stride drift: %d != %d (expected). Refusing to open SMC.",
+                   log: smcLog, type: .error,
+                   actualStride, Self.expectedKeyDataStride)
+            return nil
+        }
+
         let service = IOServiceGetMatchingService(kIOMainPortDefault, IOServiceMatching("AppleSMC"))
         guard service != 0 else {
             os_log("AppleSMC service not found", log: smcLog, type: .error)
