@@ -31,6 +31,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         Task {
             do {
                 try await HelperInstaller.installIfNeeded()
+                await HelperInstaller.refreshIfStale()
                 connectXPC()
             } catch {
                 os_log("Install failed: %{public}s", log: log, type: .error, error.localizedDescription)
