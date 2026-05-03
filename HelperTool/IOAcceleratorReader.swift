@@ -5,7 +5,7 @@ import os.log
 private let ioaLog = OSLog(subsystem: "com.macslowcooker", category: "ioaccel")
 
 /// Reads GPU utilization from `IOAccelerator`'s `PerformanceStatistics` dictionary,
-/// which is the same source Activity Monitor uses for the "GPU の履歴" graph.
+/// which is the same source Activity Monitor uses for its "GPU History" graph.
 ///
 /// `Device Utilization %` is integer percent (0–100). We pick a single service
 /// deterministically (sorted by IORegistry entry name, first one with a usable

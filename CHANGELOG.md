@@ -1,90 +1,123 @@
 # Changelog
 
-すべての注目すべき変更点を記録する。フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に準拠。
+All notable changes are tracked here. The format follows
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [Unreleased] — 2026-05-03
+## [Unreleased]
 
-### Added (Pot Icon PoC)
-- **Dutch oven Dock アイコン** (3D 白鍋 + GPU 使用率連動の炎 + ファン連動の波形湯気)
-  - 鍋色は SoC 温度で変化 (50°C 白 → 95°C 赤オレンジ)
-  - 高負荷 5 秒持続で沸騰演出 (蓋ガタガタ + 赤い湯気)
-  - 半透明青グラデーションの角丸スクエア背景
-- **Activity Monitor 風のフローティングウィンドウ**
-  - 4 つのチャート (GPU / Temperature / Fan / Power)
-  - 4 つのメトリクスタイル (危険度カラー: 白 → 黄 → 赤)
-  - リサイズ・移動可能、`.floating` レベルで他アプリの上に常駐
-  - NSVisualEffectView 半透明背景
-- **Preferences ウィンドウ**
-  - 鍋スタイル / 炎アニメーション / 沸騰トリガー設定
-  - 標準的な App / Edit / Window メニュー
-- **Activity Monitor 互換の GPU 使用率**
-  - `IOAccelerator` の `Device Utilization %` を直読み (powermetrics の `idle_ratio` ではない)
-- **Fan RPM 取得**
-  - `AppleSMC` 直叩きで `FNum` / `F0Ac` / `F1Ac` (`fpe2` + `flt ` 両形式対応)
-  - macOS 26 で `powermetrics --samplers smc` が削除されたため SMC 直接アクセスに切り替え
+### Added
+- **3D drum-shape pot icon**: cylindrical body with elliptical top rim and
+  base, dome lid with knob, back rim drawn behind the lid, and chunky loop
+  handles — replaces the earlier flat-rectangle silhouette
+- **Layered flame**: asymmetric three-layer bezier teardrop (red-orange /
+  orange / yellow-white core) with a curling tip and a soft radial halo
+- **Soft puff steam**: stacks of overlapping radial-gradient puffs that grow
+  with fan RPM and fade as they rise — replaces the stroked wavy lines
+- **Brighter background**: 3-stop blue gradient (sky → mid → anchor) replacing
+  the previous flatter 2-stop
+- **Universal Binary** (arm64 + x86_64) for Apple Silicon and Intel
+- **Intel powermetrics support**: parser recognizes Intel keys (`gpu_busy`,
+  `busy_ns` + `elapsed_ns`); helper omits `ane_power` sampler on Intel;
+  TemperatureReader matches Intel-style `proximity` / `graphics` sensors
+- **Helper version sync**: `HelperInstaller.refreshIfStale` queries the running
+  helper's CFBundleVersion via XPC and re-registers the daemon if it differs
+  from the bundled binary, so stale helpers no longer survive a deploy
+- **Cold-launch primer sample**: `HelperService.startSampling` synthesizes an
+  IOKit-only first sample (GPU% / temp / fan, no power) so the popup fills
+  within hundreds of milliseconds instead of waiting 2–3 s for powermetrics'
+  first plist
+- **2 Hz polling** (was 1 Hz) plus an immediate fetch on connect
+- **HelperService Actor isolation**: mutable state moved into a private
+  `actor HelperState`, eliminating the data-race risk that strict-concurrency
+  mode would flag on the previous queue-based design
+- **Deterministic IOAccelerator service selection**: services are sorted by
+  IORegistry name and the first one with a usable percentage wins; all
+  detected services are logged on first read for diagnosis
+- **SMCKeyData stride guard**: `SMCReader.init?()` checks
+  `MemoryLayout<SMCKeyData>.stride == 80` and refuses to open SMC on drift,
+  so layout regressions surface as graceful nil instead of garbled reads
+- **Window-level preference**: a "Float above other windows" toggle in
+  Preferences (default ON), applied immediately via Settings.changes
+- **Low Power Mode honor**: animator drops to 5 fps and disables flame wiggle
+  while LPM is on; Preferences shows a live status row explaining the override
+- **Popup chart nil handling**: nil temperature / fan / power samples render
+  as gaps in the chart instead of misleading flat-zero baselines
+- **macOS 26 (Tahoe) parser tests**: synthetic plist fixtures cover
+  `gpu.idle_ratio`, `gpu.gpu_energy + elapsed_ns`, `processor.ane_power`, and
+  `thermal_pressure`
 
-### Architecture
-- `PotRenderer` プロトコルで鍋スタイルを差し替え可能に (Phase 2 で oden / curry など追加用)
-- `DockIconAnimator` Timer ベースの state machine
-  - exponential lerp で滑らかな高さ補間 (時定数 0.7s)
-  - sin ベースの wiggle phase で炎ゆらぎ
-  - 5 秒持続の `aboveThresholdSince` 判定で沸騰トリガー
-  - 静止状態で自動的に Timer 停止 → CPU 0%
-  - `IconState.visualHash` で重複した Dock icon 更新を抑制 (WindowServer IPC 削減)
-  - NSWorkspace スリープ通知に対応
-- `Settings` を `@Observable` で実装、UserDefaults 永続化
-- `Settings.changes: AsyncStream<Void>` で AppDelegate が観測
-- `Clock` プロトコル + `TestClock` で時間依存ロジックを決定的にテスト
+### Architecture (PoC foundation)
+- `PotRenderer` protocol so pot styles can be swapped (Phase 2 will add
+  oden, curry, etc.)
+- `DockIconAnimator` Timer-based state machine
+  - exponential lerp for smooth height interpolation (0.7 s time constant)
+  - sine-based wiggle phase for flame motion
+  - 5 s sustained `aboveThresholdSince` triggers the boiling animation
+  - Timer auto-stops when no animation is in flight → idle CPU 0%
+  - `IconState.visualHash` skips redundant Dock-icon updates (cuts WindowServer
+    IPC chatter)
+  - subscribes to `NSWorkspace` sleep notifications
+- `Settings` is `@Observable`-based with `UserDefaults` persistence and a
+  `Settings.changes: AsyncStream<Void>` for downstream observers
+- `Clock` protocol + `TestClock` makes time-dependent logic deterministic in
+  tests
 
 ### Tests
-- 44 ユニットテスト (BoilingTrigger 13 + DockIconAnimator 15 + DutchOvenRenderer 2 + Settings 5 + 既存 9)
-- 全テスト pass
-- スナップショット (PNG 一致) テストは PoC スコープ外
+- 53 unit tests, all passing
+- Snapshot (PNG match) tests are intentionally out of scope for the PoC
 
 ### Fixed
-- `SMAppService.notFound` の誤報告に対するフォールバック (register() を直接試行)
-- 旧 GPUSampleTests / GPUDataStoreTests を `thermalPressure` / `anePower` フィールド追加に追従
-- `XCTestConfigurationFilePath` 環境変数で AppDelegate がテスト時にヘルパー登録をスキップ
-- 鍋アイコンの炎が鍋本体の裏に隠れて見えなかった問題 (鍋の Y 位置を 36-64% に調整)
+- `SMAppService.notFound` false positive: `register()` is attempted anyway
+- Legacy `GPUSampleTests` / `GPUDataStoreTests` updated for the new
+  `thermalPressure` and `anePower` fields
+- `XCTestConfigurationFilePath` env var causes `AppDelegate` to skip helper
+  setup under XCTest (avoids modal NSAlert blocking the test runner)
+- Pot icon flame was clipped behind the body in early iterations — pot Y
+  range now sits at 36–64 % so the flame stays visible
 
 ### Documentation
-- 設計仕様書 (`docs/superpowers/specs/2026-05-03-pot-icon-poc-design.md`)
-- 実装計画 (`docs/superpowers/plans/2026-05-03-pot-icon-poc-implementation.md`)
-- macOS 26 固有の落とし穴を `CLAUDE.md` に集約
+- Apache License 2.0 added (`LICENSE`, `NOTICE`)
+- Design spec: `docs/superpowers/specs/2026-05-03-pot-icon-poc-design.md`
+- Implementation plan: `docs/superpowers/plans/2026-05-03-pot-icon-poc-implementation.md`
+- macOS 26 platform gotchas consolidated into `CLAUDE.md`
 
-### Phase 2 Backlog (GitHub Issues)
-- #1 CGLayer による静的パーツのキャッシュ
-- #2 Low Power Mode 対応
-- #3 SMCKeyData レイアウト保証
-- #4 HelperService Swift Actor 化
-- #5 powermetrics 廃止 → IOReport 完全移行
-- #6 Helper version sync (binary 更新時の re-register)
-- #7 macOS 26 powermetrics plist fixture テスト
-- #8 nil samples をチャートで 0 表示しない
-- #9 Window level / floating preference
-- #10 IOAcceleratorReader 複数 service 絞り込み
-- #11 First-sample latency 改善
+### Phase 2 backlog (closed)
+- #1 CGLayer caching of static parts — closed as deferred-until-measured
+- #2 Honor Low Power Mode — implemented
+- #3 SMCKeyData layout guard — implemented
+- #4 HelperService Actor migration — implemented
+- #5 powermetrics → IOReport migration — partial (primer sample reduces the
+  fields that depend on powermetrics); full IOReport bindings remain a
+  separate task
+- #6 Helper version sync on binary change — implemented
+- #7 macOS 26 powermetrics plist fixture tests — implemented
+- #8 Don't plot nil samples as zero — implemented
+- #9 Window level / floating preference — implemented
+- #10 IOAcceleratorReader narrow service matching — implemented (deterministic
+  selection + first-read logging)
+- #11 First-sample latency on launch — implemented (primer + 2 Hz polling)
 
 ## [Pre-PoC] — 2026-05-02
 
-### Added (foundation work, before pot-icon-poc branch)
-- 初期 Xcode プロジェクト scaffold (xcodegen)
-- 縦バー型 Dock アイコン (`DockIconRenderer`, PoC で削除)
-- HelperTool / XPC 通信基盤 (`MacSlowCookerHelperProtocol`)
-- `PowerMetricsRunner` で powermetrics 常駐
-- `TemperatureReader` で IOHIDEventSystem から SoC 温度
-- `GPUDataStore` 60-element 循環バッファ
-- 初期 popup UI (NSPanel)
+### Added (foundation work, before the pot-icon-poc branch)
+- Initial Xcode project scaffold (xcodegen)
+- Vertical-bar Dock icon (`DockIconRenderer`, removed in the PoC)
+- HelperTool / XPC plumbing (`MacSlowCookerHelperProtocol`)
+- `PowerMetricsRunner` for the long-running powermetrics process
+- `TemperatureReader` for SoC temperature via IOHIDEventSystem
+- `GPUDataStore` 60-element ring buffer
+- Initial popup UI (NSPanel)
 
 ### Renamed
-- プロジェクト全体: GPUSMI → MacSlowCooker
-  - bundle id, plist Label, ディレクトリ名, ヘルパーキーすべて更新
+- Project-wide: GPUSMI → MacSlowCooker (bundle id, plist Label, directory
+  names, helper keys)
 
 ### Fixed
-- macOS 26 互換性
-  - `@main` の罠: AppDelegate を `main.swift` で明示セット
-  - `LSUIElement` 削除で Dock アイコン表示
-  - HelperTool Info.plist 埋め込み (`-sectcreate` フラグ)
-  - SMAppService 登録条件 (Team OU 含む designated requirement)
-  - powermetrics の新スキーマ対応 (`idle_ratio`, `gpu_energy`)
-- IOHID GPU temperature クラッシュを `readGPUTemperature()` 一時無効化で回避
+- macOS 26 compatibility
+  - `@main` trap: `AppDelegate` is set explicitly in `main.swift`
+  - Removed `LSUIElement` so the Dock icon shows
+  - HelperTool Info.plist embedding (`-sectcreate` flag)
+  - SMAppService designated requirement now includes the Team OU
+  - powermetrics new schema (`idle_ratio`, `gpu_energy`)
+- IOHID GPU temperature crash worked around by temporarily disabling
+  `readGPUTemperature()`

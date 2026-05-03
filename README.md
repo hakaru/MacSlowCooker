@@ -1,132 +1,170 @@
 # MacSlowCooker
 
-Apple Silicon Mac の GPU 使用率・SoC 温度・電力・ファン回転数を **Dock アイコン**と**フローティングウィンドウ**で可視化する macOS デスクトップアプリ。
+A macOS desktop app that visualizes GPU usage, SoC temperature, power, and fan
+RPM through a **Dock icon** and a **floating window**, designed for Apple
+Silicon and Intel Macs.
 
-`powermetrics` を root 権限で常駐実行する LaunchDaemon と XPC で通信し、IOAccelerator / SMC / IOHIDEventSystem も組み合わせて 1 秒間隔でメトリクスを収集する。
+It runs `powermetrics` as a root LaunchDaemon and talks to it via XPC, while
+also pulling data from `IOAccelerator`, `AppleSMC`, and `IOHIDEventSystem` to
+collect a sample every second.
 
-## 主な機能
+## Features
 
-### Dock アイコン (鍋メタファー)
-- **白いダッチオーブン**型のアイコン (3D グラデーション + ドロップシャドウ)
-- 鍋の色は **SoC 温度に連動** (50°C 白 → 95°C 赤オレンジ)
-- **GPU 使用率に応じた炎**が鍋の下から伸縮 (色も負荷に応じて黄→赤に変化)
-- 蓋から立ち昇る **〰️ 波形の湯気** がファン RPM に連動して本数・太さ・高さが変化
-- 高負荷 5 秒持続または `thermalPressure ≥ Serious` で**沸騰演出**(蓋ガタガタ + 赤い湯気)
-- 半透明な角丸スクエア青背景 (macOS アプリアイコン風)
+### Dock icon (cooking-pot metaphor)
+- **3D drum-shape pot** rendered with cylindrical shading, dome lid, knob,
+  back rim, and chunky loop handles
+- Pot color tracks **SoC temperature** (white at 50 °C → red-orange at 95 °C)
+- A **layered flame** (red-orange / orange / yellow-white core) under the pot
+  scales with GPU usage; a soft halo radiates onto the pot at high load
+- **Steam puffs** rising from the lid grow thicker and busier with fan RPM
+- **Boiling animation** (lid bounce + warm-tinted steam) triggers after 5 s of
+  sustained load or `thermalPressure ≥ Serious`
+- Honors **Low Power Mode**: drops to 5 fps and disables flame wiggle while LPM
+  is on
 
-### フローティングウィンドウ (Activity Monitor の "GPU の履歴" 風)
-- タイトルバー付き、移動・リサイズ可能、`.floating` レベルで他アプリの上に常駐
-- **4 つのチャート**: GPU / Temperature / Fan / Power (固定 Y 軸範囲)
-- **4 つのメトリクスタイル**: 数値が**危険度に応じて白→黄→赤**に変化
-- 半透明 NSVisualEffectView 背景
+### Floating window (Activity Monitor "GPU history" style)
+- Titled, movable, resizable `NSWindow` with optional float-above-other-windows
+- **Four charts**: GPU / Temperature / Fan / Power with fixed Y-axis ranges
+- **Four metric tiles** whose numbers shift **white → yellow → red** with risk
+- nil samples render as gaps (no misleading flat-zero baselines)
+- Translucent `NSVisualEffectView` background
 
-### Preferences ウィンドウ
-- 鍋スタイル選択 (Phase 2 で oden / curry など追加予定)
-- 炎アニメーション: Off / Interpolation / Wiggle / Both
-- 沸騰トリガー: Temperature / Thermal Pressure / Combined
+### Preferences
+- Pot style (more styles planned for Phase 2)
+- Flame animation: Off / Interpolation / Wiggle / Both
+- Boiling trigger: Temperature / Thermal Pressure / Combined
+- Float-above-other-windows toggle
+- Live "Low Power Mode is on" status row
 
-## アーキテクチャ
+## Architecture
 
 ```
-MacSlowCooker.app (非特権、ユーザーログインセッション)
-  ├── main.swift                 — NSApplication.shared に AppDelegate 手動セット
-  ├── AppDelegate                — XPC 接続、Settings 観測、メニュー構築、スリープ通知
-  ├── GPUDataStore               — @Observable 循環バッファ (60 サンプル)
-  ├── Settings                   — @Observable + UserDefaults + AsyncStream<Void>
-  ├── XPCClient                  — NSXPCConnection (.privileged) + 指数バックオフ再接続
-  ├── HelperInstaller            — SMAppService.daemon 登録・承認誘導
-  ├── DockIconAnimator           — Timer-driven state machine (interpolation/wiggle/boiling fade)
-  ├── DutchOvenRenderer          — Core Graphics 鍋・炎・湯気描画 (PotRenderer protocol 適合)
-  ├── PopupView                  — SwiftUI ダッシュボード (4 charts + 4 metrics)
-  ├── PopupWindowController      — NSWindow (titled/closable/resizable, .floating)
+MacSlowCooker.app (unprivileged, runs in the user login session)
+  ├── main.swift                  — sets AppDelegate on NSApplication.shared
+  ├── AppDelegate                 — XPC connection, settings observation, menus,
+  │                                 sleep notifications
+  ├── GPUDataStore                — @Observable ring buffer (60 samples)
+  ├── Settings                    — @Observable + UserDefaults + AsyncStream<Void>
+  ├── XPCClient                   — NSXPCConnection (.privileged) + exponential
+  │                                 backoff reconnect
+  ├── HelperInstaller             — SMAppService.daemon registration; detects
+  │                                 stale helper binaries and re-registers
+  ├── DockIconAnimator            — Timer-driven state machine
+  │                                 (interpolation / wiggle / boiling fade)
+  ├── DutchOvenRenderer           — Core Graphics drawing of pot, flame, steam
+  │                                 (conforms to PotRenderer protocol)
+  ├── PopupView                   — SwiftUI dashboard (4 charts + 4 metrics)
+  ├── PopupWindowController       — NSWindow (titled / closable / resizable)
   └── PreferencesWindowController — NSWindow + SwiftUI Form
 
 HelperTool (root LaunchDaemon, Contents/MacOS/HelperTool)
-  ├── main.swift                 — NSXPCListener、HelperService.shared 共有
-  ├── PowerMetricsRunner         — /usr/bin/powermetrics 常駐、NUL 区切り plist パース
-  ├── IOAcceleratorReader        — IOAccelerator → "Device Utilization %" (GPU 使用率, ActivityMonitor 互換)
-  ├── SMCReader                  — AppleSMC 直叩き、F0Ac/F1Ac から fan RPM (fpe2/flt 両対応)
-  └── TemperatureReader          — IOHIDEventSystem 経由で SoC 温度
+  ├── main.swift                  — NSXPCListener; HelperService.shared owns
+  │                                 sampling, latest sample isolated by Actor
+  ├── PowerMetricsRunner          — keeps /usr/bin/powermetrics running, parses
+  │                                 NUL-separated plist stream
+  ├── IOAcceleratorReader         — reads IOAccelerator's "Device Utilization %"
+  │                                 (matches Activity Monitor)
+  ├── SMCReader                   — direct AppleSMC user-client; reads FNum and
+  │                                 F[i]Ac fan keys (fpe2 / flt formats)
+  └── TemperatureReader           — IOHIDEventSystem-based SoC temperature
 
-Shared (両ターゲットで共有)
-  ├── GPUSample                  — Codable データモデル
-  ├── XPCProtocol                — MacSlowCookerHelperProtocol
-  └── PowerMetricsParser         — 静的・テスト可能な plist 解析 (legacy + macOS 26 両対応)
+Shared (compiled into both targets)
+  ├── GPUSample                   — Codable data model
+  ├── XPCProtocol                 — MacSlowCookerHelperProtocol
+  └── PowerMetricsParser          — pure / testable plist parser, supports
+                                    legacy + macOS 26 + Intel schemas
 ```
 
-## 動作環境
+## Requirements
 
-- **macOS 14 Sonoma 以降** (macOS 26 Tahoe で動作確認済み)
-- **Apple Silicon** (M1〜M4, Mac Studio M3 Ultra で開発・検証)
-- Intel Mac は非対応
-- 自動署名、Team `K38MBRNKAT`
+- **macOS 14 Sonoma or later** (verified on macOS 26 Tahoe)
+- Universal Binary: **Apple Silicon (M1–M4) and Intel Macs**
+- Automatic code signing, Team `K38MBRNKAT`
 
-## ビルド
+## Build
 
 ```bash
-# プロジェクト生成 (project.yml 編集後)
+# Regenerate the Xcode project after editing project.yml
 xcodegen generate
 
-# Release ビルド (実機動作には署名必須)
-xcodebuild -project MacSlowCooker.xcodeproj -scheme MacSlowCooker -configuration Release \
-  -derivedDataPath build build \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=K38MBRNKAT
+# Release build (signing is required for the helper to load)
+xcodebuild -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
+  -configuration Release -derivedDataPath build build \
+  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=K38MBRNKAT \
+  ONLY_ACTIVE_ARCH=NO
 ```
 
-## テスト
+`ONLY_ACTIVE_ARCH=NO` is what produces a Universal Binary (arm64 + x86_64); a
+plain `xcodebuild build` only emits the host arch.
+
+## Test
 
 ```bash
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 ```
 
-44/44 tests pass。テストカバレッジ:
+53 unit tests covering:
 
-- `BoilingTriggerTests` (13): 沸騰トリガーの 3 モード × 各種条件
-- `DockIconAnimatorTests` (15): 補間・wiggle・沸騰フェード・タイマーライフサイクル・スリープ・dedup
-- `DutchOvenRendererTests` (2): 5 状態のスモーク + 全 usage レンジでクラッシュなし
-- `SettingsTests` (5): デフォルト値・永続化・フォールバック・changes AsyncStream
-- 既存 (`GPUSample`, `GPUDataStore`, `PowerMetricsParser`): 9
+- `BoilingTriggerTests` (13): three trigger modes × edge conditions
+- `DockIconAnimatorTests` (15): interpolation, wiggle, boiling fade, timer
+  lifecycle, sleep handling, render dedup
+- `DutchOvenRendererTests` (2): smoke rendering across five states + crash
+  resistance over the full usage range
+- `PowerMetricsParserTests` (12): legacy / macOS 26 Tahoe / Intel schemas
+- `SettingsTests` (5): defaults, persistence, fallback, change stream
+- `GPUSample` / `GPUDataStore` (6): JSON round-trip and ring buffer behavior
 
-## デプロイ
+## Deploy
 
 ```bash
-# 1 度だけ所有権変更 (以降の差し替えに sudo 不要)
+# One-time: take ownership so future swaps don't need sudo
 sudo chown -R $(whoami):staff /Applications/MacSlowCooker.app
 
-# デプロイサイクル
+# Deploy cycle
 pkill -9 -x MacSlowCooker
 ditto build/Build/Products/Release/MacSlowCooker.app /Applications/MacSlowCooker.app
-sudo launchctl kickstart -k system/com.macslowcooker.helper   # helper 再起動 (binary 変更時)
+sudo launchctl kickstart -k system/com.macslowcooker.helper   # restart helper after binary change
 open /Applications/MacSlowCooker.app
 ```
 
-## 既知の落とし穴 (詳細は [CLAUDE.md](CLAUDE.md))
+The version-sync logic (HelperInstaller.refreshIfStale) auto-recovers from a
+stale helper if the bundled CFBundleVersion has been bumped, but the manual
+`launchctl kickstart` is the fastest way during active development.
 
-- **macOS 26 で powermetrics 出力スキーマが大幅変更** (`gpu_active_residency` → `idle_ratio`, `ane_power` の場所変更)
-- **`powermetrics --samplers smc` は macOS 26 で削除済み** (fan RPM は SMC 直叩きで取得)
-- **`@main` AppDelegate の罠**: macOS 26 で動作しない → `main.swift` で明示的に `delegate` セット
-- **HelperTool の Info.plist 埋め込み**: `type: tool` は通常 Info.plist を埋め込まないので codesign が失敗 → `OTHER_LDFLAGS: -sectcreate __TEXT __info_plist`
-- **SMAppService の `.notFound` 対応**: 正しく配置されていても `.notFound` を返すことがある → `register()` を試行
+## Known caveats (see [CLAUDE.md](CLAUDE.md) for the long form)
 
-## ロードマップ
+- **macOS 26 changed the powermetrics output schema** significantly
+  (`gpu_active_residency` → `idle_ratio`, ANE power moved under `processor`)
+- **`powermetrics --samplers smc` was removed in macOS 26** — fan RPM is read
+  directly from AppleSMC instead
+- **`@main` AppDelegate trap on macOS 26**: `applicationDidFinishLaunching`
+  never fires; `main.swift` sets the delegate explicitly
+- **HelperTool Info.plist embedding**: a `type: tool` target does not embed
+  Info.plist by default, so codesign rejects it for SMAppService — the
+  workaround is `OTHER_LDFLAGS: -sectcreate __TEXT __info_plist`
+- **`SMAppService.notFound` false positive**: status sometimes reports
+  `.notFound` even with a properly-placed plist; we attempt `register()` anyway
 
-Phase 2 として以下を [GitHub Issues](https://github.com/hakaru/MacSlowCooker/issues) でトラッキング:
+## Roadmap
 
-- 鍋スタイル追加 (おでん、カレー、中華鍋など)
-- ロケール検出による表示名切り替え
-- per-process 表示 (具材プカプカ)
-- powermetrics 廃止 → IOReport 完全移行
-- HelperService Swift Actor 化
-- ファースト・サンプル遅延の改善
-- その他レビューで挙がった改善項目
+Phase 2 work is tracked on [GitHub Issues](https://github.com/hakaru/MacSlowCooker/issues):
 
-## ライセンス
+- Additional pot styles (oden, curry, wok, etc.) and locale-aware names
+- Per-process visualization (ingredients floating in the pot)
+- Full `powermetrics` → `IOReport` migration to drop the spawned process
+- Faster cold-launch latency
+- Other items raised during code review
 
-[Apache License 2.0](LICENSE) — 商用利用 / 改変 / 再配布可。`NOTICE` の attribution 表記を維持してください。
+## License
 
-特許条項あり: コントリビュータが提供したコードに対する特許訴訟を起こすと、その時点で当該コードに関するライセンスが失効します。
+[Apache License 2.0](LICENSE) — commercial use, modification, and
+redistribution are permitted. Please preserve the attribution in `NOTICE`.
+
+The license includes a patent grant: contributors lose their license to any
+contributed code if they initiate patent litigation against it.
 
 ## Contributing
 
-Issue / PR 歓迎。提出されたコードは Apache 2.0 ライセンスのもとで取り込まれます (Apache License Section 5)。
+Issues and pull requests are welcome. Submitted contributions are taken under
+the Apache 2.0 license (Apache License Section 5).

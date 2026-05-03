@@ -5,7 +5,7 @@ import Foundation
 
 enum PotStyle: String, CaseIterable, Codable {
     case dutchOven = "dutchOven"
-    // 将来: case oden, curry, saucepan
+    // Future: case oden, curry, saucepan
 }
 
 enum FlameAnimation: String, CaseIterable, Codable {

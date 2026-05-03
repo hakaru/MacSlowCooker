@@ -1,7 +1,7 @@
 import AppKit
 import SwiftUI
 
-/// Activity Monitor's "GPU の履歴" style window: a regular activatable
+/// Activity Monitor's "GPU History" style window: a regular activatable
 /// NSWindow with a title bar, movable and resizable, that floats above
 /// other apps. Clicking the Dock icon toggles its visibility; once open,
 /// the user can move/resize it freely. Closing returns to hidden state.
