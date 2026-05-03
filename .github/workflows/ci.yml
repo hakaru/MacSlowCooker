@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Build & test
+    # macos-15 runners ship Xcode 16 (Swift 5.9+). macos-14 only has Xcode 15.
+    runs-on: macos-15
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install xcodegen
+        run: brew install xcodegen
+
+      - name: Generate Xcode project
+        run: xcodegen generate
+
+      - name: Build (Universal)
+        # ONLY_ACTIVE_ARCH=NO produces a real Universal Binary so the
+        # Intel slice gets built and type-checked too. Skip code signing —
+        # contributors don't need a Developer ID to validate the diff.
+        run: |
+          xcodebuild build \
+            -project MacSlowCooker.xcodeproj \
+            -scheme MacSlowCooker \
+            -configuration Release \
+            -derivedDataPath build \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            ONLY_ACTIVE_ARCH=NO
+
+      - name: Verify Universal Binary
+        run: |
+          for binary in \
+              build/Build/Products/Release/MacSlowCooker.app/Contents/MacOS/MacSlowCooker \
+              build/Build/Products/Release/MacSlowCooker.app/Contents/MacOS/HelperTool; do
+            archs="$(lipo -archs "$binary")"
+            echo "$binary → $archs"
+            echo "$archs" | grep -q arm64 || { echo "::error::missing arm64 slice in $binary"; exit 1; }
+            echo "$archs" | grep -q x86_64 || { echo "::error::missing x86_64 slice in $binary"; exit 1; }
+          done
+
+      - name: Run unit tests
+        run: |
+          xcodebuild test \
+            -project MacSlowCooker.xcodeproj \
+            -scheme MacSlowCooker \
+            -destination 'platform=macOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            -resultBundlePath TestResults.xcresult
+
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: TestResults.xcresult
+          retention-days: 7
