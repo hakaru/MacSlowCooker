@@ -2,38 +2,47 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-MacSlowCooker は Mac の GPU 使用率と温度・電力を Dock アイコンとポップアップに表示する macOS デスクトップアプリ。`powermetrics` を root 権限で常駐実行する LaunchDaemon と XPC で通信する。Universal Binary (arm64 + x86_64) で Apple Silicon と Intel Mac の両方に対応。
+MacSlowCooker is a macOS desktop app that surfaces GPU usage, SoC temperature,
+power, and fan RPM through a Dock icon and a popup window. It talks over XPC
+to a `powermetrics` LaunchDaemon that runs as root, and ships as a Universal
+Binary (arm64 + x86_64) so the same `.app` runs natively on Apple Silicon and
+Intel Macs.
 
-## 開発コマンド
+## Development commands
 
 ```bash
-# プロジェクト再生成（project.yml 編集後）
+# Regenerate the Xcode project (after editing project.yml)
 xcodegen generate
 
-# 署名ありビルド（実機動作には署名必須）
+# Signed Release build (signing is required for the helper to load)
 xcodebuild -project MacSlowCooker.xcodeproj -scheme MacSlowCooker -configuration Release \
   -derivedDataPath build build \
-  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=K38MBRNKAT
+  CODE_SIGN_STYLE=Automatic DEVELOPMENT_TEAM=K38MBRNKAT \
+  ONLY_ACTIVE_ARCH=NO
 
-# テスト（CODE_SIGNING_ALLOWED=NO で署名スキップ可、ただし MacSlowCookerTests には INFOPLIST 設定必要）
+# Tests (CODE_SIGNING_ALLOWED=NO skips code signing)
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 
-# 単一テストの実行
+# Single test
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
-  -only-testing:MacSlowCookerTests/PowerMetricsParserTests/testParseValidSample
+  -only-testing:MacSlowCookerTests/PowerMetricsParserTests/testParseFullTahoeSample
 ```
 
-## デプロイ
+`ONLY_ACTIVE_ARCH=NO` is what produces a true Universal Binary; without it
+xcodebuild emits only the host arch slice.
 
-`/Applications/MacSlowCooker.app` は root 所有になりがち。1度だけ所有権を変更すれば以降の差し替えに sudo 不要：
+## Deploy
+
+`/Applications/MacSlowCooker.app` tends to end up root-owned after the first
+deploy. Take ownership once and subsequent swaps don't need sudo:
 
 ```bash
 sudo chown -R $(whoami):staff /Applications/MacSlowCooker.app
 ```
 
-その後のデプロイサイクル：
+Then the deploy cycle is:
 
 ```bash
 pkill -9 -x MacSlowCooker
@@ -41,132 +50,246 @@ ditto build/Build/Products/Release/MacSlowCooker.app /Applications/MacSlowCooker
 open /Applications/MacSlowCooker.app
 ```
 
-**HelperTool は launchd の管理下で動き続けるので、HelperTool 側のコードを変更したら必ず再起動が必要**：
+**The HelperTool keeps running under launchd, so any change to helper code
+requires restarting it explicitly:**
 
 ```bash
 sudo launchctl kickstart -k system/com.macslowcooker.helper
 ```
 
-これをしないと、新しいバイナリを `/Applications` に置いても古いプロセスが動き続けてデバッグで混乱する。
+Skip this and the new binary in `/Applications` is dead weight — the old
+process keeps serving XPC and you'll chase phantom bugs that "shouldn't be
+there anymore." `HelperInstaller.refreshIfStale` will eventually self-heal
+when CFBundleVersion bumps, but during active development the manual
+kickstart is faster.
 
-## アーキテクチャ
+## Architecture
 
 ```
-MacSlowCooker.app（非特権、ユーザーログインセッション）
-  ├── main.swift                — NSApplication.shared に AppDelegate を手動セット
-  ├── AppDelegate               — XPC 接続、Dock アイコン更新、エラーアラート
-  ├── GPUDataStore              — @Observable 循環バッファ（60サンプル）
-  ├── Settings                  — @Observable + UserDefaults + AsyncStream<Void>
-  ├── XPCClient                 — NSXPCConnection (.privileged) + 指数バックオフ再接続、2 Hz polling
-  ├── HelperInstaller           — SMAppService.daemon 登録 + 古い helper の自動 re-register
-  ├── DockIconAnimator          — Timer-driven state machine（補間 / wiggle / 沸騰フェード）
-  ├── DutchOvenRenderer         — Core Graphics 鍋 / 炎 / 湯気描画（PotRenderer 適合）
-  ├── PopupView                 — SwiftUI + Swift Charts ダッシュボード（4 chart + 4 metric）
-  ├── PopupWindowController     — NSWindow（titled / closable / resizable, .floating 切替可能）
+MacSlowCooker.app (unprivileged, runs in the user login session)
+  ├── main.swift                  — sets AppDelegate on NSApplication.shared
+  ├── AppDelegate                 — XPC connection, settings observation,
+  │                                 menus, sleep notifications
+  ├── GPUDataStore                — @Observable ring buffer (60 samples)
+  ├── Settings                    — @Observable + UserDefaults + AsyncStream<Void>
+  ├── XPCClient                   — NSXPCConnection (.privileged), exponential
+  │                                 backoff reconnect, 2 Hz polling
+  ├── HelperInstaller             — SMAppService.daemon registration + auto
+  │                                 re-register on stale helper binary
+  ├── DockIconAnimator            — Timer-driven state machine
+  │                                 (interpolation / wiggle / boiling fade)
+  ├── DutchOvenRenderer           — Core Graphics drawing of pot, flame, steam
+  │                                 (conforms to PotRenderer)
+  ├── PopupView                   — SwiftUI dashboard (4 charts + 4 metrics)
+  ├── PopupWindowController       — NSWindow (titled / closable / resizable,
+  │                                 .floating toggleable)
   └── PreferencesWindowController — NSWindow + SwiftUI Form
 
-HelperTool（root LaunchDaemon、Contents/MacOS/HelperTool）
-  ├── main.swift                — NSXPCListener、HelperService.shared + 内部状態は actor HelperState で隔離
-  ├── PowerMetricsRunner        — /usr/bin/powermetrics 常駐、NUL 区切り plist ストリームパース
-  ├── IOAcceleratorReader       — IOAccelerator → "Device Utilization %"（Activity Monitor 互換）
-  ├── SMCReader                 — AppleSMC 直叩き、F0Ac/F1Ac から fan RPM
-  └── TemperatureReader         — IOHIDEventSystem 経由で SoC 温度センサー読み取り
-  └── SMCReader                 — AppleSMC 直叩き、fan RPM (F0Ac/F1Ac, fpe2 形式) を読み出し
+HelperTool (root LaunchDaemon, Contents/MacOS/HelperTool)
+  ├── main.swift                  — NSXPCListener + HelperService.shared;
+  │                                 mutable state isolated by `actor HelperState`
+  ├── PowerMetricsRunner          — keeps /usr/bin/powermetrics running and
+  │                                 parses its NUL-separated plist stream
+  ├── IOAcceleratorReader         — IOAccelerator → "Device Utilization %"
+  │                                 (matches Activity Monitor)
+  ├── SMCReader                   — direct AppleSMC user-client; reads FNum +
+  │                                 F[i]Ac fan keys (fpe2 / flt formats)
+  └── TemperatureReader           — IOHIDEventSystem-based SoC temperature
 
-Shared（両ターゲットでコンパイルされる）
-  ├── GPUSample                 — Codable データモデル
-  ├── XPCProtocol               — MacSlowCookerHelperProtocol
-  └── PowerMetricsParser        — 静的・テスト可能な plist 解析
+Shared (compiled into both targets)
+  ├── GPUSample                   — Codable data model
+  ├── XPCProtocol                 — MacSlowCookerHelperProtocol
+  ├── PowerMetricsParser          — pure / testable plist parser
+  ├── PlistStreamSplitter         — pure NUL-separated buffer splitter
+  ├── SMCFanDecoder               — pure fpe2 / flt fan-RPM decoder
+  ├── IOAcceleratorSelection      — pure max-aggregation across services
+  ├── SensorNameMatcher           — pure die / gpu / proximity / graphics name match
+  └── CodeSigningConfig           — single source for Team OU + XPC requirement
 ```
 
-サンプル取得の流れ：
-1. HelperService が起動時に PowerMetricsRunner.start() で powermetrics を spawn（Apple Silicon: `--samplers gpu_power,ane_power,thermal --show-all`、Intel: `--samplers gpu_power,thermal`）
-2. NUL 区切りで届く plist を PowerMetricsParser がパース、TemperatureReader で温度を補強して JSON 化
-3. XPCClient が 0.5 秒間隔（2 Hz）で `fetchLatestSample` を呼び、GPUDataStore に積んで Dock アイコンを再描画
-4. 起動直後の "--" 表示を防ぐため `startSampling` で IOKit-only な primer sample（GPU% / temp / fan、power なし）を即座に格納
+Sample-acquisition flow:
+1. `HelperService` calls `PowerMetricsRunner.start()` at first XPC connection,
+   which spawns `/usr/bin/powermetrics` (Apple Silicon: `--samplers
+   gpu_power,ane_power,thermal --show-all`; Intel: `--samplers
+   gpu_power,thermal`).
+2. `PlistStreamSplitter` chops the NUL-separated stream; `PowerMetricsParser`
+   parses each plist; `TemperatureReader` augments with SoC temp; the result
+   is JSON-encoded.
+3. `XPCClient` polls `fetchLatestSample` at 2 Hz (every 0.5 s), feeds the
+   sample into `GPUDataStore`, and re-renders the Dock icon.
+4. To avoid the "--" placeholder on cold launch, `startSampling` synthesizes
+   an IOKit-only primer sample (GPU% / temp / fan, no power) and stores it
+   immediately so the popup fills in within the first poll instead of
+   waiting ~1.3 s for powermetrics' first emission.
 
-## macOS 26 (Tahoe) 固有の落とし穴
+## macOS 26 (Tahoe) gotchas
 
-**powermetrics 出力フォーマット変更**: macOS 14 までの大文字キー（`GPU.gpu_active_residency`、`gpu_power_mW`、`gpu_die_temperature`）は **macOS 26 では一切存在しない**。新しい構造：
-- GPU 使用率: `dict["gpu"]["idle_ratio"]` から `1 - idle_ratio` で計算
-- GPU 電力: `dict["gpu"]["gpu_energy"]` (mJ) を `dict["elapsed_ns"]` で割って W 算出
-- ANE 電力: `dict["processor"]["ane_power"]` (mW)、**`--show-all` フラグが必須**で出る
-- GPU 温度: 露出なし（`thermal_pressure: "Nominal"` の段階値のみ）
+**powermetrics output schema changed**. The capitalized keys that worked up
+through macOS 14 (`GPU.gpu_active_residency`, `gpu_power_mW`,
+`gpu_die_temperature`) are **completely absent on macOS 26**. The new shape:
+- GPU usage: `dict["gpu"]["idle_ratio"]` → `1 - idle_ratio`
+- GPU power: `dict["gpu"]["gpu_energy"]` (mJ) divided by `dict["elapsed_ns"]` → W
+- ANE power: `dict["processor"]["ane_power"]` (mW), surfaces only when
+  `--show-all` is passed
+- GPU temperature: not exposed; only the categorical
+  `thermal_pressure: "Nominal"` / "Fair" / "Serious" / "Critical" remains
 
-`PowerMetricsParser` は新旧両キーを試すフォールバック設計になっている。
+`PowerMetricsParser` tries the legacy keys first and falls back to the new
+ones, so a single binary handles both schemas.
 
-**`smc` sampler は macOS 26 で削除されている**: `powermetrics --help` の Available samplers は `tasks/battery/network/disk/interrupts/cpu_power/thermal/sfi/gpu_power/ane_power` のみ。`--samplers smc` を渡すと powermetrics が即クラッシュ → `PowerMetricsRunner.handleCrash()` の指数バックオフが 3 回発動して "GPU monitoring unavailable" でエラー UI が出る。fan RPM が欲しい場合は SMC を直叩きする。
+**The `smc` sampler was removed in macOS 26**. `powermetrics --help` lists
+only `tasks/battery/network/disk/interrupts/cpu_power/thermal/sfi/gpu_power/
+ane_power`. Passing `--samplers smc` crashes powermetrics on launch, which
+trips `PowerMetricsRunner.handleCrash()`'s exponential backoff three times
+and surfaces "GPU monitoring unavailable" in the error UI. We read fan RPM
+directly from SMC instead.
 
-**Fan RPM の取得**: `HelperTool/SMCReader.swift` が `IOServiceMatching("AppleSMC")` 経由で AppleSMC ユーザクライアントに接続、`IOConnectCallStructMethod(connection, kSMCHandleYPCEvent=2, ...)` で `FNum` (UInt8) と `F[i]Ac` (fpe2: 16-bit big-endian, 14-int + 2-frac → `raw / 4.0` で RPM) を読む。Mac Studio (Mac15,14, M3 Ultra) で 2 fan 検出。Helper は root なので IOConnect は無条件で成功する。
+**Fan RPM acquisition**. `HelperTool/SMCReader.swift` opens an AppleSMC user
+client via `IOServiceMatching("AppleSMC")` and calls
+`IOConnectCallStructMethod(connection, kSMCHandleYPCEvent=2, ...)` to read
+`FNum` (UInt8 fan count) and `F[i]Ac` (fpe2: 16-bit big-endian, 14 integer +
+2 fractional bits, RPM = raw / 4.0). Mac Studio (Mac15,14, M3 Ultra) reports
+2 fans. The helper runs as root, so `IOServiceOpen` against AppleSMC always
+succeeds.
 
-**温度センサー**: IOHIDEventSystem に「GPU MTR Temp Sensor」は Apple Silicon に存在しない。M3 Ultra では `PMU tdie*` / `PMU tdev*` のみ 77 個露出。Intel Mac では「GPU Proximity」「Graphics」系が見える。`TemperatureReader` は `name.contains("die") || name.contains("gpu") || name.contains("proximity") || name.contains("graphics")` で広めに拾って平均する（GPU 専用ではないため UI ラベルは Apple Silicon では「SoC 温度」、Intel では「温度」）。GPU 専用温度は SMC `Tg05` / `Tg0D` 経由でしか取れず、未実装。
+**Temperature sensors**. There is no "GPU MTR Temp Sensor" entry in
+IOHIDEventSystem on Apple Silicon. The M3 Ultra exposes only `PMU tdie*` /
+`PMU tdev*` (77 of them). Intel Macs surface heat as `GPU Proximity` or
+`Graphics Processor Die *`. `TemperatureReader` accepts any sensor whose
+Product name contains `die`, `tdev`, `gpu`, `proximity`, or `graphics`, then
+averages — that's why the popup label says "SoC temp" on Apple Silicon and
+plain "Temp" otherwise. A truly GPU-specific reading would require SMC
+`Tg05` / `Tg0D` and is not implemented yet.
 
-**Intel powermetrics キー**: Intel Mac の powermetrics は `gpu.gpu_busy`（integer percent）または `gpu.busy_ns` + `(gpu|top).elapsed_ns` を出す。Apple Silicon の `gpu_active_residency` / `idle_ratio` キーは出ない。`PowerMetricsParser` は両系統を順に試す。
+**Intel powermetrics keys**. Intel powermetrics emits
+`gpu.gpu_busy` (integer percent) or `gpu.busy_ns` + `(gpu|root).elapsed_ns`,
+not `gpu_active_residency` / `idle_ratio`. The parser tries each in turn.
 
-**`@main` AppDelegate の罠**: macOS 26 で `@main` を `NSApplicationDelegate` 適合クラスにつけても、`NSApp.delegate` がセットされず `applicationDidFinishLaunching` が呼ばれない。`MacSlowCooker/main.swift` で `MainActor.assumeIsolated { NSApplication.shared.delegate = AppDelegate(); NSApplication.shared.run() }` と明示的にセットしている。
+**The `@main` AppDelegate trap**. On macOS 26, decorating an
+`NSApplicationDelegate`-conforming class with `@main` does not actually wire
+`NSApp.delegate`, and `applicationDidFinishLaunching` never fires.
+`MacSlowCooker/main.swift` sets the delegate explicitly:
 
-**HelperTool の Info.plist 埋め込み**: `type: tool` (CLI) は通常 Info.plist を埋め込まないので codesign が `Info.plist=not bound` になり `SMAppService.daemon` が登録できない。`project.yml` の HelperTool ターゲットに：
+```swift
+MainActor.assumeIsolated {
+    NSApplication.shared.delegate = AppDelegate()
+    NSApplication.shared.run()
+}
+```
+
+**HelperTool Info.plist embedding**. A `type: tool` (CLI) target normally
+doesn't embed `Info.plist`, so codesign reports `Info.plist=not bound` and
+`SMAppService.daemon` refuses to register. Fix in `project.yml`:
+
 ```yaml
 OTHER_LDFLAGS: "-sectcreate __TEXT __info_plist $(INFOPLIST_FILE)"
 ```
-**さらに `-sectcreate` は変数展開しない**ので `HelperTool/Info.plist` の `CFBundleIdentifier` は `$(PRODUCT_BUNDLE_IDENTIFIER)` ではなく `com.macslowcooker.helper` をハードコード。
 
-**HelperTool の配置**: バイナリは `Contents/MacOS/HelperTool`、plist は `Contents/Library/LaunchDaemons/com.macslowcooker.helper.plist`、plist の `BundleProgram` は `Contents/MacOS/HelperTool`。バイナリを `Contents/Library/LaunchDaemons/` に置くと `SMAppService.daemon.status` が `.notFound` になる。
+`-sectcreate` does not expand build variables, so `HelperTool/Info.plist`'s
+`CFBundleIdentifier` is hardcoded to `com.macslowcooker.helper` rather than
+referencing `$(PRODUCT_BUNDLE_IDENTIFIER)`.
 
-**XPC 接続オプション**: LaunchDaemon の Mach service には `NSXPCConnection(machServiceName:options:)` で **`.privileged`** が必須。
+**HelperTool placement**. The binary lives at `Contents/MacOS/HelperTool` and
+the plist at `Contents/Library/LaunchDaemons/com.macslowcooker.helper.plist`,
+with the plist's `BundleProgram` pointing back at `Contents/MacOS/HelperTool`.
+Putting the binary inside `Contents/Library/LaunchDaemons/` makes
+`SMAppService.daemon.status` return `.notFound`.
 
-**Dock アイコン表示条件**: `Info.plist` に `LSUIElement=true` があると Dock アイコン非表示。`AppDelegate` で `setActivationPolicy(.accessory)` も同様。両方排除して `.regular` で動かす（Dock アイコンクリックで `applicationShouldHandleReopen` が呼ばれる）。
+**XPC connection options**. Mach services exposed by a LaunchDaemon require
+`NSXPCConnection(machServiceName:options:)` with **`.privileged`**.
 
-**SMAuthorizedClients の要件記述子**: 緩いと（`identifier "com.macslowcooker.app" and anchor apple generic` だけだと）認証が通らない場合がある。Team OU を必ず含める：
+**Dock-icon visibility**. `LSUIElement = true` in `Info.plist` hides the
+Dock icon, as does `setActivationPolicy(.accessory)` in `AppDelegate`. We
+remove both and run as `.regular` so the Dock icon appears (clicking it
+calls `applicationShouldHandleReopen`).
+
+**`SMAuthorizedClients` requirement string**. A loose requirement
+(`identifier "com.macslowcooker.app" and anchor apple generic` alone) is
+sometimes rejected. Always include the Team OU:
+
 ```
 identifier "com.macslowcooker.app" and anchor apple generic and certificate leaf[subject.OU] = "K38MBRNKAT"
 ```
 
-## HelperTool セキュリティ
+## HelperTool security
 
-XPC 接続検証は `setCodeSigningRequirement` (macOS 13+ 公開 API) を使用。`shouldAcceptNewConnection` で connection に requirement を設定し、システムが署名検証する：
+Incoming XPC connections are validated with `setCodeSigningRequirement` (a
+public macOS 13+ API). `shouldAcceptNewConnection` sets the requirement on
+the connection and macOS performs the signature check:
 
 ```swift
-connection.setCodeSigningRequirement(
-  "identifier \"com.macslowcooker.app\" and anchor apple generic and certificate leaf[subject.OU] = \"K38MBRNKAT\""
-)
+connection.setCodeSigningRequirement(CodeSigningConfig.xpcClientRequirement)
 ```
 
-**`HelperService` はシングルトン (`HelperService.shared`)**。`shouldAcceptNewConnection` で `connection.exportedObject = HelperService.shared` を渡し、すべての接続が同じ powermetrics プロセスを共有する。接続ごとに新規インスタンスを返すと powermetrics が重複起動する。
+`CodeSigningConfig` (in `Shared/`) holds the Team OU and bundle id and
+constructs the requirement string at runtime, so there's only one place to
+edit when forking. `bin/set-team-id.sh` updates every place that references
+the Team ID in lockstep (the constant, plist, project.yml, README, this
+file).
 
-`sampling` / `latestSampleData` は private `actor HelperState` で隔離（旧 serial queue 設計から移行済み）。XPC reply 経由のすべての mutate は `Task { await state.foo() }` でホップする。
+**`HelperService` is a singleton (`HelperService.shared`)**. The XPC
+listener delegate hands `HelperService.shared` to every connection so they
+all share one powermetrics process. Returning a fresh instance per
+connection would spin up duplicate powermetrics children.
 
-`PowerMetricsRunner.stop()` は `isStopping = true` を立ててから `terminate()` を呼ぶ。terminationHandler が走るが `isStopping` を見て crash 扱いの再起動をスキップする。
+`sampling` and `latestSampleData` live inside a private
+`actor HelperState`. Every mutation hops via `Task { await state.foo() }`,
+which is cleaner than the old serial-DispatchQueue design and survives
+Swift 6 strict-concurrency.
 
-## SourceKit の偽陽性
+`PowerMetricsRunner.stop()` sets `isStopping = true` before calling
+`terminate()`. The terminationHandler runs but observes the flag and skips
+the crash-handling restart path.
 
-Shared ターゲット型（`GPUSample`, `MacSlowCookerHelperProtocol`, `GPUDataStore` 等）が他ターゲットで「not in scope」と表示されることがある。SourceKit のインデックス問題による**偽陽性**。`xcodebuild` ではビルド・テスト通る。新規 Swift ファイルを追加した場合は `xcodegen generate` 後に Xcode を再起動するとインデックスが直る。
+## SourceKit false positives
 
-## デバッグの定石
+Shared types (`GPUSample`, `MacSlowCookerHelperProtocol`, `GPUDataStore`,
+etc.) sometimes show up as "not in scope" in the editor. Indexing artifact
+— `xcodebuild` builds and tests cleanly. After adding new Swift files run
+`xcodegen generate` and restart Xcode to refresh the index.
 
-- アプリが起動するが何もしない → ターミナルから直接実行で stderr を見る:
+## Debugging cookbook
+
+- The app launches but does nothing → run it directly to see stderr:
   ```bash
   /Applications/MacSlowCooker.app/Contents/MacOS/MacSlowCooker
   ```
-- HelperTool の状態確認:
+- Helper status:
   ```bash
   launchctl print system/com.macslowcooker.helper | head -30
   ```
-- powermetrics の生 plist を捕まえる: `PowerMetricsRunner.flushSamples` で受信した chunk を `/tmp` に書き出すデバッグコードを一時的に追加（macOS 26 のキーが想定と違ったら必須）
+- Capture raw powermetrics plist data: temporarily add code in
+  `PowerMetricsRunner.flushSamplesLocked` that writes the chunk to `/tmp`
+  before parsing — essential when the macOS schema doesn't match
+  expectations.
 
-## Intel Mac 対応
+## Intel Mac support
 
-Universal Binary (`ARCHS: "arm64 x86_64"`) で両アーキテクチャに対応。`#if arch(x86_64)` でコンパイル時分岐：
+The Universal Binary is enabled by `ARCHS: "arm64 x86_64"` in `project.yml`.
+Behavior diverges by compile-time `#if arch(arm64)`:
 
-- **powermetrics サンプラー**: Intel では `ane_power` サンプラーと `--show-all` を除外（ANE 非搭載）
-- **PowerMetricsParser**: `gpuUsage` は `Double` 非 Optional のまま。Intel AMD GPU の `gpu_busy`（%）や `busy_ns/elapsed_ns` キーから値を計算するので、Intel でも parseable な usage を取得できる前提
-- **TemperatureReader**: Intel 系センサー名 (`proximity`, `graphics`) にもマッチ
-- **PopupView**: 4 chart レイアウトは Apple Silicon / Intel 共通（pot-icon-poc で統一）。ANE 電力は metric tile では露出しない
+- **powermetrics samplers**: Intel drops `ane_power` (no Apple Neural
+  Engine) and the `--show-all` flag (which only exists for ANE on macOS 26).
+- **Parser**: `gpuUsage` stays `Double` (non-Optional) on this branch;
+  Intel-specific `gpu_busy` and `busy_ns / elapsed_ns` keys feed the same
+  field. (`origin/main`'s parser refactor that made `gpuUsage` Optional was
+  not adopted on `feat/pot-icon-poc` because the animator stack assumes a
+  real value.)
+- **TemperatureReader**: also matches Intel-style `proximity` / `graphics`
+  sensor names.
+- **PopupView**: layout is shared between Apple Silicon and Intel. ANE
+  power is not surfaced in any metric tile, so it just stays nil on Intel.
 
-**Intel GPU (AMD Radeon) での powermetrics 出力**: 実際のキー名は macOS バージョンと GPU ベンダーで異なる。初回デプロイ時に `/tmp` への plist ダンプで確認し、`PowerMetricsParser` のキーを調整すること。
+**Real Intel powermetrics keys are vendor-specific** — AMD Radeon, Intel
+integrated, etc. all emit slightly different shapes by macOS version. On
+first deploy to a new Intel machine, dump a chunk to `/tmp` (see "Debugging
+cookbook" above) and adjust `PowerMetricsParser` keys if the popup stays
+empty.
 
-## 環境
+## Environment
 
-- macOS 14 Sonoma 以降。**macOS 26 (Tahoe) で powermetrics 出力が大幅変更されている**ことに注意。
-- Universal Binary: Apple Silicon (M1〜M4) + Intel Mac 対応。
-- 自動署名、Team `K38MBRNKAT`。
+- macOS 14 Sonoma or later. **macOS 26 (Tahoe) changed the powermetrics
+  output schema substantially** — see the gotchas section above.
+- Universal Binary covers Apple Silicon (M1–M4) and Intel Macs.
+- Automatic code signing, Team `K38MBRNKAT` (override via
+  `bin/set-team-id.sh <YOUR_TEAM_ID>` when forking).

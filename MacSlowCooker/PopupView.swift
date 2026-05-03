@@ -1,31 +1,77 @@
 import SwiftUI
 import Charts
+import ServiceManagement
 
 struct PopupView: View {
     let store: GPUDataStore
 
     var body: some View {
-        // Vertical layout: fixed-height header, flexible chart row, fixed metric tiles.
-        // Resizing only stretches the chart area; the header and bottom margins
-        // never change size.
+        // Vertical layout: fixed-height header, optional install-error banner,
+        // flexible chart row, fixed metric tiles. The banner only appears when
+        // helper setup failed and pushes the chart row down without resizing
+        // the header or metric bands.
         VStack(spacing: 0) {
             header
                 .padding(.horizontal, 16)
                 .padding(.top, 12)
                 .padding(.bottom, 12)
-                .frame(height: 46)                  // fixed top band
+                .frame(height: 46)
+            if let error = store.installError {
+                installBanner(message: error)
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 8)
+            }
             charts
                 .padding(.horizontal, 16)
-                .frame(maxHeight: .infinity)        // grows with window resize
+                .frame(maxHeight: .infinity)
             metrics
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
                 .padding(.bottom, 14)
-                .frame(height: 102)                 // fixed bottom band
+                .frame(height: 102)
         }
         .frame(minWidth: 760, minHeight: 320)
         .background(VisualEffectBackground())
         .preferredColorScheme(.dark)
+    }
+
+    // MARK: - Install error banner
+    //
+    // Replaces the previous modal NSAlert. Modal alerts blocked the run loop
+    // and forced the user to dismiss before they could approve the helper in
+    // System Settings — the banner stays out of the way and provides a
+    // direct shortcut to the right Settings pane.
+
+    private func installBanner(message: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 18))
+                .foregroundStyle(.yellow)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Setup error")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.primary)
+                Text(message)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+            }
+            Spacer()
+            Button("Open Login Items") {
+                SMAppService.openSystemSettingsLoginItems()
+            }
+            .controlSize(.small)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .fill(Color.yellow.opacity(0.12))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .strokeBorder(Color.yellow.opacity(0.45), lineWidth: 1)
+                )
+        )
     }
 
     // MARK: - Header (fixed height)

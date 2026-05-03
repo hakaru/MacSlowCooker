@@ -35,8 +35,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 connectXPC()
             } catch {
                 os_log("Install failed: %{public}s", log: log, type: .error, error.localizedDescription)
+                store.setInstallError(error.localizedDescription)
+                // Surface the error inside the popup window instead of as a
+                // modal NSAlert. Modal alerts block the run loop and force
+                // the user to dismiss before they can approve the helper in
+                // System Settings; the popup banner stays out of the way
+                // and disappears once installation succeeds.
                 NSApp.activate(ignoringOtherApps: true)
-                showError(error.localizedDescription)
+                if popupController.window?.isVisible != true {
+                    popupController.toggle()
+                }
             }
         }
     }
@@ -164,14 +172,4 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         nc.addObserver(forName: NSWorkspace.screensDidWakeNotification,   object: nil, queue: .main) { [weak self] _ in self?.animator.setSystemAsleep(false) }
     }
 
-    // MARK: - Error UI
-
-    private func showError(_ message: String) {
-        let alert = NSAlert()
-        alert.messageText = "MacSlowCooker — Setup Error"
-        alert.informativeText = message
-        alert.alertStyle = .critical
-        alert.addButton(withTitle: "OK")
-        alert.runModal()
-    }
 }
