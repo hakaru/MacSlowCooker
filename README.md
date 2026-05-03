@@ -1,5 +1,8 @@
 # MacSlowCooker
 
+[![CI](https://github.com/hakaru/MacSlowCooker/actions/workflows/ci.yml/badge.svg)](https://github.com/hakaru/MacSlowCooker/actions/workflows/ci.yml)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
+
 A macOS desktop app that visualizes GPU usage, SoC temperature, power, and fan
 RPM through a **Dock icon** and a **floating window**, designed for Apple
 Silicon and Intel Macs.
@@ -183,5 +186,6 @@ contributed code if they initiate patent litigation against it.
 
 ## Contributing
 
-Issues and pull requests are welcome. Submitted contributions are taken under
-the Apache 2.0 license (Apache License Section 5).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build/test, and
+PR-submission guidance. Submitted contributions are taken under the Apache
+2.0 license (Apache License Section 5).
