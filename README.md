@@ -123,4 +123,10 @@ Phase 2 として以下を [GitHub Issues](https://github.com/hakaru/MacSlowCook
 
 ## ライセンス
 
-未定 (個人プロジェクト)。
+[Apache License 2.0](LICENSE) — 商用利用 / 改変 / 再配布可。`NOTICE` の attribution 表記を維持してください。
+
+特許条項あり: コントリビュータが提供したコードに対する特許訴訟を起こすと、その時点で当該コードに関するライセンスが失効します。
+
+## Contributing
+
+Issue / PR 歓迎。提出されたコードは Apache 2.0 ライセンスのもとで取り込まれます (Apache License Section 5)。
