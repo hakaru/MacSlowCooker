@@ -14,6 +14,7 @@ All notable changes are tracked here. The format follows
   reported (3-column layout instead of 4).
 
 ### Added
+- **Prometheus exporter** (opt-in via Preferences) — exposes live GPU/temp/power/fan/thermal/helper metrics on `http://127.0.0.1:9091/metrics` for Prometheus, Grafana Agent, and other compatible scrapers.
 - **History window**: MRTG-style Daily / Weekly / Monthly / Yearly graphs for
   GPU / Temp / Power / Fan, accessible via Cmd+Shift+H.
 - **Local round-robin SQLite store**: `~/Library/Application Support/MacSlowCooker/history.sqlite`

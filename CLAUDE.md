@@ -150,6 +150,17 @@ not the helper. `HistoryStore` manages insert, query, and cascading rollup. `His
 renders MRTG-style 4-panel Daily / Weekly / Monthly / Yearly graphs for GPU / Temp / Power / Fan,
 wired to a window accessible via Cmd+Shift+H from the app menu.
 
+**Prometheus exporter** (opt-in, off by default). When enabled in Preferences,
+`PrometheusExporter` (an `NWListener` + manual HTTP/1.1 handler in
+`MacSlowCooker/PrometheusExporter.swift`) exposes `GET /metrics` in the
+Prometheus text exposition format, populated from the same XPC sample stream
+that feeds the Dock icon and history store. By default it binds 127.0.0.1
+only; the "Bind to all interfaces" toggle opens it up for remote scraping
+(triggers the macOS firewall prompt). Pure formatting lives in
+`Shared/PrometheusFormatter.swift` and is fully unit-tested. Default port:
+9091. Auth: none (Prometheus convention; front with a reverse proxy if
+needed).
+
 ## macOS 26 (Tahoe) gotchas
 
 **powermetrics output schema changed**. The capitalized keys that worked up
