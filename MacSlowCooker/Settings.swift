@@ -13,6 +13,8 @@ final class Settings {
         static let prometheusEnabled      = "prometheusEnabled"
         static let prometheusPort         = "prometheusPort"
         static let prometheusBindAll      = "prometheusBindAll"
+        static let pngExportEnabled = "pngExportEnabled"
+        static let pngExportPath    = "pngExportPath"
     }
 
     @ObservationIgnored
@@ -46,6 +48,14 @@ final class Settings {
         didSet { defaults.set(prometheusBindAll, forKey: Keys.prometheusBindAll) }
     }
 
+    var pngExportEnabled: Bool = false {
+        didSet { defaults.set(pngExportEnabled, forKey: Keys.pngExportEnabled) }
+    }
+
+    var pngExportPath: String = Settings.defaultPNGExportPath {
+        didSet { defaults.set(pngExportPath, forKey: Keys.pngExportPath) }
+    }
+
     /// Restore every tracked property to its default value. didSet on each
     /// property handles persistence; downstream observers see one yield per
     /// changed field through `Settings.changes`.
@@ -57,6 +67,16 @@ final class Settings {
         prometheusEnabled = false
         prometheusPort    = 9091
         prometheusBindAll = false
+        pngExportEnabled = false
+        pngExportPath    = Settings.defaultPNGExportPath
+    }
+
+    static var defaultPNGExportPath: String {
+        let dir = FileManager.default
+            .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+            .appendingPathComponent("MacSlowCooker", isDirectory: true)
+            .appendingPathComponent("web", isDirectory: true)
+        return dir.path
     }
 
     static let shared = Settings()
@@ -77,6 +97,8 @@ final class Settings {
         let storedPort = defaults.integer(forKey: Keys.prometheusPort)
         self.prometheusPort    = (1024...65535).contains(storedPort) ? storedPort : 9091
         self.prometheusBindAll = (defaults.object(forKey: Keys.prometheusBindAll) as? Bool) ?? false
+        self.pngExportEnabled = (defaults.object(forKey: Keys.pngExportEnabled) as? Bool) ?? false
+        self.pngExportPath    = (defaults.string(forKey: Keys.pngExportPath)) ?? Settings.defaultPNGExportPath
     }
 }
 
@@ -126,6 +148,8 @@ private final class SettingsChangeTracker {
             _ = settings.prometheusEnabled
             _ = settings.prometheusPort
             _ = settings.prometheusBindAll
+            _ = settings.pngExportEnabled
+            _ = settings.pngExportPath
         } onChange: { [weak self] in
             // onChange fires synchronously *before* the mutation completes.
             // Hop to a Task so the new value is observable when downstream
