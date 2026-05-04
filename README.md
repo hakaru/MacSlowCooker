@@ -3,6 +3,10 @@
 [![CI](https://github.com/hakaru/MacSlowCooker/actions/workflows/ci.yml/badge.svg)](https://github.com/hakaru/MacSlowCooker/actions/workflows/ci.yml)
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
+<p align="center">
+  <img src="docs/images/dock-icon-animation.gif" width="256" alt="MacSlowCooker Dock icon: idle → high-load ramp → boiling → cooldown" />
+</p>
+
 A macOS desktop app that visualizes GPU usage, SoC temperature, power, and fan
 RPM through a **Dock icon** and a **floating window**, designed for Apple
 Silicon and Intel Macs.
