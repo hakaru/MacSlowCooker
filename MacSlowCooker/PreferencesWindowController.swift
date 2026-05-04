@@ -13,7 +13,7 @@ final class PreferencesWindowController: NSWindowController {
         let window = NSWindow(contentViewController: host)
         window.title = "Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 420, height: 440))
+        window.setContentSize(NSSize(width: 420, height: 540))
         window.center()
         super.init(window: window)
     }
@@ -89,6 +89,30 @@ struct PreferencesView: View {
                 }
             }
 
+            Section("PNG Export") {
+                Toggle("Enable", isOn: $settings.pngExportEnabled)
+                HStack {
+                    Text("Folder")
+                    Spacer()
+                    Text(abbreviatedPath(settings.pngExportPath))
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                        .truncationMode(.head)
+                }
+                HStack {
+                    Spacer()
+                    Button("Choose Folder…") { chooseFolder() }
+                    Button("Reveal in Finder") { revealInFinder() }
+                        .disabled(!FileManager.default.fileExists(atPath: settings.pngExportPath))
+                }
+                if settings.pngExportEnabled {
+                    Text("Re-rendered every 5 minutes. Serve with e.g. `python3 -m http.server -d \"\(settings.pngExportPath)\"`.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
             Section("Energy") {
                 LowPowerStatusRow()
             }
@@ -103,6 +127,32 @@ struct PreferencesView: View {
         }
         .formStyle(.grouped)
         .scrollDisabled(true)
+    }
+
+    private func abbreviatedPath(_ path: String) -> String {
+        let home = NSHomeDirectory()
+        if path.hasPrefix(home) {
+            return "~" + String(path.dropFirst(home.count))
+        }
+        return path
+    }
+
+    private func chooseFolder() {
+        let panel = NSOpenPanel()
+        panel.canChooseFiles = false
+        panel.canChooseDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.canCreateDirectories = true
+        panel.directoryURL = URL(fileURLWithPath: settings.pngExportPath)
+        panel.prompt = "Choose"
+        if panel.runModal() == .OK, let url = panel.url {
+            settings.pngExportPath = url.path
+        }
+    }
+
+    private func revealInFinder() {
+        let url = URL(fileURLWithPath: settings.pngExportPath)
+        NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 }
 
