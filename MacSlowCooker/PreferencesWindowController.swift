@@ -68,13 +68,24 @@ struct PreferencesView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .disabled(!settings.prometheusEnabled)
                 Toggle("Bind to all interfaces (allows remote scraping)", isOn: $settings.prometheusBindAll)
                     .disabled(!settings.prometheusEnabled)
                 if settings.prometheusEnabled {
-                    Text("http://\(settings.prometheusBindAll ? "0.0.0.0" : "127.0.0.1"):\(settings.prometheusPort)/metrics")
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(.secondary)
-                        .textSelection(.enabled)
+                    if settings.prometheusBindAll {
+                        Text("http://<this-Mac-IP>:\(settings.prometheusPort)/metrics")
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                        Text("Listens on all interfaces. macOS will prompt to allow incoming connections on first remote access.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("http://127.0.0.1:\(settings.prometheusPort)/metrics")
+                            .font(.system(.caption, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                    }
                 }
             }
 

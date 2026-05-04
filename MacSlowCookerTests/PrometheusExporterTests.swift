@@ -2,11 +2,22 @@ import XCTest
 @testable import MacSlowCooker
 
 final class PrometheusExporterTests: XCTestCase {
+
+    /// Wait up to ~1s for the listener to reach `.ready` and report its
+    /// OS-assigned ephemeral port. Replaces the previous fixed `sleep(150ms)`
+    /// — robust to slow CI and immune to randomized-port collisions because
+    /// the port is `0` (OS picks).
+    private func awaitResolvedPort(_ exporter: PrometheusExporter) async throws -> UInt16 {
+        for _ in 0..<40 {
+            if let p = exporter.resolvedPort { return p }
+            try await Task.sleep(for: .milliseconds(25))
+        }
+        throw XCTSkip("Listener never became ready within 1s")
+    }
+
     func testServeMetricsEndpoint() async throws {
         let exporter = PrometheusExporter(version: "1.2.3")
-        // Random unprivileged port in 49152..65535 (IANA ephemeral range).
-        let port = UInt16.random(in: 49152...65535)
-        try exporter.start(port: port, loopbackOnly: true)
+        try exporter.start(port: 0, loopbackOnly: true)
         defer { exporter.stop() }
 
         // Push a snapshot.
@@ -23,9 +34,7 @@ final class PrometheusExporterTests: XCTestCase {
         exporter.update(sample: sample)
         exporter.update(helperConnected: true)
 
-        // Allow the listener to settle.
-        try await Task.sleep(for: .milliseconds(150))
-
+        let port = try await awaitResolvedPort(exporter)
         let url = URL(string: "http://127.0.0.1:\(port)/metrics")!
         let (data, response) = try await URLSession.shared.data(from: url)
         let http = try XCTUnwrap(response as? HTTPURLResponse)
@@ -39,11 +48,10 @@ final class PrometheusExporterTests: XCTestCase {
 
     func testUnknownPathReturns404() async throws {
         let exporter = PrometheusExporter(version: "1.0.0")
-        let port = UInt16.random(in: 49152...65535)
-        try exporter.start(port: port, loopbackOnly: true)
+        try exporter.start(port: 0, loopbackOnly: true)
         defer { exporter.stop() }
-        try await Task.sleep(for: .milliseconds(150))
 
+        let port = try await awaitResolvedPort(exporter)
         let url = URL(string: "http://127.0.0.1:\(port)/nope")!
         let (_, response) = try await URLSession.shared.data(from: url)
         let http = try XCTUnwrap(response as? HTTPURLResponse)

@@ -13,19 +13,28 @@ final class PrometheusExporter {
     private var listener: NWListener?
     private var latestSample: GPUSample?
     private var helperConnected: Bool = false
+    private var _resolvedPort: UInt16?
+
+    /// Actual bound port. Populated when the listener reaches `.ready`. Useful
+    /// for tests that pass `port: 0` to let the OS pick an ephemeral port.
+    var resolvedPort: UInt16? { queue.sync { _resolvedPort } }
 
     init(version: String) { self.version = version }
 
     deinit { listener?.cancel() }
 
-    /// Start listening on `port`. If `loopbackOnly` is true the listener
-    /// binds only to the loopback interface (no firewall prompt; only
-    /// reachable from the same Mac).
+    /// Start listening on `port` (pass `0` to let the OS pick an ephemeral
+    /// port; read it back from `resolvedPort` once ready). If `loopbackOnly`
+    /// is true the listener binds only to the loopback interface (no firewall
+    /// prompt; only reachable from the same Mac).
     func start(port: UInt16, loopbackOnly: Bool) throws {
         // Stop any previous listener first.
         stop()
 
         let params = NWParameters.tcp
+        // Allow rebinding the same port immediately after a previous bind,
+        // including the TIME_WAIT window left behind by SIGKILL or a crash.
+        params.allowLocalEndpointReuse = true
         if loopbackOnly { params.requiredInterfaceType = .loopback }
         // Disable IPv6 on loopback to keep the URL stable (`127.0.0.1`)
         // — Prometheus scrape configs typically use the IPv4 form.
@@ -46,9 +55,14 @@ final class PrometheusExporter {
             guard let self else { return }
             switch state {
             case .ready:
-                os_log("Prometheus listener ready on %d", log: self.log, type: .info, Int(port))
+                let actual = self.listener?.port?.rawValue ?? port
+                self._resolvedPort = actual
+                os_log("Prometheus listener ready on %d", log: self.log, type: .info, Int(actual))
             case .failed(let err):
+                self._resolvedPort = nil
                 os_log("Prometheus listener failed: %{public}@", log: self.log, type: .error, "\(err)")
+            case .cancelled:
+                self._resolvedPort = nil
             default:
                 break
             }
@@ -60,6 +74,7 @@ final class PrometheusExporter {
     func stop() {
         listener?.cancel()
         listener = nil
+        queue.async { [weak self] in self?._resolvedPort = nil }
     }
 
     func update(sample: GPUSample?) {
