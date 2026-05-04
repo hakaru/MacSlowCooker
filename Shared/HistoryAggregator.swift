@@ -11,6 +11,13 @@ enum HistoryAggregator {
 
 extension HistoryAggregator {
     static func record(from sample: GPUSample, granularity: HistoryGranularity) -> HistoryRecord {
+        // Debug-only contract guard: `gpuUsage` is a ratio 0..1 (1 - idle_ratio
+        // from powermetrics). If a future caller passes a percentage by
+        // mistake, this assert catches it before the value gets multiplied to
+        // 10000 and silently clipped at the chart's 100% ceiling.
+        assert(sample.gpuUsage >= 0 && sample.gpuUsage <= 1.0,
+               "gpuUsage must be a 0..1 ratio, got \(sample.gpuUsage)")
+
         let powerTotal: Double? = {
             switch (sample.power, sample.anePower) {
             case (nil, nil):           return nil
@@ -19,9 +26,9 @@ extension HistoryAggregator {
             case let (p?, a?):         return p + a
             }
         }()
-        // GPUSample.gpuUsage is a 0..1 ratio (matches powermetrics' idle_ratio
-        // semantics); HistoryRecord.gpuPct is a percentage 0..100 to match the
-        // visual scale used by the popup and the MRTG yMaxHint of 100.
+        // GPUSample.gpuUsage is a 0..1 ratio; HistoryRecord.gpuPct is a
+        // percentage 0..100 to match the visual scale used by the popup and
+        // the MRTG yMaxHint of 100.
         return HistoryRecord(
             ts: bucketStart(sample.timestamp, granularity: granularity),
             gpuPct: sample.gpuUsage * 100,

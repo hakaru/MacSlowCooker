@@ -10,14 +10,22 @@ final class HistoryViewModel {
 
     init(store: HistoryStore) { self.store = store }
 
-    func reload() {
-        nowTs = Int(Date().timeIntervalSince1970)
-        var out: [HistoryGranularity: [HistoryRecord]] = [:]
-        for g in HistoryGranularity.allCases {
-            let since = nowTs - g.retentionSeconds
-            out[g] = (try? store.query(granularity: g, sinceTs: since, untilTs: nowTs)) ?? []
-        }
-        byGranularity = out
+    /// Reload the per-granularity slices off the main thread, then publish to
+    /// the view-model on the main actor. Keeps SwiftUI smooth even if SQLite
+    /// I/O ever stalls (e.g. heavy disk pressure).
+    func reload() async {
+        let now = Int(Date().timeIntervalSince1970)
+        let store = self.store
+        let result: [HistoryGranularity: [HistoryRecord]] = await Task.detached(priority: .userInitiated) {
+            var out: [HistoryGranularity: [HistoryRecord]] = [:]
+            for g in HistoryGranularity.allCases {
+                let since = now - g.retentionSeconds
+                out[g] = (try? store.query(granularity: g, sinceTs: since, untilTs: now)) ?? []
+            }
+            return out
+        }.value
+        self.nowTs = now
+        self.byGranularity = result
     }
 }
 
@@ -52,12 +60,12 @@ struct HistoryView: View {
         }
         .frame(minWidth: 560, minHeight: 860)
         .background(Color(white: 0.82))
-        .onAppear { model.reload() }
         .task {
-            // refresh every 30s while window is open
+            await model.reload()
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(30))
-                model.reload()
+                if Task.isCancelled { break }
+                await model.reload()
             }
         }
     }

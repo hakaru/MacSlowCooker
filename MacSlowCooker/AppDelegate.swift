@@ -154,7 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc private func openHistoryWindow() {
-        historyController?.showWindow()
+        historyController?.showWindow(nil)
     }
 
     // MARK: - XPC

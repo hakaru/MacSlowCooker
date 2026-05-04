@@ -153,31 +153,49 @@ struct MRTGGraphView: View {
         .overlay(Rectangle().stroke(MRTGStyle.frame, lineWidth: 0.5))
     }
 
-    /// Number of evenly-spaced X-axis labels (= segments + 1).
-    private var xLabelCount: Int {
+    /// Place a label at every Nth fine vertical gridline so labels align with
+    /// real grid positions instead of an evenly-spaced HStack.
+    private var xLabelEveryFineLine: Int {
         switch granularity {
-        case .fiveMin:   return 13   // every 2h across 24h
-        case .thirtyMin: return 8    // every day across 7d
-        case .twoHour:   return 7    // every ~5d across 31d
-        case .oneDay:    return 9    // every ~50d across 400d
+        case .fiveMin:   return 2   // every 2h (fine = 1h)         → 13 labels
+        case .thirtyMin: return 4   // every 1d (fine = 6h)         → 8 labels
+        case .twoHour:   return 5   // every 5d (fine = 1d)         → 7 labels
+        case .oneDay:    return 8   // every ~56d (fine = 1w)       → 8 labels
         }
+    }
+
+    private func xLabelPositions() -> [(frac: Double, label: String)] {
+        let spec = verticalGridSpec
+        let total = granularity.retentionSeconds
+        let count = total / spec.fine
+        var out: [(Double, String)] = []
+        for i in stride(from: 0, through: count, by: xLabelEveryFineLine) {
+            let secAgo = i * spec.fine
+            let frac = 1.0 - Double(secAgo) / Double(total)
+            out.append((frac, xLabel(at: frac)))
+        }
+        return out
     }
 
     private var xAxisLabels: some View {
         HStack(spacing: 0) {
             Spacer().frame(width: yAxisWidth + 2)
-            HStack(spacing: 0) {
-                ForEach(0..<xLabelCount, id: \.self) { i in
-                    let frac = Double(i) / Double(xLabelCount - 1)
-                    let alignment: Alignment = (i == 0)
-                        ? .leading
-                        : (i == xLabelCount - 1 ? .trailing : .center)
-                    Text(xLabel(at: frac))
-                        .font(.custom("Menlo", size: 10))
-                        .foregroundColor(MRTGStyle.axisText)
-                        .frame(maxWidth: .infinity, alignment: alignment)
+            Canvas { ctx, size in
+                for (frac, label) in xLabelPositions() {
+                    let xx = CGFloat(frac) * size.width
+                    let resolved = ctx.resolve(
+                        Text(label)
+                            .font(.custom("Menlo", size: 10))
+                            .foregroundColor(MRTGStyle.axisText)
+                    )
+                    let anchor: UnitPoint
+                    if frac < 0.02       { anchor = .topLeading }
+                    else if frac > 0.98  { anchor = .topTrailing }
+                    else                 { anchor = .top }
+                    ctx.draw(resolved, at: CGPoint(x: xx, y: 0), anchor: anchor)
                 }
             }
+            .frame(height: 14)
             Spacer().frame(width: yAxisWidth + 2)
         }
         .padding(.vertical, 2)
@@ -228,7 +246,7 @@ struct MRTGGraphView: View {
     // MARK: - Layout
 
     private var graphHeight: CGFloat { 90 }
-    private var yAxisWidth: CGFloat { 44 }
+    private var yAxisWidth: CGFloat { 52 }   // wide enough for "5000rpm" / "1.5kW"
 
     // MARK: - Formatting
 
@@ -258,27 +276,33 @@ struct MRTGGraphView: View {
         }
     }
 
+    private static let dayOfWeekFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "EEE"
+        return f
+    }()
+
+    private static let monthFormatter: DateFormatter = {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.dateFormat = "MMM"
+        return f
+    }()
+
     private func xLabel(at frac: Double) -> String {
         let ts = TimeInterval(rangeStart) + frac * Double(granularity.retentionSeconds)
         let date = Date(timeIntervalSince1970: ts)
         let cal = Calendar.current
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "en_US_POSIX")
         switch granularity {
         case .fiveMin:
-            // Hour-of-day, "00".."23".
             return String(format: "%02d", cal.component(.hour, from: date))
         case .thirtyMin:
-            // Day-of-week abbreviation "Mon"..."Sun" (numeric month/day fallback if locale weird).
-            fmt.dateFormat = "EEE"
-            return fmt.string(from: date)
+            return Self.dayOfWeekFormatter.string(from: date)
         case .twoHour:
-            // Day-of-month, "1".."31".
             return "\(cal.component(.day, from: date))"
         case .oneDay:
-            // Month abbreviation "Jan".."Dec".
-            fmt.dateFormat = "MMM"
-            return fmt.string(from: date)
+            return Self.monthFormatter.string(from: date)
         }
     }
 

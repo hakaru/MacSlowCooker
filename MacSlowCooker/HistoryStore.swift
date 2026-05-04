@@ -4,9 +4,13 @@ import os
 
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
-/// Round-robin SQLite store for aggregate history. Not thread-safe;
-/// access from one queue/actor.
-final class HistoryStore {
+/// Round-robin SQLite store for aggregate history.
+///
+/// Opened with `SQLITE_OPEN_FULLMUTEX`, so concurrent calls into the C library
+/// are safe at the SQLite level. The Swift wrapper has no mutable state beyond
+/// the connection handle (set in `init`, released in `deinit`), so cross-actor
+/// access is safe in practice — hence `@unchecked Sendable`.
+final class HistoryStore: @unchecked Sendable {
     private var db: OpaquePointer?
     private let log = OSLog(subsystem: "com.macslowcooker.app", category: "HistoryStore")
 

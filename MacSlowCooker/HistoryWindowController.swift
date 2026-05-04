@@ -2,21 +2,13 @@ import AppKit
 import SwiftUI
 
 @MainActor
-final class HistoryWindowController {
-    private var window: NSWindow?
+final class HistoryWindowController: NSWindowController {
     private let model: HistoryViewModel
 
     init(store: HistoryStore) {
-        self.model = HistoryViewModel(store: store)
-    }
+        let model = HistoryViewModel(store: store)
+        self.model = model
 
-    func showWindow() {
-        if let window {
-            window.makeKeyAndOrderFront(nil)
-            NSApp.activate(ignoringOtherApps: true)
-            model.reload()
-            return
-        }
         let host = NSHostingController(rootView: HistoryView(model: model))
         let w = NSWindow(contentViewController: host)
         w.title = "MacSlowCooker — History"
@@ -24,8 +16,16 @@ final class HistoryWindowController {
         w.setContentSize(NSSize(width: 560, height: 860))
         w.center()
         w.isReleasedWhenClosed = false
-        self.window = w
-        w.makeKeyAndOrderFront(nil)
+
+        super.init(window: w)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
+
+    override func showWindow(_ sender: Any?) {
+        super.showWindow(sender)
         NSApp.activate(ignoringOtherApps: true)
+        Task { @MainActor in await model.reload() }
     }
 }
