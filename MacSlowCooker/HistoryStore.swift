@@ -94,6 +94,22 @@ final class HistoryStore {
         return out
     }
 
+    // MARK: - Prune / Rollup
+
+    func prune(granularity: HistoryGranularity, nowTs: Int) throws {
+        let cutoff = nowTs - granularity.retentionSeconds
+        let sql = "DELETE FROM \(granularity.tableName) WHERE ts < \(cutoff);"
+        try exec(sql)
+    }
+
+    func rollup(from src: HistoryGranularity, into dst: HistoryGranularity, bucketTs: Int) throws {
+        precondition(dst.bucketSeconds > src.bucketSeconds, "dst must be coarser than src")
+        let end = bucketTs + dst.bucketSeconds  // exclusive
+        let rows = try query(granularity: src, sinceTs: bucketTs, untilTs: end - 1)
+        guard let avg = HistoryAggregator.average(rows, at: bucketTs) else { return }
+        try insert(avg, granularity: dst)
+    }
+
     // MARK: - Helpers
 
     private func bindOptional(_ stmt: OpaquePointer?, _ idx: Int32, _ v: Double?) {
