@@ -11,6 +11,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private let settings = Settings.shared
     private let animator = DockIconAnimator()
 
+    private let historyStore: HistoryStore? = {
+        do {
+            let dir = FileManager.default
+                .urls(for: .applicationSupportDirectory, in: .userDomainMask).first!
+                .appendingPathComponent("MacSlowCooker", isDirectory: true)
+            try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+            return try HistoryStore(path: dir.appendingPathComponent("history.sqlite").path)
+        } catch {
+            os_log("HistoryStore init failed: %{public}@", log: log, type: .error, String(describing: error))
+            return nil
+        }
+    }()
+
+    private lazy var historyIngestor: HistoryIngestor? = historyStore.map { HistoryIngestor(store: $0) }
+
     private lazy var popupController = PopupWindowController(store: store)
     private var preferencesController: PreferencesWindowController?
     private var settingsObservationTask: Task<Void, Never>?
@@ -138,6 +153,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             guard let self else { return }
             store.addSample(sample)
             animator.update(sample: sample)
+            historyIngestor?.ingest(sample)
         }
         xpcClient.onConnected = { [weak self] in
             self?.store.setConnected(true)
@@ -160,6 +176,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 animator.settingsDidChange()
             }
         }
+    }
+
+    func applicationWillTerminate(_ notification: Notification) {
+        historyIngestor?.flushPending()
     }
 
     // MARK: - System sleep
