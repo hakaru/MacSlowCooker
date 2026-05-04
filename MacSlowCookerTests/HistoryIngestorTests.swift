@@ -41,9 +41,11 @@ final class HistoryIngestorTests: XCTestCase {
         XCTAssertEqual(thirty[0].gpuPct ?? 0, 25, accuracy: 0.001)
     }
 
+    /// `gpu` is the readable percentage (0..100); converted to the 0..1 ratio
+    /// that GPUSample.gpuUsage actually carries.
     private func sample(ts: TimeInterval, gpu: Double) -> GPUSample {
         GPUSample(timestamp: Date(timeIntervalSince1970: ts),
-                  gpuUsage: gpu, temperature: 50, thermalPressure: nil,
+                  gpuUsage: gpu / 100, temperature: 50, thermalPressure: nil,
                   power: 5, anePower: nil, aneUsage: nil, fanRPM: [1500])
     }
 }

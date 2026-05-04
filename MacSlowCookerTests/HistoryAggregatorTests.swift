@@ -13,9 +13,10 @@ final class HistoryAggregatorTests: XCTestCase {
     }
 
     func testRecordFromSampleSumsPowerAndTakesMaxFan() {
+        // GPUSample.gpuUsage is a 0..1 ratio; HistoryRecord.gpuPct is a 0..100 percentage.
         let sample = GPUSample(
             timestamp: Date(timeIntervalSince1970: 1778231262),
-            gpuUsage: 42.5,
+            gpuUsage: 0.425,
             temperature: 67.2,
             thermalPressure: nil,
             power: 8.4,
@@ -25,7 +26,7 @@ final class HistoryAggregatorTests: XCTestCase {
         )
         let r = HistoryAggregator.record(from: sample, granularity: .fiveMin)
         XCTAssertEqual(r.ts, 1778231100)
-        XCTAssertEqual(r.gpuPct, 42.5)
+        XCTAssertEqual(r.gpuPct ?? 0, 42.5, accuracy: 0.001)
         XCTAssertEqual(r.socTempC, 67.2)
         XCTAssertEqual(r.powerW ?? 0, 10.0, accuracy: 0.001)
         XCTAssertEqual(r.fanRPM ?? 0, 2100)

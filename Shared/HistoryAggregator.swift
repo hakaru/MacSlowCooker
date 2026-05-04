@@ -19,9 +19,12 @@ extension HistoryAggregator {
             case let (p?, a?):         return p + a
             }
         }()
+        // GPUSample.gpuUsage is a 0..1 ratio (matches powermetrics' idle_ratio
+        // semantics); HistoryRecord.gpuPct is a percentage 0..100 to match the
+        // visual scale used by the popup and the MRTG yMaxHint of 100.
         return HistoryRecord(
             ts: bucketStart(sample.timestamp, granularity: granularity),
-            gpuPct: sample.gpuUsage,
+            gpuPct: sample.gpuUsage * 100,
             socTempC: sample.temperature,
             powerW: powerTotal,
             fanRPM: sample.fanRPM?.max()
