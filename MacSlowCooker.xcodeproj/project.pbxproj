@@ -11,6 +11,7 @@
 		06C982BBA6C2D8039BB17C7D /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06304D97009BFCA9ACC5499C /* HistoryRecord.swift */; };
 		081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */; };
 		0B75C45876F33514001EBF69 /* PopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FBE4FF29F56752B038056F5 /* PopupView.swift */; };
+		10A2BED7A53BBE81289F4575 /* PrometheusExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73285E3E425BB5DEFB7ABCD3 /* PrometheusExporter.swift */; };
 		11C55A0CA8A92D0ECF01FD4F /* DockIconAnimatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */; };
 		16596D0D42204EC72E657A65 /* Clock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50B160393A833FD4D1952BEF /* Clock.swift */; };
 		16FFDF1EF96AF04C45D24C0A /* HistoryRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06304D97009BFCA9ACC5499C /* HistoryRecord.swift */; };
@@ -30,6 +31,7 @@
 		43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */; };
 		44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
+		51706EE599EF5DF545783700 /* PrometheusExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AA87AE3CDB93470488ECF2D /* PrometheusExporterTests.swift */; };
 		51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC092273F19F128EE10C4267 /* HistoryStore.swift */; };
 		539257942A88FDD87E47A253 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 76ABE4137C3F8CB45E5EBC19 /* libsqlite3.tbd */; };
 		5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */; };
@@ -123,10 +125,12 @@
 		45F7531D09F4944188F12578 /* HistoryIngestor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryIngestor.swift; sourceTree = "<group>"; };
 		49590860FBFF3F1F61A81C47 /* CookingHeuristics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingHeuristics.swift; sourceTree = "<group>"; };
 		495D61085AE6A59E664ACBF0 /* SettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
+		4AA87AE3CDB93470488ECF2D /* PrometheusExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrometheusExporterTests.swift; sourceTree = "<group>"; };
 		4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCFanDecoder.swift; sourceTree = "<group>"; };
 		4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestClock.swift; sourceTree = "<group>"; };
 		50B160393A833FD4D1952BEF /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		5DC5135696164D72811AE540 /* PotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotRenderer.swift; sourceTree = "<group>"; };
+		73285E3E425BB5DEFB7ABCD3 /* PrometheusExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrometheusExporter.swift; sourceTree = "<group>"; };
 		73FF777792F4238DEEF4F99A /* HelperInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
 		76ABE4137C3F8CB45E5EBC19 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		77174FD10C845A60B62D41FC /* HistoryGranularity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGranularity.swift; sourceTree = "<group>"; };
@@ -211,6 +215,7 @@
 				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
 				41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */,
 				1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */,
+				4AA87AE3CDB93470488ECF2D /* PrometheusExporterTests.swift */,
 				FDE0E05029EBE4C2FD9F783D /* PrometheusFormatterTests.swift */,
 				A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */,
 				495D61085AE6A59E664ACBF0 /* SettingsTests.swift */,
@@ -277,6 +282,7 @@
 				90386A8D8287F8D6433DA49A /* PopupWindowController.swift */,
 				5DC5135696164D72811AE540 /* PotRenderer.swift */,
 				D77B625B7314BE4A0C36E1C8 /* PreferencesWindowController.swift */,
+				73285E3E425BB5DEFB7ABCD3 /* PrometheusExporter.swift */,
 				81A7139D20C2519CF55ABAFB /* Settings.swift */,
 				78D676208B045B062E261378 /* XPCClient.swift */,
 			);
@@ -456,6 +462,7 @@
 				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
 				081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */,
+				10A2BED7A53BBE81289F4575 /* PrometheusExporter.swift in Sources */,
 				BE259AFF54D4E1BA992589B7 /* PrometheusFormatter.swift in Sources */,
 				44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */,
 				DAB315CD66ED5297D43BD725 /* SensorNameMatcher.swift in Sources */,
@@ -512,6 +519,7 @@
 				8CCF001921C683107237C79E /* IconStateTests.swift in Sources */,
 				A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */,
 				F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */,
+				51706EE599EF5DF545783700 /* PrometheusExporterTests.swift in Sources */,
 				7854A848EF2500293A5F6997 /* PrometheusFormatterTests.swift in Sources */,
 				B7966580AB33ED760BE514D2 /* SMCFanDecoderTests.swift in Sources */,
 				25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */,
