@@ -37,11 +37,46 @@ collect a sample every second.
 - nil samples render as gaps (no misleading flat-zero baselines)
 - Translucent `NSVisualEffectView` background
 
+### History window (MRTG-style)
+- Open with **Cmd+Shift+H** from the menu bar
+- Four stacked panels per category — **Daily / Weekly / Monthly / Yearly**
+  (24 h / 7 d / 31 d / 400 d retention)
+- Two categories selectable via the segmented Picker:
+  - **Compute** — GPU% (filled green) + Power W (blue line), dual Y axis
+  - **Thermal** — SoC °C (filled green) + Fan RPM (blue line), dual Y axis
+- Authentic MRTG aesthetic: white plot background, dense fine + coarse vertical
+  gridlines, wall-clock X axis (hour-of-day / day-of-week / day-of-month /
+  month abbrev), Max / Avg / Cur stats footer, navy title bar
+- Round-robin SQLite store at
+  `~/Library/Application Support/MacSlowCooker/history.sqlite` with 5-min
+  in-memory buffering and cascading rollups (5 min → 30 min → 2 h → 1 d)
+
+### Prometheus exporter (opt-in)
+- HTTP endpoint **`/metrics`** in Prometheus text exposition format
+- Default port **9091**, **127.0.0.1** only — toggle "Bind to all interfaces"
+  to allow remote scraping (triggers macOS firewall prompt on first remote hit)
+- Exposed metrics: `gpu_usage_ratio`, `gpu_power_watts`, `ane_power_watts`,
+  `temperature_celsius`, `fan_rpm{fan="N"}`, `thermal_pressure`,
+  `helper_connected`, `build_info{version="..."}`
+- No auth (Prometheus convention; front with a reverse proxy if needed)
+
+### PNG export (opt-in)
+- Periodically writes 8 PNG snapshots (`compute-{daily,weekly,monthly,yearly}.png`,
+  `thermal-{daily,weekly,monthly,yearly}.png`) plus an auto-refreshing
+  `index.html` to a chosen folder, the literal MRTG cron-and-PNG workflow
+- Default output: `~/Library/Application Support/MacSlowCooker/web/`;
+  configurable via Preferences with an Open Panel folder picker
+- Re-rendered every 5 minutes; renders one immediate snapshot on enable
+- Serve with any static web server, e.g.
+  `python3 -m http.server -d ~/Library/Application\ Support/MacSlowCooker/web`
+
 ### Preferences
 - Pot style (more styles planned for Phase 2)
 - Flame animation: Off / Interpolation / Wiggle / Both
 - Boiling trigger: Temperature / Thermal Pressure / Combined
 - Float-above-other-windows toggle
+- **Prometheus exporter**: enable / port / bind-all
+- **PNG export**: enable / folder picker / Reveal in Finder
 - Live "Low Power Mode is on" status row
 
 ## Architecture
@@ -50,7 +85,7 @@ collect a sample every second.
 MacSlowCooker.app (unprivileged, runs in the user login session)
   ├── main.swift                  — sets AppDelegate on NSApplication.shared
   ├── AppDelegate                 — XPC connection, settings observation, menus,
-  │                                 sleep notifications
+  │                                 sleep notifications, exporter lifecycle
   ├── GPUDataStore                — @Observable ring buffer (60 samples)
   ├── Settings                    — @Observable + UserDefaults + AsyncStream<Void>
   ├── XPCClient                   — NSXPCConnection (.privileged) + exponential
@@ -62,6 +97,12 @@ MacSlowCooker.app (unprivileged, runs in the user login session)
   ├── DutchOvenRenderer           — Core Graphics drawing of pot, flame, steam
   │                                 (conforms to PotRenderer protocol)
   ├── PopupView                   — SwiftUI dashboard (4 charts + 4 metrics)
+  ├── HistoryStore / Ingestor     — round-robin SQLite + 5-min in-memory buffer
+  │                                 with cascading rollups
+  ├── MRTGGraphView / HistoryView — SwiftUI Canvas MRTG renderer + tabbed root
+  ├── HistoryWindowController     — NSWindow host for the history viewer
+  ├── PrometheusExporter          — NWListener serving /metrics (opt-in)
+  ├── PNGExporter                 — ImageRenderer → 8 PNGs + index.html (opt-in)
   ├── PopupWindowController       — NSWindow (titled / closable / resizable)
   └── PreferencesWindowController — NSWindow + SwiftUI Form
 
@@ -76,11 +117,14 @@ HelperTool (root LaunchDaemon, Contents/MacOS/HelperTool)
   │                                 F[i]Ac fan keys (fpe2 / flt formats)
   └── TemperatureReader           — IOHIDEventSystem-based SoC temperature
 
-Shared (compiled into both targets)
+Shared (compiled into both targets — types that legitimately cross XPC)
   ├── GPUSample                   — Codable data model
   ├── XPCProtocol                 — MacSlowCookerHelperProtocol
-  └── PowerMetricsParser          — pure / testable plist parser, supports
-                                    legacy + macOS 26 + Intel schemas
+  ├── HistoryGranularity / Record — pure value types for the history subsystem
+  ├── HistoryAggregator           — pure: bucket alignment, averaging
+  ├── PowerMetricsParser          — pure / testable plist parser, supports
+  │                                 legacy + macOS 26 + Intel schemas
+  └── PrometheusFormatter         — pure: GPUSample → exposition string
 ```
 
 ## Requirements

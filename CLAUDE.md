@@ -75,7 +75,7 @@ kickstart is faster.
 MacSlowCooker.app (unprivileged, runs in the user login session)
   ├── main.swift                  — sets AppDelegate on NSApplication.shared
   ├── AppDelegate                 — XPC connection, settings observation,
-  │                                 menus, sleep notifications
+  │                                 menus, sleep notifications, exporter lifecycle
   ├── GPUDataStore                — @Observable ring buffer (60 samples)
   ├── Settings                    — @Observable + UserDefaults + AsyncStream<Void>
   ├── XPCClient                   — NSXPCConnection (.privileged), exponential
@@ -87,6 +87,15 @@ MacSlowCooker.app (unprivileged, runs in the user login session)
   ├── DutchOvenRenderer           — Core Graphics drawing of pot, flame, steam
   │                                 (conforms to PotRenderer)
   ├── PopupView                   — SwiftUI dashboard (4 charts + 4 metrics)
+  ├── HistoryStore                — round-robin SQLite (4 tables, 4 retentions)
+  ├── HistoryIngestor             — @MainActor 5-min in-memory buffer + cascade
+  ├── HistoryPanel                — Compute / Thermal panel definitions (display)
+  ├── MRTGGraphView               — SwiftUI Canvas: dual-Y MRTG-style graph
+  ├── HistoryView / VM            — tabbed root + @Observable view-model (async load)
+  ├── HistoryWindowController     — NSWindowController host (Cmd+Shift+H)
+  ├── PrometheusExporter          — NWListener serving /metrics (opt-in)
+  ├── PNGExporter                 — ImageRenderer → 8 PNGs + index.html (opt-in)
+  ├── PNGExporterHTML             — pure index.html renderer
   ├── PopupWindowController       — NSWindow (titled / closable / resizable,
   │                                 .floating toggleable)
   └── PreferencesWindowController — NSWindow + SwiftUI Form
@@ -102,7 +111,7 @@ HelperTool (root LaunchDaemon, Contents/MacOS/HelperTool)
   │                                 F[i]Ac fan keys (fpe2 / flt formats)
   └── TemperatureReader           — IOHIDEventSystem-based SoC temperature
 
-Shared (compiled into both targets)
+Shared (compiled into both targets — only types that legitimately cross XPC)
   ├── DomainTypes                 — PotStyle / FlameAnimation /
   │                                 BoilingTrigger / IconState / ThermalPressure
   ├── GPUSample                   — Codable data model
@@ -114,7 +123,10 @@ Shared (compiled into both targets)
   ├── SensorNameMatcher           — pure die / gpu / proximity / graphics name match
   ├── CookingHeuristics           — pure boiling/temperature rules used by animator
   ├── HostCPU                     — runtime Apple Silicon detection
-  └── CodeSigningConfig           — single source for Team OU + XPC requirement
+  ├── CodeSigningConfig           — single source for Team OU + XPC requirement
+  ├── HistoryGranularity / Record — pure value types for the history subsystem
+  ├── HistoryAggregator           — pure: bucket alignment, averaging, mapping
+  └── PrometheusFormatter         — pure: GPUSample → exposition string
 ```
 
 **Pure-helper pattern**. The IOKit-bound classes (`SMCReader`,
