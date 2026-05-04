@@ -13,7 +13,7 @@ final class PreferencesWindowController: NSWindowController {
         let window = NSWindow(contentViewController: host)
         window.title = "Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 420, height: 320))
+        window.setContentSize(NSSize(width: 420, height: 440))
         window.center()
         super.init(window: window)
     }
@@ -55,6 +55,27 @@ struct PreferencesView: View {
 
             Section("Window") {
                 Toggle("Float above other windows", isOn: $settings.floatAboveOtherWindows)
+            }
+
+            Section("Prometheus Exporter") {
+                Toggle("Enable", isOn: $settings.prometheusEnabled)
+                Stepper(value: $settings.prometheusPort, in: 1024...65535) {
+                    HStack {
+                        Text("Port")
+                        Spacer()
+                        Text("\(settings.prometheusPort)")
+                            .font(.system(.body, design: .monospaced))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                Toggle("Bind to all interfaces (allows remote scraping)", isOn: $settings.prometheusBindAll)
+                    .disabled(!settings.prometheusEnabled)
+                if settings.prometheusEnabled {
+                    Text("http://\(settings.prometheusBindAll ? "0.0.0.0" : "127.0.0.1"):\(settings.prometheusPort)/metrics")
+                        .font(.system(.caption, design: .monospaced))
+                        .foregroundStyle(.secondary)
+                        .textSelection(.enabled)
+                }
             }
 
             Section("Energy") {
