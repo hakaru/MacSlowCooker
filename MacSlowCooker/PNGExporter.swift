@@ -35,8 +35,9 @@ final class PNGExporter {
         }
         let t = Timer(timeInterval: interval, repeats: true) { [weak self] _ in
             guard let self else { return }
-            Task { @MainActor [weak self] in
-                try? await self?.renderOnce(to: directory)
+            // Outer guard already pinned `self`; inner Task captures it strongly.
+            Task { @MainActor in
+                try? await self.renderOnce(to: directory)
             }
         }
         RunLoop.main.add(t, forMode: .common)
