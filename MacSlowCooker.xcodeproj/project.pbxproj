@@ -28,6 +28,8 @@
 		43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */; };
 		44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
+		51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC092273F19F128EE10C4267 /* HistoryStore.swift */; };
+		539257942A88FDD87E47A253 /* libsqlite3.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 76ABE4137C3F8CB45E5EBC19 /* libsqlite3.tbd */; };
 		5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */; };
 		55920E4448E396122E2C94B2 /* DockIconAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */; };
 		5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36464BD999D5385543BA7023 /* AppDelegate.swift */; };
@@ -70,6 +72,7 @@
 		F0BB23CF05F11DA7B3E5C488 /* TemperatureReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */; };
 		F5BCEE668D15EEC8ABC539E1 /* HistoryGranularity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77174FD10C845A60B62D41FC /* HistoryGranularity.swift */; };
 		F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */; };
+		FD373F98FA95CC6561D6FA4B /* HistoryStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D49462714C3DCBE433D3F1 /* HistoryStoreTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -114,6 +117,7 @@
 		50B160393A833FD4D1952BEF /* Clock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clock.swift; sourceTree = "<group>"; };
 		5DC5135696164D72811AE540 /* PotRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PotRenderer.swift; sourceTree = "<group>"; };
 		73FF777792F4238DEEF4F99A /* HelperInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperInstaller.swift; sourceTree = "<group>"; };
+		76ABE4137C3F8CB45E5EBC19 /* libsqlite3.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libsqlite3.tbd; path = usr/lib/libsqlite3.tbd; sourceTree = SDKROOT; };
 		77174FD10C845A60B62D41FC /* HistoryGranularity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryGranularity.swift; sourceTree = "<group>"; };
 		78D676208B045B062E261378 /* XPCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCClient.swift; sourceTree = "<group>"; };
 		79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParser.swift; sourceTree = "<group>"; };
@@ -137,7 +141,9 @@
 		BAB3F838CEAED7F8769AD2D2 /* MacSlowCookerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSlowCookerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB01D55A43D433F0DB854F7C /* SMCReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCReader.swift; sourceTree = "<group>"; };
 		BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
+		BC092273F19F128EE10C4267 /* HistoryStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStore.swift; sourceTree = "<group>"; };
 		C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimatorTests.swift; sourceTree = "<group>"; };
+		C1D49462714C3DCBE433D3F1 /* HistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStoreTests.swift; sourceTree = "<group>"; };
 		C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStore.swift; sourceTree = "<group>"; };
 		C929AEEF3850949F5C500F9E /* MacSlowCooker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSlowCooker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacSlowCooker.entitlements; sourceTree = "<group>"; };
@@ -148,6 +154,17 @@
 		FB505FEF4C5660E59EB3CEAA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
+/* Begin PBXFrameworksBuildPhase section */
+		B55D2E5FA35A8CF18C4FBF0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				539257942A88FDD87E47A253 /* libsqlite3.tbd in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
 /* Begin PBXGroup section */
 		13A733869CC4ED420DE44C9F = {
 			isa = PBXGroup;
@@ -156,6 +173,7 @@
 				76C939F6C80FB47CA4B82435 /* MacSlowCooker */,
 				5403F53908354ADD688DA209 /* MacSlowCookerTests */,
 				5E9A950B1AB17BB7E355B449 /* Shared */,
+				7BECCA050D729E3CE9E27C80 /* Frameworks */,
 				80EC7ECBBC3C7734D6518E7C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -171,6 +189,7 @@
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
 				36BDB90D732C6D0E4D1A6FC0 /* HelperInstallerTests.swift */,
 				0E818E5D6FFE6F9A591F616B /* HistoryAggregatorTests.swift */,
+				C1D49462714C3DCBE433D3F1 /* HistoryStoreTests.swift */,
 				9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */,
 				8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */,
 				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
@@ -228,6 +247,7 @@
 				A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */,
 				C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */,
 				73FF777792F4238DEEF4F99A /* HelperInstaller.swift */,
+				BC092273F19F128EE10C4267 /* HistoryStore.swift */,
 				F1526E4C501E999A7FB17583 /* Info.plist */,
 				CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */,
 				FB505FEF4C5660E59EB3CEAA /* main.swift */,
@@ -239,6 +259,14 @@
 				78D676208B045B062E261378 /* XPCClient.swift */,
 			);
 			path = MacSlowCooker;
+			sourceTree = "<group>";
+		};
+		7BECCA050D729E3CE9E27C80 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				76ABE4137C3F8CB45E5EBC19 /* libsqlite3.tbd */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		80EC7ECBBC3C7734D6518E7C /* Products */ = {
@@ -277,6 +305,7 @@
 			buildConfigurationList = 282BA1771ECE6AEF557DFB1F /* Build configuration list for PBXNativeTarget "MacSlowCooker" */;
 			buildPhases = (
 				03D677C4883429005D3AE285 /* Sources */,
+				B55D2E5FA35A8CF18C4FBF0D /* Frameworks */,
 				2B08961DFC1D9966971A390A /* Copy HelperTool to MacOS and plist to LaunchDaemons */,
 			);
 			buildRules = (
@@ -392,6 +421,7 @@
 				4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */,
 				5F2CCCED899B5219A2E7FFFF /* HistoryGranularity.swift in Sources */,
 				06C982BBA6C2D8039BB17C7D /* HistoryRecord.swift in Sources */,
+				51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */,
 				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
 				AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */,
 				D80B10C0C617AD41F5BA4257 /* PlistStreamSplitter.swift in Sources */,
@@ -447,6 +477,7 @@
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
 				302501165907DD4DB1F77ADD /* HelperInstallerTests.swift in Sources */,
 				8DE91AA62416730A4C745E9C /* HistoryAggregatorTests.swift in Sources */,
+				FD373F98FA95CC6561D6FA4B /* HistoryStoreTests.swift in Sources */,
 				174FF65D4FEA5DC343574588 /* HostCPUTests.swift in Sources */,
 				BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */,
 				8CCF001921C683107237C79E /* IconStateTests.swift in Sources */,

@@ -35,6 +35,7 @@ targets:
     dependencies:
       - target: HelperTool
         embed: false
+      - sdk: libsqlite3.tbd
     postBuildScripts:
       - name: "Copy HelperTool to MacOS and plist to LaunchDaemons"
         script: |
