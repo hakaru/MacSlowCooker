@@ -62,13 +62,10 @@ enum PrometheusFormatter {
         return out
     }
 
-    /// Trim trailing zeros and decimal point. Prometheus accepts plain numeric
-    /// floats; minimising width keeps the response small.
+    /// Trim trailing zeros and decimal point. `%g` already drops trailing
+    /// zeros for integer-valued doubles, so no extra branching is needed.
     private static func format(_ v: Double) -> String {
-        if v == v.rounded() && abs(v) < 1e15 {
-            return String(format: "%g", v)
-        }
-        return String(format: "%g", v)
+        String(format: "%g", v)
     }
 
     private static func level(of pressure: ThermalPressure) -> Int {
