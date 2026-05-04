@@ -43,4 +43,27 @@ final class HistoryStoreTests: XCTestCase {
         XCTAssertEqual(rows[0].gpuPct ?? 0, 35, accuracy: 0.001)  // (10+20+...+60)/6
         XCTAssertEqual(rows[0].socTempC, 50)
     }
+
+    /// Regression: rollup must not include rows from the *next* dst bucket,
+    /// even when their ts equals the exclusive upper bound (`bucketTs + dst.bucketSeconds`).
+    func testRollupExcludesNextBucketBoundaryRow() throws {
+        let store = try HistoryStore(path: ":memory:")
+        let bucketTs = 1778230800
+        // Six rows inside the 30-min bucket [1778230800, 1778232600), all gpuPct=10.
+        for i in 0..<6 {
+            try store.insert(HistoryRecord(ts: bucketTs + i*300,
+                                           gpuPct: 10, socTempC: nil, powerW: nil, fanRPM: nil),
+                             granularity: .fiveMin)
+        }
+        // One row at the boundary 1778232600 — first row of the *next* 30-min bucket.
+        // It must NOT be averaged into this rollup.
+        try store.insert(HistoryRecord(ts: bucketTs + 1800,
+                                       gpuPct: 1000, socTempC: nil, powerW: nil, fanRPM: nil),
+                         granularity: .fiveMin)
+        try store.rollup(from: .fiveMin, into: .thirtyMin, bucketTs: bucketTs)
+        let rows = try store.query(granularity: .thirtyMin, sinceTs: 0, untilTs: Int.max)
+        XCTAssertEqual(rows.count, 1)
+        XCTAssertEqual(rows[0].gpuPct ?? 0, 10, accuracy: 0.001,
+                       "boundary row must not be included in average")
+    }
 }

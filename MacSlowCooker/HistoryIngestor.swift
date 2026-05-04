@@ -48,6 +48,11 @@ final class HistoryIngestor {
 
     /// After a finer bucket lands, if its parent coarser bucket boundary is now
     /// past, trigger the rollup. Cascades up the granularity chain.
+    ///
+    /// Known limitation: only catches up one bucket per level per call. If the app
+    /// is offline across multiple coarser-bucket boundaries (e.g. Mac slept for
+    /// hours), only the boundary containing `finerBucketTs` is rolled up. v1
+    /// accepts the gap; a future revision could query for stale dst buckets.
     private func cascadeRollups(after finerBucketTs: Int) throws {
         var src = HistoryGranularity.fiveMin
         var srcTs = finerBucketTs

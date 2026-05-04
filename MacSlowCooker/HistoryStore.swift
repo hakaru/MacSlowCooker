@@ -104,8 +104,10 @@ final class HistoryStore {
 
     func rollup(from src: HistoryGranularity, into dst: HistoryGranularity, bucketTs: Int) throws {
         precondition(dst.bucketSeconds > src.bucketSeconds, "dst must be coarser than src")
-        let end = bucketTs + dst.bucketSeconds  // exclusive
-        let rows = try query(granularity: src, sinceTs: bucketTs, untilTs: end - 1)
+        // `query` is inclusive on both bounds; the largest valid src bucket
+        // inside the dst window is `bucketTs + dst.bucketSeconds - src.bucketSeconds`.
+        let lastSrcBucket = bucketTs + dst.bucketSeconds - src.bucketSeconds
+        let rows = try query(granularity: src, sinceTs: bucketTs, untilTs: lastSrcBucket)
         guard let avg = HistoryAggregator.average(rows, at: bucketTs) else { return }
         try insert(avg, granularity: dst)
     }
