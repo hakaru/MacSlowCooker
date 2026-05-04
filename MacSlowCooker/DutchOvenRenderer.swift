@@ -576,8 +576,8 @@ enum DutchOvenRenderer: PotRenderer {
     /// stroked-line look. Hot boiling tints the puffs warm.
     private static func drawSteam(in ctx: CGContext, rect: CGRect, state: IconState) {
         let g = PotGeometry.standardForIconSize
-        let fanIntensity = fanIntensity(state: state)
-        let count = steamStrandCount(state: state, fanIntensity: fanIntensity)
+        let steamIntensity = steamIntensity(state: state)
+        let count = steamStrandCount(state: state, steamIntensity: steamIntensity)
         if count == 0 { return }
 
         // Tint the steam toward warm orange when actively boiling
@@ -589,8 +589,8 @@ enum DutchOvenRenderer: PotRenderer {
         let baseX = g.centerX
         let stride = rect.width * 0.095
         let bottomY = g.lidApexY + rect.height * 0.035
-        let topY = rect.height * (0.93 + 0.05 * fanIntensity)
-        let swayMag = stride * (0.55 + 0.55 * fanIntensity)
+        let topY = rect.height * (0.93 + 0.05 * steamIntensity)
+        let swayMag = stride * (0.55 + 0.55 * steamIntensity)
 
         let strands: [(CGFloat, CGFloat)] = [
             (baseX,                  0.6),
@@ -601,7 +601,7 @@ enum DutchOvenRenderer: PotRenderer {
         ]
         // Per-strand puff size scales with fan intensity so a hot helper
         // visibly produces thicker steam columns.
-        let puffRadius = rect.width * (0.065 + 0.030 * fanIntensity)
+        let puffRadius = rect.width * (0.065 + 0.030 * steamIntensity)
         for i in 0..<min(count, strands.count) {
             let (x, sway) = strands[i]
             let phaseShift = Double(i) * 0.5 + (state.flameWiggleEnabled ? state.flameWigglePhase * 0.3 : 0)
@@ -614,7 +614,7 @@ enum DutchOvenRenderer: PotRenderer {
                 phase: phaseShift,
                 baseRadius: puffRadius,
                 tint: baseTint,
-                fanIntensity: fanIntensity)
+                steamIntensity: steamIntensity)
         }
     }
 
@@ -630,7 +630,7 @@ enum DutchOvenRenderer: PotRenderer {
         phase: Double,
         baseRadius: CGFloat,
         tint: CGColor,
-        fanIntensity: Double
+        steamIntensity: Double
     ) {
         let totalHeight = topY - bottomY
         // 6 puffs per column for fuller coverage; each overlaps the previous
@@ -661,7 +661,7 @@ enum DutchOvenRenderer: PotRenderer {
             // Alpha decays slowly so even the topmost puff stays visible
             // against the blue background. Fan intensity gives a small extra
             // boost on top.
-            let alpha: CGFloat = (1.00 - 0.45 * t) * (0.85 + 0.15 * CGFloat(fanIntensity))
+            let alpha: CGFloat = (1.00 - 0.45 * t) * (0.85 + 0.15 * CGFloat(steamIntensity))
 
             drawPuff(
                 in: ctx,
@@ -698,12 +698,21 @@ enum DutchOvenRenderer: PotRenderer {
             options: [])
     }
 
-    private static func fanIntensity(state: IconState) -> Double {
-        guard let rpm = state.fanRPM else { return 0 }
-        return max(0, min(1, (rpm - 1300) / 2200))
+    /// 0..1 normalized "how active is the pot" factor that drives steam.
+    /// Fan-equipped Macs: Mac Studio fans idle ~1300 RPM, max ~3500 → linear.
+    /// Fanless Macs (no `fanRPM`, e.g. MacBook Air M-series): fall back to
+    /// temperature using the same 50 °C → 95 °C ramp that `potColor` uses, so
+    /// the pot color and steam liveliness move in lockstep instead of leaving
+    /// the steam visually flat.
+    private static func steamIntensity(state: IconState) -> Double {
+        if let rpm = state.fanRPM {
+            return max(0, min(1, (rpm - 1300) / 2200))
+        }
+        guard let t = state.temperature else { return 0 }
+        return max(0, min(1, (t - 50) / 45))
     }
 
-    private static func steamStrandCount(state: IconState, fanIntensity: Double) -> Int {
+    private static func steamStrandCount(state: IconState, steamIntensity: Double) -> Int {
         let usage = state.displayedUsage
         let base: Int
         switch usage {
@@ -713,7 +722,7 @@ enum DutchOvenRenderer: PotRenderer {
         default:      base = 3
         }
         let boilingExtra = state.boilingIntensity > 0.5 ? 1 : 0
-        let fanExtra = fanIntensity >= 0.5 ? 2 : (fanIntensity >= 0.2 ? 1 : 0)
+        let fanExtra = steamIntensity >= 0.5 ? 2 : (steamIntensity >= 0.2 ? 1 : 0)
         return base + boilingExtra + fanExtra
     }
 

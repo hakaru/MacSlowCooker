@@ -161,6 +161,18 @@ averages — that's why the popup label says "SoC temp" on Apple Silicon and
 plain "Temp" otherwise. A truly GPU-specific reading would require SMC
 `Tg05` / `Tg0D` and is not implemented yet.
 
+**Fanless Macs (e.g. MacBook Air M-series)**. AppleSMC has no `FNum` key on
+fanless hardware, so `SMCReader` logs `SMC: FNum read failed` once at
+init — this is expected, not an error. `GPUSample.fanRPM` then arrives as
+nil, which both the renderer and the popup treat as the fanless signal:
+- `DutchOvenRenderer.steamIntensity(state:)` falls back to a
+  `(temp - 50) / 45` ramp (same 50 °C → 95 °C range as `potColor`), so
+  pot color and steam liveliness move together. Fan-equipped Macs keep
+  the `(rpm - 1300) / 2200` clamp.
+- `PopupView.hasFans` (`latest?.fanRPM != nil`) gates the Fan chart and
+  Fan metric tile out of the layout, leaving a 3-column GPU /
+  Temperature / Power view.
+
 **Intel powermetrics keys**. Intel powermetrics emits
 `gpu.gpu_busy` (integer percent) or `gpu.busy_ns` + `(gpu|root).elapsed_ns`,
 not `gpu_active_residency` / `idle_ratio`. The parser tries each in turn.

@@ -7,15 +7,17 @@ final class DutchOvenRendererTests: XCTestCase {
     private func state(usage: Double = 0,
                        isConnected: Bool = true,
                        boilingIntensity: Double = 0,
-                       wiggleEnabled: Bool = false) -> IconState {
+                       wiggleEnabled: Bool = false,
+                       temperature: Double? = 50,
+                       fanRPM: Double? = nil) -> IconState {
         IconState(displayedUsage: usage,
-                  temperature: 50,
+                  temperature: temperature,
                   isConnected: isConnected,
                   flameWigglePhase: 1.23,
                   flameWiggleEnabled: wiggleEnabled,
                   isBoiling: boilingIntensity > 0,
                   boilingIntensity: boilingIntensity,
-                  fanRPM: nil)
+                  fanRPM: fanRPM)
     }
 
     func testProducesNonEmptyImageForRepresentativeStates() {
@@ -33,6 +35,22 @@ final class DutchOvenRendererTests: XCTestCase {
             XCTAssertFalse(img.representations.isEmpty,
                            "renderer must produce a bitmap rep for \(s)")
         }
+    }
+
+    func testFanlessTemperatureFallbackProducesValidImage() {
+        // Fanless Macs (fanRPM == nil) drive steam intensity from temperature
+        // instead. Walk the 50→95°C ramp + an out-of-range value to make sure
+        // the temperature fallback path doesn't crash and produces a real image.
+        for t: Double in [50, 70, 95, 110] {
+            let s = state(usage: 0.5, temperature: t, fanRPM: nil)
+            let img = DutchOvenRenderer.render(state: s)
+            XCTAssertEqual(img.size, DutchOvenRenderer.iconSize)
+            XCTAssertFalse(img.representations.isEmpty,
+                           "fanless render must produce a bitmap rep at \(t)°C")
+        }
+        // Temperature also nil: intensity falls to 0, but render must still succeed.
+        let zero = state(usage: 0.5, temperature: nil, fanRPM: nil)
+        XCTAssertFalse(DutchOvenRenderer.render(state: zero).representations.isEmpty)
     }
 
     func testDoesNotCrashOnExtremes() {

@@ -5,6 +5,14 @@ All notable changes are tracked here. The format follows
 
 ## [Unreleased]
 
+### Changed
+- **Fanless Mac support**: `DutchOvenRenderer.steamIntensity` (renamed from
+  `fanIntensity`) falls back to a temperature ramp (50 °C → 95 °C) when
+  `fanRPM == nil`, so the steam still tracks pot heat on MacBook Air-class
+  hardware. Fan-equipped Macs keep the previous `(rpm - 1300) / 2200` curve.
+  `PopupView` hides the Fan chart and Fan metric tile when no fans are
+  reported (3-column layout instead of 4).
+
 ### Added
 - **3D drum-shape pot icon**: cylindrical body with elliptical top rim and
   base, dome lid with knob, back rim drawn behind the lid, and chunky loop

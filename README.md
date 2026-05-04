@@ -20,6 +20,7 @@ collect a sample every second.
 - A **layered flame** (red-orange / orange / yellow-white core) under the pot
   scales with GPU usage; a soft halo radiates onto the pot at high load
 - **Steam puffs** rising from the lid grow thicker and busier with fan RPM
+  (or with temperature on **fanless Macs**)
 - **Boiling animation** (lid bounce + warm-tinted steam) triggers after 5 s of
   sustained load or `thermalPressure ≥ Serious`
 - Honors **Low Power Mode**: drops to 5 fps and disables flame wiggle while LPM
@@ -82,6 +83,8 @@ Shared (compiled into both targets)
 
 - **macOS 14 Sonoma or later** (verified on macOS 26 Tahoe)
 - Universal Binary: **Apple Silicon (M1–M4) and Intel Macs**
+- **Fanless Macs** (MacBook Air M-series, etc.): the Fan chart and Fan metric
+  tile auto-hide; the steam falls back to a temperature ramp
 - Automatic code signing, Team `K38MBRNKAT`
 
 ## Forking / re-signing
@@ -124,15 +127,22 @@ xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO
 ```
 
-53 unit tests covering:
+114 unit tests covering:
 
 - `BoilingTriggerTests` (13): three trigger modes × edge conditions
 - `DockIconAnimatorTests` (15): interpolation, wiggle, boiling fade, timer
   lifecycle, sleep handling, render dedup
-- `DutchOvenRendererTests` (2): smoke rendering across five states + crash
-  resistance over the full usage range
+- `DutchOvenRendererTests` (3): smoke rendering across five states, crash
+  resistance over the full usage range, and the fanless temperature fallback
 - `PowerMetricsParserTests` (12): legacy / macOS 26 Tahoe / Intel schemas
-- `SettingsTests` (5): defaults, persistence, fallback, change stream
+- `IconStateTests` (10) + `IOAcceleratorSelectionTests` (8) +
+  `SensorNameMatcherTests` (10) + `SMCFanDecoderTests` (10) +
+  `PlistStreamSplitterTests` (7): pure helpers extracted from the renderer
+  and the IOKit-bound readers
+- `HelperInstallerTests` (9): version-comparison rules including the
+  monotonic downgrade-refusal cases
+- `HostCPUTests` (2), `SettingsTests` (6): runtime arch detection,
+  persistence, fallback, change stream, reset-to-defaults
 - `GPUSample` / `GPUDataStore` (6): JSON round-trip and ring buffer behavior
 
 ## Deploy
