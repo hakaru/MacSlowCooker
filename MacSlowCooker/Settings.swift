@@ -10,6 +10,9 @@ final class Settings {
         static let flameAnimation = "flameAnimation"
         static let boilingTrigger = "boilingTrigger"
         static let floatAboveOtherWindows = "floatAboveOtherWindows"
+        static let prometheusEnabled      = "prometheusEnabled"
+        static let prometheusPort         = "prometheusPort"
+        static let prometheusBindAll      = "prometheusBindAll"
     }
 
     @ObservationIgnored
@@ -31,6 +34,18 @@ final class Settings {
         didSet { defaults.set(floatAboveOtherWindows, forKey: Keys.floatAboveOtherWindows) }
     }
 
+    var prometheusEnabled: Bool = false {
+        didSet { defaults.set(prometheusEnabled, forKey: Keys.prometheusEnabled) }
+    }
+
+    var prometheusPort: Int = 9091 {
+        didSet { defaults.set(prometheusPort, forKey: Keys.prometheusPort) }
+    }
+
+    var prometheusBindAll: Bool = false {
+        didSet { defaults.set(prometheusBindAll, forKey: Keys.prometheusBindAll) }
+    }
+
     /// Restore every tracked property to its default value. didSet on each
     /// property handles persistence; downstream observers see one yield per
     /// changed field through `Settings.changes`.
@@ -39,6 +54,9 @@ final class Settings {
         flameAnimation = .both
         boilingTrigger = .combined
         floatAboveOtherWindows = true
+        prometheusEnabled = false
+        prometheusPort    = 9091
+        prometheusBindAll = false
     }
 
     static let shared = Settings()
@@ -55,6 +73,10 @@ final class Settings {
         // .object(forKey:) returns nil when the key is missing — distinguish "never set"
         // from "explicitly false" so the default of true holds on first launch.
         self.floatAboveOtherWindows = (defaults.object(forKey: Keys.floatAboveOtherWindows) as? Bool) ?? true
+        self.prometheusEnabled = (defaults.object(forKey: Keys.prometheusEnabled) as? Bool) ?? false
+        let storedPort = defaults.integer(forKey: Keys.prometheusPort)
+        self.prometheusPort    = (1024...65535).contains(storedPort) ? storedPort : 9091
+        self.prometheusBindAll = (defaults.object(forKey: Keys.prometheusBindAll) as? Bool) ?? false
     }
 }
 
@@ -101,6 +123,9 @@ private final class SettingsChangeTracker {
             _ = settings.flameAnimation
             _ = settings.boilingTrigger
             _ = settings.floatAboveOtherWindows
+            _ = settings.prometheusEnabled
+            _ = settings.prometheusPort
+            _ = settings.prometheusBindAll
         } onChange: { [weak self] in
             // onChange fires synchronously *before* the mutation completes.
             // Hop to a Task so the new value is observable when downstream
