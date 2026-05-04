@@ -126,6 +126,36 @@ final class PowerMetricsParserTests: XCTestCase {
         XCTAssertNil(sample.temperature)   // not exposed on macOS 26
     }
 
+    /// powermetrics has historically capitalized the thermal_pressure value
+    /// ("Nominal", "Fair", "Serious", "Critical"), but a future macOS could
+    /// switch the casing or emit a trailing newline. The parser uses the
+    /// lenient enum init so neither variation silently disables the
+    /// combined boiling trigger.
+    func testThermalPressureLenientParsingIsCaseInsensitive() throws {
+        for raw in ["nominal", "NOMINAL", "Nominal", "  Nominal  ", "Nominal\n"] {
+            let dict: [String: Any] = [
+                "gpu": ["idle_ratio": 0.7] as [String: Any],
+                "thermal_pressure": raw
+            ]
+            let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+            let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
+            XCTAssertEqual(sample.thermalPressure, .nominal,
+                           "raw '\(raw)' should map to .nominal")
+        }
+    }
+
+    /// Truly unknown values still surface as nil — the lenient init must
+    /// not guess.
+    func testThermalPressureUnknownStringReturnsNil() throws {
+        let dict: [String: Any] = [
+            "gpu": ["idle_ratio": 0.7] as [String: Any],
+            "thermal_pressure": "Heavy"
+        ]
+        let plistData = try PropertyListSerialization.data(fromPropertyList: dict, format: .binary, options: 0)
+        let sample = try XCTUnwrap(PowerMetricsParser.parse(plistData: plistData, timestamp: Date()))
+        XCTAssertNil(sample.thermalPressure)
+    }
+
     // MARK: - Intel powermetrics schema
 
     /// Intel Macs running powermetrics emit gpu_busy as integer percent.

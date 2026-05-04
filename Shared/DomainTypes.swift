@@ -40,6 +40,26 @@ enum ThermalPressure: String, CaseIterable, Codable, Sendable {
     /// True when the OS asks us to back off — at "Serious" or "Critical".
     /// Used by the boiling-trigger heuristics.
     var isPressured: Bool { self == .serious || self == .critical }
+
+    /// Tolerant init for upstream values that may differ in case ("nominal")
+    /// or carry leading/trailing whitespace. The strict `init(rawValue:)`
+    /// only accepts the canonical capitalized form, which silently
+    /// disabled the combined boiling trigger when powermetrics started
+    /// emitting the value with a trailing newline. Unknown strings still
+    /// return nil — we don't guess at meanings.
+    init?(lenientRawValue raw: String) {
+        let trimmed = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let exact = Self(rawValue: trimmed) {
+            self = exact
+            return
+        }
+        let lower = trimmed.lowercased()
+        for c in Self.allCases where c.rawValue.lowercased() == lower {
+            self = c
+            return
+        }
+        return nil
+    }
 }
 
 // MARK: - Renderer input

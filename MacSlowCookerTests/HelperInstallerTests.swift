@@ -31,8 +31,14 @@ final class HelperInstallerTests: XCTestCase {
         XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.3.0", running: "1.2.9"), Cmp.bundledNewer)
     }
 
-    func testDottedBundledLongerWhenSharedPrefixEqual() {
-        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.2.0", running: "1.2"), Cmp.bundledNewer)
+    /// Trailing zeros are implicit (semver convention). 1.2.0 and 1.2 must
+    /// compare equal so the helper isn't re-registered on every launch when
+    /// the bundled and running CFBundleVersion strings differ only by a
+    /// trailing .0.
+    func testDottedTrailingZerosTreatedAsEqual() {
+        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.2.0", running: "1.2"), Cmp.same)
+        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.0", running: "1.0.0"), Cmp.same)
+        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.0.0.0", running: "1"), Cmp.same)
     }
 
     // MARK: - Bundled older (refresh refused — security blocker)
@@ -45,8 +51,11 @@ final class HelperInstallerTests: XCTestCase {
         XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.2.0", running: "1.3.0"), Cmp.bundledOlder)
     }
 
-    func testDottedRunningLongerRefusesDowngrade() {
-        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.2", running: "1.2.0"), Cmp.bundledOlder)
+    /// Non-zero trailing components are real version differences and must
+    /// trigger refresh in the right direction.
+    func testDottedTrailingNonZeroIsRealUpgrade() {
+        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.0.1", running: "1.0"), Cmp.bundledNewer)
+        XCTAssertEqual(HelperInstaller.compareVersions(bundled: "1.0", running: "1.0.1"), Cmp.bundledOlder)
     }
 
     /// Strings that don't parse as integer or dotted-numeric are treated as

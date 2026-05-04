@@ -9,26 +9,58 @@ private let log = OSLog(subsystem: "com.macslowcooker", category: "helper")
 /// Eliminates the data-race risk that strict-concurrency mode flags on the
 /// previous queue-protected design — actor isolation enforces single-threaded
 /// access to `sampling` and `latestSampleData` at the type system level.
+///
+/// Three-phase lifecycle:
+///   - .idle      — no powermetrics process; first caller transitions to .starting
+///   - .starting  — leader is running runner.start(); subsequent callers wait
+///                  on a continuation, then receive the same outcome
+///   - .running   — sampling is live; subsequent callers short-circuit success
+///
+/// The phase + waiter queue closes the race that pure boolean
+/// tryBeginSampling left open: previously a follower replied "(true, nil)"
+/// to its client immediately, so if the leader's runner.start() then threw,
+/// the follower's app proceeded believing the helper was active when it
+/// wasn't (Gemini security audit, 2026-05-04, finding #26).
 private actor HelperState {
-    private var sampling = false
+    enum Phase { case idle, starting, running }
+    enum StartRole { case leader, follower, alreadyRunning }
+
+    private var phase: Phase = .idle
+    private var startWaiters: [CheckedContinuation<Bool, Never>] = []
     private var latestSampleData: Data?
 
-    /// Atomically check + flip the sampling flag. Returns true when the
-    /// caller should spawn the runner; false when sampling is already in
-    /// progress. Combining the check and the set in one actor call closes
-    /// the race where two correctly-signed XPC clients calling startSampling
-    /// concurrently could both observe `sampling == false` and both spawn
-    /// a powermetrics process (Codex security audit, 2026-05-04, finding #14).
-    func tryBeginSampling() -> Bool {
-        guard !sampling else { return false }
-        sampling = true
-        return true
+    /// Atomically claim the leader role or queue as a follower.
+    /// Followers must call `awaitStartOutcome()` next; leaders must call
+    /// `completeStart(success:)` once `runner.start()` has resolved.
+    func acquireStartRole() -> StartRole {
+        switch phase {
+        case .idle:
+            phase = .starting
+            return .leader
+        case .starting:
+            return .follower
+        case .running:
+            return .alreadyRunning
+        }
     }
 
-    /// Roll back the sampling flag if `runner.start()` throws after we
-    /// committed to the begin. Without this the actor would be stuck at
-    /// `sampling == true` even though no runner is alive.
-    func rollbackSamplingStart() { sampling = false }
+    /// Block the follower's Task until the leader publishes the outcome.
+    /// Returns true if sampling is now live, false if the leader's
+    /// runner.start() threw.
+    func awaitStartOutcome() async -> Bool {
+        await withCheckedContinuation { cont in
+            startWaiters.append(cont)
+        }
+    }
+
+    /// Leader resolves the start: flips the phase, then resumes any
+    /// followers queued during the .starting window with the same outcome.
+    func completeStart(success: Bool) {
+        phase = success ? .running : .idle
+        let waiters = startWaiters
+        startWaiters.removeAll()
+        for w in waiters { w.resume(returning: success) }
+    }
 
     func setLatestSample(_ data: Data?) { latestSampleData = data }
     func latestSample() -> Data? { latestSampleData }
@@ -82,34 +114,42 @@ final class HelperService: NSObject, MacSlowCookerHelperProtocol {
     func startSampling(withReply reply: @escaping (Bool, String?) -> Void) {
         Task { [weak self] in
             guard let self else { reply(false, "service deallocated"); return }
-            // Atomic begin: only the first concurrent caller spawns the
-            // runner. Subsequent callers receive the same success reply
-            // (idempotent) without trying to start a second powermetrics
-            // process.
-            guard await self.state.tryBeginSampling() else {
+            switch await self.state.acquireStartRole() {
+            case .alreadyRunning:
+                // Sampling is already live; idempotent success.
                 reply(true, nil)
-                return
-            }
-            do {
-                try self.runner.start()
-                // Powermetrics takes ~1.3 s to emit its first plist after spawn,
-                // and the app polls fetchLatestSample at 2 Hz. Without a primer,
-                // the popup shows "--" for 2–3 s after every cold launch. Build
-                // a sample from IOAccelerator + SMC + temp readers (everything
-                // except powermetrics-derived power) so the popup fills within
-                // the first poll. Power fills in once powermetrics catches up.
-                if let primer = self.makeIOKitOnlySample(),
-                   let data = try? JSONEncoder().encode(primer) {
-                    await self.state.setLatestSample(data)
+
+            case .follower:
+                // Another caller is in the middle of starting. Wait for the
+                // leader's outcome and reply with the same answer so the two
+                // clients can't disagree about whether the helper is alive.
+                let success = await self.state.awaitStartOutcome()
+                reply(success, success ? nil : "leader's runner.start() failed")
+
+            case .leader:
+                do {
+                    try self.runner.start()
+                    // Powermetrics takes ~1.3 s to emit its first plist after spawn,
+                    // and the app polls fetchLatestSample at 2 Hz. Without a primer,
+                    // the popup shows "--" for 2–3 s after every cold launch. Build
+                    // a sample from IOAccelerator + SMC + temp readers (everything
+                    // except powermetrics-derived power) so the popup fills within
+                    // the first poll. Power fills in once powermetrics catches up.
+                    if let primer = self.makeIOKitOnlySample(),
+                       let data = try? JSONEncoder().encode(primer) {
+                        await self.state.setLatestSample(data)
+                    }
+                    os_log("Sampling started", log: log, type: .info)
+                    await self.state.completeStart(success: true)
+                    reply(true, nil)
+                } catch {
+                    // runner.start() failed: roll the phase back to .idle
+                    // and propagate the failure to every queued follower
+                    // so they don't proceed thinking the helper is alive.
+                    await self.state.completeStart(success: false)
+                    os_log("Failed to start: %{public}s", log: log, type: .error, error.localizedDescription)
+                    reply(false, error.localizedDescription)
                 }
-                os_log("Sampling started", log: log, type: .info)
-                reply(true, nil)
-            } catch {
-                // runner.start() failed after we committed — release the
-                // begin so the next caller can retry.
-                await self.state.rollbackSamplingStart()
-                os_log("Failed to start: %{public}s", log: log, type: .error, error.localizedDescription)
-                reply(false, error.localizedDescription)
             }
         }
     }

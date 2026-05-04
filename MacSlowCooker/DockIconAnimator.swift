@@ -166,12 +166,27 @@ final class DockIconAnimator {
 
     // MARK: - Animation predicate
 
+    /// Threshold below which the renderer's flame becomes invisible
+    /// (`DutchOvenRenderer.drawFlame` short-circuits at `usage < 0.01`,
+    /// so any wiggle phase advance below this is wasted CPU). Keep a
+    /// small margin so the wiggle stays alive at the visible boundary.
+    private static let wiggleVisibleThreshold: Double = 0.05
+
     private func needsAnimation() -> Bool {
         if isSystemAsleep { return false }
-        // Wiggle only matters when there's an active flame to wiggle —
-        // i.e., the helper is sending samples. Disconnected → no wiggle.
-        // Low Power Mode also forces wiggle off (see observeLowPowerMode).
-        if isConnected && !isLowPowerMode && settings.flameAnimation.hasWiggle { return true }
+        // Wiggle keeps the timer alive only when there's actually a flame
+        // visible to wiggle — `DutchOvenRenderer` doesn't draw a flame at
+        // usage < 0.01, so advancing the wiggle phase 10 times a second
+        // while the GPU is idle just burns CPU and WindowServer IPC for
+        // an identical bitmap. Gate on usage so the timer can settle to
+        // 0% CPU during idle. Low Power Mode also forces wiggle off
+        // (see observeLowPowerMode).
+        if isConnected
+            && !isLowPowerMode
+            && settings.flameAnimation.hasWiggle
+            && displayedUsage > Self.wiggleVisibleThreshold {
+            return true
+        }
         if abs(displayedUsage - targetUsage) > 0.005 { return true }
         let boilingTarget: Double = isBoiling ? 1.0 : 0.0
         if abs(boilingIntensity - boilingTarget) > 0.005 { return true }

@@ -72,23 +72,46 @@ final class HelperInstaller {
     /// (2026-05-04, finding #13).
     static func refreshIfStale() async {
         let expected = bundledVersion
-        guard let running = await XPCClient.fetchHelperVersion() else {
-            os_log("Could not query helper version (timeout / XPC error) — skipping refresh check",
+        let runningVersion = await XPCClient.fetchHelperVersion()
+
+        // Decide whether a refresh is warranted. Three paths land here:
+        //   - .same       → no-op
+        //   - .bundledOlder → refuse (downgrade ban)
+        //   - .bundledNewer → refresh
+        // A nil running version is the catch-22 case: SMAppService says
+        // .enabled but the helper isn't answering helperVersion. If the
+        // app simply skipped here (the previous behavior) the user was
+        // stuck with a broken helper forever. Treat persistent
+        // non-response as a stronger "stale" signal than "can't tell"
+        // and force-refresh, gated by a 24 h throttle so a transient
+        // XPC hiccup at launch doesn't churn the daemon every time.
+        let action: RefreshAction
+        if let running = runningVersion {
+            switch compareVersions(bundled: expected, running: running) {
+            case .same:
+                os_log("Helper version matches bundle (%{public}s)", log: log, type: .info, expected)
+                return
+            case .bundledOlder:
+                os_log("Refusing helper downgrade: bundled=%{public}s < running=%{public}s",
+                       log: log, type: .info, expected, running)
+                return
+            case .bundledNewer:
+                os_log("Helper version stale — running=%{public}s bundled=%{public}s; re-registering",
+                       log: log, type: .info, running, expected)
+                action = .refresh
+            }
+        } else if shouldAttemptRecoveryRefresh() {
+            os_log("Helper not responding to helperVersion — attempting recovery re-registration",
+                   log: log, type: .info)
+            recordRecoveryAttempt()
+            action = .refresh
+        } else {
+            os_log("Helper non-responsive but recovery throttle still active — skipping",
                    log: log, type: .info)
             return
         }
-        switch compareVersions(bundled: expected, running: running) {
-        case .same:
-            os_log("Helper version matches bundle (%{public}s)", log: log, type: .info, expected)
-            return
-        case .bundledOlder:
-            os_log("Refusing helper downgrade: bundled=%{public}s < running=%{public}s",
-                   log: log, type: .info, expected, running)
-            return
-        case .bundledNewer:
-            os_log("Helper version stale — running=%{public}s bundled=%{public}s; re-registering",
-                   log: log, type: .info, running, expected)
-        }
+
+        guard action == .refresh else { return }
 
         let service = SMAppService.daemon(plistName: plistName)
         do {
@@ -104,6 +127,26 @@ final class HelperInstaller {
         } catch {
             os_log("Re-register failed: %{public}s", log: log, type: .error, error.localizedDescription)
         }
+    }
+
+    private enum RefreshAction { case refresh }
+
+    private static let recoveryThrottleKey = "helper.lastRecoveryAttempt"
+    private static let recoveryThrottleInterval: TimeInterval = 24 * 60 * 60   // 24 h
+
+    /// Throttle the catch-22 recovery path. Without throttling, a helper
+    /// that always times out on helperVersion would force a re-register
+    /// on every launch — annoying for the user (the app stalls ~3 s on
+    /// each launch) and chatty in launchd logs. 24 h is long enough to
+    /// avoid churn, short enough that the user doesn't wait days for
+    /// auto-recovery.
+    private static func shouldAttemptRecoveryRefresh() -> Bool {
+        let last = UserDefaults.standard.double(forKey: recoveryThrottleKey)
+        return Date().timeIntervalSince1970 - last >= recoveryThrottleInterval
+    }
+
+    private static func recordRecoveryAttempt() {
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: recoveryThrottleKey)
     }
 
     enum VersionComparison {
@@ -127,19 +170,23 @@ final class HelperInstaller {
             return b > r ? .bundledNewer : .bundledOlder
         }
 
-        // Dotted-numeric compare (e.g., "1.2.3" vs "1.3.0")
+        // Dotted-numeric compare (e.g., "1.2.3" vs "1.3.0"). Pad the shorter
+        // component list with zeros so "1.0.0" and "1.0" compare equal —
+        // semantic versioning treats trailing zeros as implicit, and the
+        // earlier "longer wins" rule triggered redundant re-registration on
+        // every launch when the bundled version had a trailing .0 the
+        // running helper didn't (or vice versa).
         let bComponents = bundled.split(separator: ".").compactMap { Int($0) }
         let rComponents = running.split(separator: ".").compactMap { Int($0) }
         if !bComponents.isEmpty,
            !rComponents.isEmpty,
            bComponents.count == bundled.split(separator: ".").count,
            rComponents.count == running.split(separator: ".").count {
-            for (b, r) in zip(bComponents, rComponents) {
+            let longest = Swift.max(bComponents.count, rComponents.count)
+            let bPadded = bComponents + Array(repeating: 0, count: longest - bComponents.count)
+            let rPadded = rComponents + Array(repeating: 0, count: longest - rComponents.count)
+            for (b, r) in zip(bPadded, rPadded) {
                 if b != r { return b > r ? .bundledNewer : .bundledOlder }
-            }
-            // All shared components equal; longer string wins
-            if bComponents.count != rComponents.count {
-                return bComponents.count > rComponents.count ? .bundledNewer : .bundledOlder
             }
             return .same
         }

@@ -44,9 +44,12 @@ enum PowerMetricsParser {
             ?? energyToWatts(energyMJ: coalesceDouble(from: aneDict, keys: ["ane_energy"]),
                              elapsedNs: dict["elapsed_ns"] as? Double)
 
-        // Thermal pressure: top-level categorical value. Unknown future states
-        // surface as nil rather than crashing the parse.
-        let thermalPressure = (dict["thermal_pressure"] as? String).flatMap(ThermalPressure.init(rawValue:))
+        // Thermal pressure: top-level categorical value. Use the lenient
+        // initializer so case differences and trailing whitespace don't
+        // silently disable the combined boiling trigger; truly unknown
+        // future values (Apple may add states) still surface as nil.
+        let thermalPressure = (dict["thermal_pressure"] as? String)
+            .flatMap(ThermalPressure.init(lenientRawValue:))
 
         return GPUSample(
             timestamp: timestamp,

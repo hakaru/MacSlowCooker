@@ -198,6 +198,29 @@ final class DockIconAnimatorTests: XCTestCase {
         XCTAssertTrue(animator.isTimerRunningForTesting)
     }
 
+    /// Wiggle should not keep the timer alive when the GPU is idle —
+    /// `DutchOvenRenderer` doesn't draw a flame at usage < 0.01, so
+    /// advancing the wiggle phase against an invisible flame is wasted
+    /// CPU and WindowServer IPC. needsAnimation() gates wiggle on a
+    /// visibility threshold so the timer can settle.
+    func testWiggleAtIdleStopsTimer() {
+        settings.flameAnimation = .wiggle
+        let animator = DockIconAnimator(settings: settings,
+                                        renderer: CapturingRenderer.self,
+                                        clock: clock,
+                                        autostartTimer: true)
+        animator.setConnected(true)
+        // Idle: GPU usage 0, no boiling, no thermal pressure.
+        animator.update(sample: sample(usage: 0.0))
+
+        for _ in 0..<30 {
+            clock.advance(by: 0.1)
+            animator.tickForTesting()
+        }
+        XCTAssertFalse(animator.isTimerRunningForTesting,
+                       "timer must stop when wiggle is on but GPU is idle")
+    }
+
     // MARK: - System sleep
 
     func testSystemSleepStopsTimer() {
