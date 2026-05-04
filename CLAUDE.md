@@ -141,6 +141,15 @@ Sample-acquisition flow:
    immediately so the popup fills in within the first poll instead of
    waiting ~1.3 s for powermetrics' first emission.
 
+**History subsystem**. Long-term trends are stored in a round-robin SQLite database
+(`~/Library/Application Support/MacSlowCooker/history.sqlite`) with four granularity
+tiers: 5-min/24h, 30-min/7d, 2-hour/31d, 1-day/400d. `HistoryIngestor` (Main-Actor)
+buffers incoming samples in-memory for 5 minutes, then rolls them up via `HistoryAggregator`
+(pure) into the four tables on a staggered schedule — new samples only hit the app,
+not the helper. `HistoryStore` manages insert, query, and cascading rollup. `HistoryView`
+renders MRTG-style 4-panel Daily / Weekly / Monthly / Yearly graphs for GPU / Temp / Power / Fan,
+wired to a window accessible via Cmd+Shift+H from the app menu.
+
 ## macOS 26 (Tahoe) gotchas
 
 **powermetrics output schema changed**. The capitalized keys that worked up

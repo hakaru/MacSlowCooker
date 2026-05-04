@@ -14,6 +14,10 @@ All notable changes are tracked here. The format follows
   reported (3-column layout instead of 4).
 
 ### Added
+- **History window**: MRTG-style Daily / Weekly / Monthly / Yearly graphs for
+  GPU / Temp / Power / Fan, accessible via Cmd+Shift+H.
+- **Local round-robin SQLite store**: `~/Library/Application Support/MacSlowCooker/history.sqlite`
+  with 24h/7d/31d/400d retention across four granularity tiers (5-min / 30-min / 2-hour / 1-day).
 - **3D drum-shape pot icon**: cylindrical body with elliptical top rim and
   base, dome lid with knob, back rim drawn behind the lid, and chunky loop
   handles — replaces the earlier flat-rectangle silhouette
