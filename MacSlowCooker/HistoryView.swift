@@ -23,13 +23,13 @@ final class HistoryViewModel {
 
 struct HistoryView: View {
     @Bindable var model: HistoryViewModel
-    @State private var selectedMetric: HistoryMetric = .gpu
+    @State private var selectedPanel: HistoryPanel = .compute
 
     var body: some View {
         VStack(spacing: 8) {
-            Picker("Metric", selection: $selectedMetric) {
-                ForEach(HistoryMetric.allCases) { m in
-                    Text(m.label).tag(m)
+            Picker("Panel", selection: $selectedPanel) {
+                ForEach(HistoryPanel.all) { p in
+                    Text(p.title).tag(p)
                 }
             }
             .pickerStyle(.segmented)
@@ -40,7 +40,7 @@ struct HistoryView: View {
                     ForEach(HistoryGranularity.allCases, id: \.self) { g in
                         MRTGGraphView(
                             records: model.byGranularity[g] ?? [],
-                            metric: selectedMetric,
+                            panel: selectedPanel,
                             granularity: g,
                             nowTs: model.nowTs
                         )
@@ -50,8 +50,8 @@ struct HistoryView: View {
                 .padding(.vertical, 6)
             }
         }
-        .frame(minWidth: 520, minHeight: 520)
-        .background(Color(white: 0.04))
+        .frame(minWidth: 560, minHeight: 860)
+        .background(Color(white: 0.82))
         .onAppear { model.reload() }
         .task {
             // refresh every 30s while window is open

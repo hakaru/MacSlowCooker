@@ -21,7 +21,7 @@ final class HistoryWindowController {
         let w = NSWindow(contentViewController: host)
         w.title = "MacSlowCooker — History"
         w.styleMask = [.titled, .closable, .resizable, .miniaturizable]
-        w.setContentSize(NSSize(width: 560, height: 600))
+        w.setContentSize(NSSize(width: 560, height: 860))
         w.center()
         w.isReleasedWhenClosed = false
         self.window = w
