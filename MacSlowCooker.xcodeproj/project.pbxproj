@@ -40,9 +40,11 @@
 		615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = 73FF777792F4238DEEF4F99A /* HelperInstaller.swift */; };
 		6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */; };
 		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
+		736FAE3084734726C1C2F678 /* PrometheusFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40E15AC15D47D04A7574141 /* PrometheusFormatter.swift */; };
 		760D565509E5823256AB4D9A /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB8F2B268DF690695A9B7A5 /* HistoryView.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
+		7854A848EF2500293A5F6997 /* PrometheusFormatterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FDE0E05029EBE4C2FD9F783D /* PrometheusFormatterTests.swift */; };
 		7EF33FEE839A8E06A3E1FBF1 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		807416548C9F17AF8218954C /* DomainTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEFEAB2D6813CEADDF5073D /* DomainTypes.swift */; };
@@ -64,6 +66,7 @@
 		BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */; };
 		BB2103C829016BA8059FF165 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB505FEF4C5660E59EB3CEAA /* main.swift */; };
 		BBB0FA64BE257EE7B741C962 /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
+		BE259AFF54D4E1BA992589B7 /* PrometheusFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = C40E15AC15D47D04A7574141 /* PrometheusFormatter.swift */; };
 		C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5DC5135696164D72811AE540 /* PotRenderer.swift */; };
 		C7683C66966DFF255A795402 /* DutchOvenRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */; };
 		C9A77AD58066B63A688D390A /* CodeSigningConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */; };
@@ -155,6 +158,7 @@
 		C09F2932603A8ED77B89214A /* DockIconAnimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DockIconAnimatorTests.swift; sourceTree = "<group>"; };
 		C1D49462714C3DCBE433D3F1 /* HistoryStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryStoreTests.swift; sourceTree = "<group>"; };
 		C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStore.swift; sourceTree = "<group>"; };
+		C40E15AC15D47D04A7574141 /* PrometheusFormatter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrometheusFormatter.swift; sourceTree = "<group>"; };
 		C929AEEF3850949F5C500F9E /* MacSlowCooker.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MacSlowCooker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MacSlowCooker.entitlements; sourceTree = "<group>"; };
 		D6FD3EAEBA63C6A9E996791F /* TemperatureReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemperatureReader.swift; sourceTree = "<group>"; };
@@ -162,6 +166,7 @@
 		F1526E4C501E999A7FB17583 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		F4F70EDB8D4300E8C29FAFEB /* CodeSigningConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeSigningConfig.swift; sourceTree = "<group>"; };
 		FB505FEF4C5660E59EB3CEAA /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		FDE0E05029EBE4C2FD9F783D /* PrometheusFormatterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrometheusFormatterTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -206,6 +211,7 @@
 				A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */,
 				41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */,
 				1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */,
+				FDE0E05029EBE4C2FD9F783D /* PrometheusFormatterTests.swift */,
 				A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */,
 				495D61085AE6A59E664ACBF0 /* SettingsTests.swift */,
 				00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */,
@@ -242,6 +248,7 @@
 				1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */,
 				89761905E8056C5CE8F2091D /* PlistStreamSplitter.swift */,
 				79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */,
+				C40E15AC15D47D04A7574141 /* PrometheusFormatter.swift */,
 				11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */,
 				4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */,
 				947C59473F2C40EDC54468E3 /* XPCProtocol.swift */,
@@ -449,6 +456,7 @@
 				C11EA1D407B1C5C45BD363A4 /* PotRenderer.swift in Sources */,
 				B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */,
 				081A0E07BDD1AE9959679FD6 /* PreferencesWindowController.swift in Sources */,
+				BE259AFF54D4E1BA992589B7 /* PrometheusFormatter.swift in Sources */,
 				44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */,
 				DAB315CD66ED5297D43BD725 /* SensorNameMatcher.swift in Sources */,
 				7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */,
@@ -475,6 +483,7 @@
 				D0E44CBA71ACE5AD74AE423D /* PlistStreamSplitter.swift in Sources */,
 				357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */,
 				77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */,
+				736FAE3084734726C1C2F678 /* PrometheusFormatter.swift in Sources */,
 				8F2558172004E9EECBC1DD6F /* SMCFanDecoder.swift in Sources */,
 				6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */,
 				6741480FA9A8030FD9E8044A /* SensorNameMatcher.swift in Sources */,
@@ -503,6 +512,7 @@
 				8CCF001921C683107237C79E /* IconStateTests.swift in Sources */,
 				A06448FE4590B91C638C8A36 /* PlistStreamSplitterTests.swift in Sources */,
 				F7DA8A7656AFAE9B544DDE36 /* PowerMetricsParserTests.swift in Sources */,
+				7854A848EF2500293A5F6997 /* PrometheusFormatterTests.swift in Sources */,
 				B7966580AB33ED760BE514D2 /* SMCFanDecoderTests.swift in Sources */,
 				25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */,
 				224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */,
