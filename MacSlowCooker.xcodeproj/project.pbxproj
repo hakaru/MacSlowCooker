@@ -44,6 +44,7 @@
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		807416548C9F17AF8218954C /* DomainTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEFEAB2D6813CEADDF5073D /* DomainTypes.swift */; };
 		8CCF001921C683107237C79E /* IconStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */; };
+		8D50769B09D36F775901AA85 /* HistoryIngestorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10932E253D1A27CB2821EA75 /* HistoryIngestorTests.swift */; };
 		8DE91AA62416730A4C745E9C /* HistoryAggregatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E818E5D6FFE6F9A591F616B /* HistoryAggregatorTests.swift */; };
 		8F2558172004E9EECBC1DD6F /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893FAA89E50A101FCB8B0C01 /* HostCPU.swift */; };
@@ -54,6 +55,7 @@
 		AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */; };
 		AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
 		AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
+		AF77608B99D36EA876BE4394 /* HistoryIngestor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45F7531D09F4944188F12578 /* HistoryIngestor.swift */; };
 		B0C4EF3C729DF56EB85AD35C /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
 		B7966580AB33ED760BE514D2 /* SMCFanDecoderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */; };
 		BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEECA616DE215DB9C32857 /* IOAcceleratorSelectionTests.swift */; };
@@ -99,6 +101,7 @@
 		06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
 		0A6845F2B35F7FD152E9F7AE /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		0E818E5D6FFE6F9A591F616B /* HistoryAggregatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryAggregatorTests.swift; sourceTree = "<group>"; };
+		10932E253D1A27CB2821EA75 /* HistoryIngestorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryIngestorTests.swift; sourceTree = "<group>"; };
 		11577E53C0E7A7F17A9A7609 /* SensorNameMatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcher.swift; sourceTree = "<group>"; };
 		13B73BDFE8425C8EA1986F72 /* AnimationFrameGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimationFrameGeneratorTests.swift; sourceTree = "<group>"; };
 		1ACF2BE355AE74EAAEF6F11B /* PowerMetricsParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsParserTests.swift; sourceTree = "<group>"; };
@@ -110,6 +113,7 @@
 		3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUSampleTests.swift; sourceTree = "<group>"; };
 		3A3F7901E7ECC5583D7607FA /* HelperTool */ = {isa = PBXFileReference; includeInIndex = 0; path = HelperTool; sourceTree = BUILT_PRODUCTS_DIR; };
 		41807F7F5A576518F1652F0F /* PlistStreamSplitterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlistStreamSplitterTests.swift; sourceTree = "<group>"; };
+		45F7531D09F4944188F12578 /* HistoryIngestor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryIngestor.swift; sourceTree = "<group>"; };
 		49590860FBFF3F1F61A81C47 /* CookingHeuristics.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookingHeuristics.swift; sourceTree = "<group>"; };
 		495D61085AE6A59E664ACBF0 /* SettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsTests.swift; sourceTree = "<group>"; };
 		4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCFanDecoder.swift; sourceTree = "<group>"; };
@@ -189,6 +193,7 @@
 				3928EFACA36DAF2829134BC2 /* GPUSampleTests.swift */,
 				36BDB90D732C6D0E4D1A6FC0 /* HelperInstallerTests.swift */,
 				0E818E5D6FFE6F9A591F616B /* HistoryAggregatorTests.swift */,
+				10932E253D1A27CB2821EA75 /* HistoryIngestorTests.swift */,
 				C1D49462714C3DCBE433D3F1 /* HistoryStoreTests.swift */,
 				9CE0042C42E9744B3EB0C886 /* HostCPUTests.swift */,
 				8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */,
@@ -247,6 +252,7 @@
 				A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */,
 				C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */,
 				73FF777792F4238DEEF4F99A /* HelperInstaller.swift */,
+				45F7531D09F4944188F12578 /* HistoryIngestor.swift */,
 				BC092273F19F128EE10C4267 /* HistoryStore.swift */,
 				F1526E4C501E999A7FB17583 /* Info.plist */,
 				CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */,
@@ -420,6 +426,7 @@
 				615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */,
 				4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */,
 				5F2CCCED899B5219A2E7FFFF /* HistoryGranularity.swift in Sources */,
+				AF77608B99D36EA876BE4394 /* HistoryIngestor.swift in Sources */,
 				06C982BBA6C2D8039BB17C7D /* HistoryRecord.swift in Sources */,
 				51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */,
 				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
@@ -477,6 +484,7 @@
 				AB111A595122C203DE8CC5DE /* GPUSampleTests.swift in Sources */,
 				302501165907DD4DB1F77ADD /* HelperInstallerTests.swift in Sources */,
 				8DE91AA62416730A4C745E9C /* HistoryAggregatorTests.swift in Sources */,
+				8D50769B09D36F775901AA85 /* HistoryIngestorTests.swift in Sources */,
 				FD373F98FA95CC6561D6FA4B /* HistoryStoreTests.swift in Sources */,
 				174FF65D4FEA5DC343574588 /* HostCPUTests.swift in Sources */,
 				BA6F204A9127CBDD43454165 /* IOAcceleratorSelectionTests.swift in Sources */,
