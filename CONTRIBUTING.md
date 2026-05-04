@@ -86,6 +86,31 @@ context document for AI coding assistants used during development.)
   comments when the *why* is non-obvious — a hidden constraint, a workaround
   for a specific macOS quirk, behavior that would surprise a reader.
 
+## Regenerating the README hero GIF
+
+The animated Dock icon at the top of the README is generated
+programmatically — `AnimationFrameGeneratorTests` runs a synthetic
+`IconState` timeline (idle → ramp → boiling → cooldown) through
+`DutchOvenRenderer` and assembles a GIF with `ImageIO`. No ffmpeg
+dependency.
+
+To regenerate after a renderer tweak:
+
+```bash
+touch /tmp/MACSLOWCOOKER_GENERATE_FRAMES
+xcodebuild test \
+  -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
+  -destination 'platform=macOS' \
+  -only-testing:MacSlowCookerTests/AnimationFrameGeneratorTests \
+  CODE_SIGNING_ALLOWED=NO
+cp /tmp/macslowcooker.gif docs/images/dock-icon-animation.gif
+```
+
+The sentinel file (rather than an env var) gates the test because
+`xcodebuild` does not propagate shell environment to the test runner
+process. The test is otherwise skipped by default so it doesn't slow
+the regular test pass / CI.
+
 ## Submitting changes
 
 - Fork, branch, push, open a PR against `main`.
