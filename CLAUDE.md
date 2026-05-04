@@ -93,6 +93,10 @@ Shared（両ターゲットでコンパイルされる）
 
 **Fan RPM の取得**: `HelperTool/SMCReader.swift` が `IOServiceMatching("AppleSMC")` 経由で AppleSMC ユーザクライアントに接続、`IOConnectCallStructMethod(connection, kSMCHandleYPCEvent=2, ...)` で `FNum` (UInt8) と `F[i]Ac` (fpe2: 16-bit big-endian, 14-int + 2-frac → `raw / 4.0` で RPM) を読む。Mac Studio (Mac15,14, M3 Ultra) で 2 fan 検出。Helper は root なので IOConnect は無条件で成功する。
 
+**ファンレス機種 (MacBook Air M-series など) の扱い**: `FNum` キーが SMC に存在しないため `SMC: FNum read failed` がログに出るが、**これは正常**。`GPUSample.fanRPM` が `nil` になることをシグナルとして、UI と描画の両方でフォールバックする:
+- `DutchOvenRenderer.steamIntensity(state:)` は `state.fanRPM == nil` のとき温度ベース計算 `(temp - 50) / 45` にフォールバックし、ファン搭載機と同じ `0…1` レンジを返す。この温度ランプの下限 50°C・上限 95°C は `potColor` のグラデーション範囲と意図的に揃えてある。ファン搭載機は従来通り `(rpm - 1300) / 2200` クランプ。`steamStrandCount(state:intensity:)` の引数名は `intensity:` に統一。
+- `PopupView.hasFans` (`latest?.fanRPM != nil`) が `false` の場合、Fan チャートと Fan メトリクスタイルは `if hasFans` で条件的に非表示となり、GPU / Temperature / Power の 3 列構成になる。
+
 **温度センサー**: IOHIDEventSystem に「GPU MTR Temp Sensor」は Apple Silicon に存在しない。M3 Ultra では `PMU tdie*` / `PMU tdev*` のみ 77 個露出。Intel Mac では「GPU Proximity」「Graphics」系が見える。`TemperatureReader` は `name.contains("die") || name.contains("gpu") || name.contains("proximity") || name.contains("graphics")` で広めに拾って平均する（GPU 専用ではないため UI ラベルは Apple Silicon では「SoC 温度」、Intel では「温度」）。GPU 専用温度は SMC `Tg05` / `Tg0D` 経由でしか取れず、未実装。
 
 **Intel powermetrics キー**: Intel Mac の powermetrics は `gpu.gpu_busy`（integer percent）または `gpu.busy_ns` + `(gpu|top).elapsed_ns` を出す。Apple Silicon の `gpu_active_residency` / `idle_ratio` キーは出ない。`PowerMetricsParser` は両系統を順に試す。

@@ -337,18 +337,19 @@ enum DutchOvenRenderer: PotRenderer {
             options: [])
         ctx.restoreGState()
 
-        // Steam — count, height, and thickness scale with fan RPM (more steam
-        // when fans spin harder). Mac Studio fans run ~1300 idle → ~3500 max,
-        // so we normalize that range to a 0..1 intensity factor.
-        let fanIntensity = fanIntensity(state: state)
-        let count = steamStrandCount(state: state, fanIntensity: fanIntensity)
+        // Steam intensity drives count/height/thickness/color. On fan-equipped
+        // Macs we use fan RPM (more steam when fans spin harder); on fanless
+        // Macs (MacBook Air) we fall back to temperature so the visual still
+        // tells a "the pot is heating up" story.
+        let intensity = steamIntensity(state: state)
+        let count = steamStrandCount(state: state, intensity: intensity)
         if count == 0 { return }
 
         // Bold, opaque, wavy steam so it reads at Dock size.
-        let lineWidth = rect.width * (0.045 + 0.030 * fanIntensity)
+        let lineWidth = rect.width * (0.045 + 0.030 * intensity)
         ctx.setLineWidth(lineWidth)
         ctx.setLineCap(.round)
-        let steamAlpha: CGFloat = 0.78 + 0.22 * fanIntensity
+        let steamAlpha: CGFloat = 0.78 + 0.22 * intensity
         let hotAlpha: CGFloat = min(1.0, steamAlpha)
         let coolColor = CGColor(red: 1, green: 1, blue: 1, alpha: steamAlpha)
         let hotColor  = CGColor(red: 1, green: 0.45, blue: 0.25, alpha: hotAlpha)
@@ -358,8 +359,8 @@ enum DutchOvenRenderer: PotRenderer {
         let baseX = rect.width * 0.50
         let stride = rect.width * 0.11
         let bottomY = rect.height * 0.68
-        let topY    = rect.height * (0.94 + 0.04 * fanIntensity)
-        let swayMag = stride * (0.45 + 0.50 * fanIntensity)
+        let topY    = rect.height * (0.94 + 0.04 * intensity)
+        let swayMag = stride * (0.45 + 0.50 * intensity)
 
         // Five candidate strand positions; we draw the first `count`.
         // Sway sign alternates so adjacent strands wave in opposite directions.
@@ -412,14 +413,20 @@ enum DutchOvenRenderer: PotRenderer {
         ctx.strokePath()
     }
 
-    /// Mac Studio fans idle at ~1300 RPM and approach ~3500 RPM under sustained
-    /// heavy load. Map that range to 0..1 for visual scaling.
-    private static func fanIntensity(state: IconState) -> Double {
-        guard let rpm = state.fanRPM else { return 0 }
-        return max(0, min(1, (rpm - 1300) / 2200))
+    /// 0..1 normalized "how active is the pot" factor that drives steam.
+    /// Fan-equipped Macs: Mac Studio fans idle ~1300 RPM, max ~3500 → linear.
+    /// Fanless Macs (no `fanRPM`): fall back to temperature using the same
+    /// 50°C → 95°C ramp that `potColor` uses, so the pot color and steam
+    /// liveliness move in lockstep.
+    private static func steamIntensity(state: IconState) -> Double {
+        if let rpm = state.fanRPM {
+            return max(0, min(1, (rpm - 1300) / 2200))
+        }
+        guard let t = state.temperature else { return 0 }
+        return max(0, min(1, (t - 50) / 45))
     }
 
-    private static func steamStrandCount(state: IconState, fanIntensity: Double) -> Int {
+    private static func steamStrandCount(state: IconState, intensity: Double) -> Int {
         let usage = state.displayedUsage
         let base: Int
         switch usage {
@@ -428,10 +435,10 @@ enum DutchOvenRenderer: PotRenderer {
         case ..<0.85: base = 3
         default:      base = 3
         }
-        // Boiling adds one strand; high fan adds up to 2 more.
+        // Boiling adds one strand; high intensity adds up to 2 more.
         let boilingExtra = state.boilingIntensity > 0.5 ? 1 : 0
-        let fanExtra = fanIntensity >= 0.5 ? 2 : (fanIntensity >= 0.2 ? 1 : 0)
-        return base + boilingExtra + fanExtra
+        let intensityExtra = intensity >= 0.5 ? 2 : (intensity >= 0.2 ? 1 : 0)
+        return base + boilingExtra + intensityExtra
     }
 
     private static func lerpColor(from a: CGColor, to b: CGColor, t: Double) -> CGColor {

@@ -75,16 +75,18 @@ struct PopupView: View {
                 yDomain: 30...100,
                 unit: "°C"
             )
-            chartView(
-                title: "Fan",
-                systemImage: "fan.fill",
-                samples: store.samples,
-                value: { $0.fanRPM?.max() },
-                color: .mint,
-                scale: 1,
-                yDomain: 0...4000,
-                unit: "rpm"
-            )
+            if hasFans {
+                chartView(
+                    title: "Fan",
+                    systemImage: "fan.fill",
+                    samples: store.samples,
+                    value: { $0.fanRPM?.max() },
+                    color: .mint,
+                    scale: 1,
+                    yDomain: 0...4000,
+                    unit: "rpm"
+                )
+            }
             chartView(
                 title: "Power",
                 systemImage: "bolt.fill",
@@ -175,8 +177,10 @@ struct PopupView: View {
                        value: gpuText,   accent: .cyan,    valueColor: gpuDangerColor)
             metricCard(systemImage: "thermometer.medium",  label: "Temp",
                        value: tempText,  accent: tempColor, valueColor: tempDangerColor)
-            metricCard(systemImage: "fan.fill",            label: "Fan",
-                       value: fanText,   accent: .mint,    valueColor: fanDangerColor)
+            if hasFans {
+                metricCard(systemImage: "fan.fill",        label: "Fan",
+                           value: fanText,   accent: .mint, valueColor: fanDangerColor)
+            }
             metricCard(systemImage: "bolt.fill",           label: "Power",
                        value: powerText, accent: .yellow,  valueColor: powerDangerColor)
         }
@@ -271,6 +275,10 @@ struct PopupView: View {
     }
 
     private var latest: GPUSample? { store.latestSample }
+
+    /// Hide Fan chart and tile on fanless Macs (e.g., MacBook Air). HelperService
+    /// signals "no fans" by leaving `fanRPM` nil — see `Shared/GPUSample.swift`.
+    private var hasFans: Bool { latest?.fanRPM != nil }
 
     private var gpuText: String {
         latest.map { String(format: "%.0f%%", $0.gpuUsage * 100) } ?? "--"

@@ -2,7 +2,14 @@
 
 すべての注目すべき変更点を記録する。フォーマットは [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) に準拠。
 
-## [Unreleased] — 2026-05-03
+## [Unreleased] — 2026-05-04
+
+### Changed
+- **湯気エフェクトをファンレス機種では温度ベースに切り替え** (`DutchOvenRenderer`): `fanIntensity` を `steamIntensity` にリネームし、`fanRPM == nil` のとき温度ランプ `(temp - 50) / 45` (50→95°C) にフォールバック。ファン搭載機は従来通り `(rpm - 1300) / 2200` クランプ。
+- **ポップアップの Fan チャートと Fan メトリクスタイルをファンレス機種で非表示** (`PopupView`): `hasFans` プロパティ (`latest?.fanRPM != nil`) を追加し、`if hasFans` で Fan UI を条件表示。ファンレス機種 (MacBook Air など) では GPU / Temperature / Power の 3 列構成になる。
+
+### Tests
+- `DutchOvenRendererTests` にファンレス温度フォールバック経路のスモークテスト (`testFanlessTemperatureFallbackProducesValidImage`) を追加 (55 テスト全 pass)
 
 ### Added (Pot Icon PoC)
 - **Dutch oven Dock アイコン** (3D 白鍋 + GPU 使用率連動の炎 + ファン連動の波形湯気)
