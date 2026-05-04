@@ -30,6 +30,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var preferencesController: PreferencesWindowController?
     private lazy var historyController: HistoryWindowController? =
         historyStore.map { HistoryWindowController(store: $0) }
+    private let prometheusExporter = PrometheusExporter(
+        version: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "0"
+    )
     private var settingsObservationTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -64,6 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+        configurePrometheusExporter()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -165,15 +169,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             store.addSample(sample)
             animator.update(sample: sample)
             historyIngestor?.ingest(sample)
+            prometheusExporter.update(sample: sample)
         }
         xpcClient.onConnected = { [weak self] in
             self?.store.setConnected(true)
             self?.animator.setConnected(true)
+            self?.prometheusExporter.update(helperConnected: true)
             os_log("XPC connected", log: log, type: .info)
         }
         xpcClient.onDisconnected = { [weak self] in
             self?.store.setConnected(false)
             self?.animator.setConnected(false)
+            self?.prometheusExporter.update(helperConnected: false)
             os_log("XPC disconnected", log: log, type: .info)
         }
         xpcClient.connect()
@@ -181,16 +188,32 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Settings observation
 
+    private func configurePrometheusExporter() {
+        prometheusExporter.stop()
+        guard settings.prometheusEnabled else { return }
+        do {
+            try prometheusExporter.start(
+                port: UInt16(settings.prometheusPort),
+                loopbackOnly: !settings.prometheusBindAll
+            )
+        } catch {
+            os_log("PrometheusExporter start failed: %{public}@", log: log, type: .error, String(describing: error))
+        }
+    }
+
     private func observeSettings() {
-        settingsObservationTask = Task { @MainActor [animator, settings] in
+        settingsObservationTask = Task { @MainActor [weak self] in
+            guard let self else { return }
             for await _ in settings.changes {
                 animator.settingsDidChange()
+                configurePrometheusExporter()
             }
         }
     }
 
     func applicationWillTerminate(_ notification: Notification) {
         historyIngestor?.flushPending()
+        prometheusExporter.stop()
     }
 
     // MARK: - System sleep
