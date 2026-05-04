@@ -28,6 +28,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var popupController = PopupWindowController(store: store)
     private var preferencesController: PreferencesWindowController?
+    private lazy var historyController: HistoryWindowController? =
+        historyStore.map { HistoryWindowController(store: $0) }
     private var settingsObservationTask: Task<Void, Never>?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
@@ -84,6 +86,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         appMenu.addItem(NSMenuItem(title: "Preferences…",
                                    action: #selector(showPreferences),
                                    keyEquivalent: ","))
+        let historyItem = NSMenuItem(title: "History…",
+                                     action: #selector(openHistoryWindow),
+                                     keyEquivalent: "h")
+        historyItem.keyEquivalentModifierMask = [.command, .shift]
+        appMenu.addItem(historyItem)
 
         let services = NSMenuItem(title: "Services", action: nil, keyEquivalent: "")
         let servicesMenu = NSMenu()
@@ -144,6 +151,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             preferencesController = PreferencesWindowController()
         }
         preferencesController?.showWindow()
+    }
+
+    @objc private func openHistoryWindow() {
+        historyController?.showWindow()
     }
 
     // MARK: - XPC

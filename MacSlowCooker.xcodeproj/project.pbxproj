@@ -26,6 +26,7 @@
 		33CC2BCD849BE234FA621AEE /* GPUDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */; };
 		357987FE82A77A7069D4EBDA /* PowerMetricsParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79E7A44D0F265693D50B89FE /* PowerMetricsParser.swift */; };
 		3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
+		3F3ED321D9347E61B77A0AE2 /* HistoryWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91FD30DF4F71C52F6B2DEF7C /* HistoryWindowController.swift */; };
 		43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */; };
 		44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
 		4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
@@ -136,6 +137,7 @@
 		8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconStateTests.swift; sourceTree = "<group>"; };
 		8CB8F2B268DF690695A9B7A5 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		90386A8D8287F8D6433DA49A /* PopupWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PopupWindowController.swift; sourceTree = "<group>"; };
+		91FD30DF4F71C52F6B2DEF7C /* HistoryWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryWindowController.swift; sourceTree = "<group>"; };
 		947C59473F2C40EDC54468E3 /* XPCProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XPCProtocol.swift; sourceTree = "<group>"; };
 		94D92C3800DE781ECF37A6F3 /* IOAcceleratorReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IOAcceleratorReader.swift; sourceTree = "<group>"; };
 		9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PowerMetricsRunner.swift; sourceTree = "<group>"; };
@@ -259,6 +261,7 @@
 				45F7531D09F4944188F12578 /* HistoryIngestor.swift */,
 				BC092273F19F128EE10C4267 /* HistoryStore.swift */,
 				8CB8F2B268DF690695A9B7A5 /* HistoryView.swift */,
+				91FD30DF4F71C52F6B2DEF7C /* HistoryWindowController.swift */,
 				F1526E4C501E999A7FB17583 /* Info.plist */,
 				CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */,
 				FB505FEF4C5660E59EB3CEAA /* main.swift */,
@@ -436,6 +439,7 @@
 				06C982BBA6C2D8039BB17C7D /* HistoryRecord.swift in Sources */,
 				51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */,
 				760D565509E5823256AB4D9A /* HistoryView.swift in Sources */,
+				3F3ED321D9347E61B77A0AE2 /* HistoryWindowController.swift in Sources */,
 				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
 				AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */,
 				1DD5E2D55DB9FAFD23A02D06 /* MRTGGraphView.swift in Sources */,
