@@ -18,6 +18,7 @@
 		194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C338472C191A1C9B820B0DF1 /* GPUDataStore.swift */; };
 		1D20E94F4249CF8D845E1598 /* AnimationFrameGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 13B73BDFE8425C8EA1986F72 /* AnimationFrameGeneratorTests.swift */; };
 		1DD3C572DD4FEAF2BCD9A9A7 /* HostCPU.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893FAA89E50A101FCB8B0C01 /* HostCPU.swift */; };
+		1DD5E2D55DB9FAFD23A02D06 /* MRTGGraphView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0596F2BDFE65790DC19C1086 /* MRTGGraphView.swift */; };
 		224619B4DCE6E4EE426A3A4B /* SettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495D61085AE6A59E664ACBF0 /* SettingsTests.swift */; };
 		25056354E9BAD68BD1E23146 /* SensorNameMatcherTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */; };
 		273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B0E01379C7F34814B84799B /* GPUSample.swift */; };
@@ -96,6 +97,7 @@
 
 /* Begin PBXFileReference section */
 		00E5E75B9BF5087EE50D15EE /* SMCFanDecoderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCFanDecoderTests.swift; sourceTree = "<group>"; };
+		0596F2BDFE65790DC19C1086 /* MRTGGraphView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MRTGGraphView.swift; sourceTree = "<group>"; };
 		05A9EF7E1C735A467AD710EA /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		06304D97009BFCA9ACC5499C /* HistoryRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryRecord.swift; sourceTree = "<group>"; };
 		06AC80CB23420BF937E3E1F9 /* GPUDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPUDataStoreTests.swift; sourceTree = "<group>"; };
@@ -257,6 +259,7 @@
 				F1526E4C501E999A7FB17583 /* Info.plist */,
 				CD37423AD9E49ABE81BD17D2 /* MacSlowCooker.entitlements */,
 				FB505FEF4C5660E59EB3CEAA /* main.swift */,
+				0596F2BDFE65790DC19C1086 /* MRTGGraphView.swift */,
 				1FBE4FF29F56752B038056F5 /* PopupView.swift */,
 				90386A8D8287F8D6433DA49A /* PopupWindowController.swift */,
 				5DC5135696164D72811AE540 /* PotRenderer.swift */,
@@ -431,6 +434,7 @@
 				51D2E8C6506D814FD8EEDBEA /* HistoryStore.swift in Sources */,
 				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
 				AE8C9D4100DF7EEB7F817DE1 /* IOAcceleratorSelection.swift in Sources */,
+				1DD5E2D55DB9FAFD23A02D06 /* MRTGGraphView.swift in Sources */,
 				D80B10C0C617AD41F5BA4257 /* PlistStreamSplitter.swift in Sources */,
 				0B75C45876F33514001EBF69 /* PopupView.swift in Sources */,
 				7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */,
