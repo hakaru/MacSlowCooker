@@ -11,7 +11,12 @@ Intel Macs.
 ## Development commands
 
 ```bash
-# Regenerate the Xcode project (after editing project.yml)
+# Swap the Apple Developer Team ID across the 5 places that pin it
+# (Shared/CodeSigningConfig.swift, HelperTool/Info.plist, project.yml,
+# README.md, this file). Required after forking with a different cert.
+bin/set-team-id.sh ABC1234XYZ
+
+# Regenerate the Xcode project (after editing project.yml or adding files)
 xcodegen generate
 
 # Signed Release build (signing is required for the helper to load)
@@ -31,7 +36,8 @@ xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
 ```
 
 `ONLY_ACTIVE_ARCH=NO` is what produces a true Universal Binary; without it
-xcodebuild emits only the host arch slice.
+xcodebuild emits only the host arch slice. CI (`.github/workflows/ci.yml`)
+runs the same build + test pipeline on every PR into `main`.
 
 ## Deploy
 
@@ -97,6 +103,8 @@ HelperTool (root LaunchDaemon, Contents/MacOS/HelperTool)
   └── TemperatureReader           — IOHIDEventSystem-based SoC temperature
 
 Shared (compiled into both targets)
+  ├── DomainTypes                 — PotStyle / FlameAnimation /
+  │                                 BoilingTrigger / IconState / ThermalPressure
   ├── GPUSample                   — Codable data model
   ├── XPCProtocol                 — MacSlowCookerHelperProtocol
   ├── PowerMetricsParser          — pure / testable plist parser
@@ -104,8 +112,19 @@ Shared (compiled into both targets)
   ├── SMCFanDecoder               — pure fpe2 / flt fan-RPM decoder
   ├── IOAcceleratorSelection      — pure max-aggregation across services
   ├── SensorNameMatcher           — pure die / gpu / proximity / graphics name match
+  ├── CookingHeuristics           — pure boiling/temperature rules used by animator
+  ├── HostCPU                     — runtime Apple Silicon detection
   └── CodeSigningConfig           — single source for Team OU + XPC requirement
 ```
+
+**Pure-helper pattern**. The IOKit-bound classes (`SMCReader`,
+`IOAcceleratorReader`, `TemperatureReader`, `PowerMetricsRunner`) are thin
+wrappers over the IOKit / Process APIs. The byte-level / sort / match /
+buffer logic each lifts into a pure type in `Shared/` (`SMCFanDecoder`,
+`IOAcceleratorSelection`, `SensorNameMatcher`, `PlistStreamSplitter`,
+`PowerMetricsParser`). Tests exercise the pure types directly without
+needing a live SMC connection or spawned process — when adding a new
+reader, follow the same split.
 
 Sample-acquisition flow:
 1. `HelperService` calls `PowerMetricsRunner.start()` at first XPC connection,
@@ -278,17 +297,20 @@ etc.) sometimes show up as "not in scope" in the editor. Indexing artifact
 ## Intel Mac support
 
 The Universal Binary is enabled by `ARCHS: "arm64 x86_64"` in `project.yml`.
-Behavior diverges by compile-time `#if arch(arm64)`:
+Sampler choice keys off the **host CPU at runtime** via
+`HostCPU.isAppleSilicon` (which reads `sysctlbyname("hw.optional.arm64")`),
+not compile-time `#if arch(...)`. That way a Universal Binary's x86_64
+slice running under Rosetta on an Apple Silicon host still asks for
+`ane_power` because the kernel still exposes the ANE.
 
 - **powermetrics samplers**: Intel drops `ane_power` (no Apple Neural
   Engine) and the `--show-all` flag (which only exists for ANE on macOS 26).
-- **Parser**: `gpuUsage` stays `Double` (non-Optional) on this branch;
-  Intel-specific `gpu_busy` and `busy_ns / elapsed_ns` keys feed the same
-  field. (`origin/main`'s parser refactor that made `gpuUsage` Optional was
-  not adopted on `feat/pot-icon-poc` because the animator stack assumes a
-  real value.)
-- **TemperatureReader**: also matches Intel-style `proximity` / `graphics`
-  sensor names.
+- **Parser**: `gpuUsage` stays `Double` (non-Optional); Intel-specific
+  `gpu_busy` and `busy_ns / elapsed_ns` keys feed the same field via
+  `PowerMetricsParser`'s coalesce/fallback chain.
+- **TemperatureReader**: `SensorNameMatcher` accepts the Intel-style
+  `proximity` and `graphics` sensor names alongside Apple Silicon's
+  `die` / `tdev` / `gpu`.
 - **PopupView**: layout is shared between Apple Silicon and Intel. ANE
   power is not surfaced in any metric tile, so it just stays nil on Intel.
 
@@ -302,6 +324,9 @@ empty.
 
 - macOS 14 Sonoma or later. **macOS 26 (Tahoe) changed the powermetrics
   output schema substantially** — see the gotchas section above.
-- Universal Binary covers Apple Silicon (M1–M4) and Intel Macs.
+- Universal Binary covers Apple Silicon (M1–M4) and Intel Macs. Fanless
+  Macs (MacBook Air M-series) are first-class — see the gotchas section.
 - Automatic code signing, Team `K38MBRNKAT` (override via
   `bin/set-team-id.sh <YOUR_TEAM_ID>` when forking).
+- Contributor-facing setup notes live in `CONTRIBUTING.md`; this file
+  focuses on operational / architectural context for code agents.
