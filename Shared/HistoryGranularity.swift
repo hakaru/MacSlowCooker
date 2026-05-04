@@ -38,4 +38,14 @@ enum HistoryGranularity: Int, CaseIterable, Sendable {
         case .oneDay:    return "samples_1day"
         }
     }
+
+    /// Filename-safe identifier used by the PNG exporter (`compute-daily.png` etc.).
+    var id: String {
+        switch self {
+        case .fiveMin:   return "daily"
+        case .thirtyMin: return "weekly"
+        case .twoHour:   return "monthly"
+        case .oneDay:    return "yearly"
+        }
+    }
 }
