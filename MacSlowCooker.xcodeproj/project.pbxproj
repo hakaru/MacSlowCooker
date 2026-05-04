@@ -27,6 +27,7 @@
 		3B8DC24A5D4436C61C57728B /* IOAcceleratorSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1C774EDDCEDF104B5F0D9A53 /* IOAcceleratorSelection.swift */; };
 		43055AD4B1B9757792D23B41 /* BoilingTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2EA4A0B31CF11F19C7B0098 /* BoilingTriggerTests.swift */; };
 		44A65218E511CB6BF6946009 /* SMCFanDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4AD63528150E97F4D8B5B408 /* SMCFanDecoder.swift */; };
+		4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
 		5393B75BAA4B68BD4C5D9A2C /* TestClock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D04F8B9BA8DBCD67631DF06 /* TestClock.swift */; };
 		55920E4448E396122E2C94B2 /* DockIconAnimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D25CB70D06860E6AE1F6A3F /* DockIconAnimator.swift */; };
 		5691C7D05CF1BC7853F5009E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36464BD999D5385543BA7023 /* AppDelegate.swift */; };
@@ -37,6 +38,7 @@
 		6D6EB4AACFE3AF352F07B067 /* SMCReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB01D55A43D433F0DB854F7C /* SMCReader.swift */; };
 		7620ACC07C793D03D92223E2 /* PopupWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90386A8D8287F8D6433DA49A /* PopupWindowController.swift */; };
 		77DC1D77479B4AC6C3227D29 /* PowerMetricsRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9C95D755624F9C69736A558B /* PowerMetricsRunner.swift */; };
+		7EF33FEE839A8E06A3E1FBF1 /* HistoryAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */; };
 		7F6B6DD9859D9DFA164D358D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A7139D20C2519CF55ABAFB /* Settings.swift */; };
 		807416548C9F17AF8218954C /* DomainTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEFEAB2D6813CEADDF5073D /* DomainTypes.swift */; };
 		8CCF001921C683107237C79E /* IconStateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8CB793C2CE66A9C1C3C256AE /* IconStateTests.swift */; };
@@ -131,6 +133,7 @@
 		A63621AABDDB48985BD56CAC /* SensorNameMatcherTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorNameMatcherTests.swift; sourceTree = "<group>"; };
 		A857FDD2F28FED3FB923AED5 /* DutchOvenRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRenderer.swift; sourceTree = "<group>"; };
 		B9124F4F49B6E7692AC6DCFE /* DutchOvenRendererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DutchOvenRendererTests.swift; sourceTree = "<group>"; };
+		B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryAggregator.swift; sourceTree = "<group>"; };
 		BAB3F838CEAED7F8769AD2D2 /* MacSlowCookerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSlowCookerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BB01D55A43D433F0DB854F7C /* SMCReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCReader.swift; sourceTree = "<group>"; };
 		BB5D749B6886B5B68B735AAA /* HelperTool.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HelperTool.entitlements; sourceTree = "<group>"; };
@@ -202,6 +205,7 @@
 				49590860FBFF3F1F61A81C47 /* CookingHeuristics.swift */,
 				8AEFEAB2D6813CEADDF5073D /* DomainTypes.swift */,
 				7B0E01379C7F34814B84799B /* GPUSample.swift */,
+				B91FA75F3869FDBDE853FB8E /* HistoryAggregator.swift */,
 				77174FD10C845A60B62D41FC /* HistoryGranularity.swift */,
 				06304D97009BFCA9ACC5499C /* HistoryRecord.swift */,
 				893FAA89E50A101FCB8B0C01 /* HostCPU.swift */,
@@ -385,6 +389,7 @@
 				194771B7C47269FD2D0F97B1 /* GPUDataStore.swift in Sources */,
 				273CC8FA38DC2DC6D096DAA3 /* GPUSample.swift in Sources */,
 				615062A37BF674D4E48C1F88 /* HelperInstaller.swift in Sources */,
+				4572E7A84E25AA809A1B0765 /* HistoryAggregator.swift in Sources */,
 				5F2CCCED899B5219A2E7FFFF /* HistoryGranularity.swift in Sources */,
 				06C982BBA6C2D8039BB17C7D /* HistoryRecord.swift in Sources */,
 				92D1AEB8087D960B13157679 /* HostCPU.swift in Sources */,
@@ -412,6 +417,7 @@
 				E9F7BF418A0BDDF8E39B8794 /* CookingHeuristics.swift in Sources */,
 				807416548C9F17AF8218954C /* DomainTypes.swift in Sources */,
 				AE4B12A70031BF71CD2ABA31 /* GPUSample.swift in Sources */,
+				7EF33FEE839A8E06A3E1FBF1 /* HistoryAggregator.swift in Sources */,
 				F5BCEE668D15EEC8ABC539E1 /* HistoryGranularity.swift in Sources */,
 				16FFDF1EF96AF04C45D24C0A /* HistoryRecord.swift in Sources */,
 				1DD3C572DD4FEAF2BCD9A9A7 /* HostCPU.swift in Sources */,
