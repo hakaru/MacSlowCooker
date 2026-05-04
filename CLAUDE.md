@@ -161,6 +161,17 @@ only; the "Bind to all interfaces" toggle opens it up for remote scraping
 9091. Auth: none (Prometheus convention; front with a reverse proxy if
 needed).
 
+**PNG export** (opt-in, off by default). When enabled in Preferences,
+`PNGExporter` (`MacSlowCooker/PNGExporter.swift`) rasterises the same
+`MRTGGraphView` panels via SwiftUI's `ImageRenderer` and writes them to
+disk as `compute-{daily,weekly,monthly,yearly}.png` /
+`thermal-{daily,weekly,monthly,yearly}.png` plus an auto-refreshing
+`index.html`. Re-render cadence: every 5 minutes via a `Timer` on the main
+runloop, plus one immediate render on enable. Default output:
+`~/Library/Application Support/MacSlowCooker/web/`. Pure HTML rendering
+in `Shared/PNGExporterHTML.swift` is unit-tested. Serve the directory with
+any static server (`python3 -m http.server -d <path>`, nginx, Caddy).
+
 ## macOS 26 (Tahoe) gotchas
 
 **powermetrics output schema changed**. The capitalized keys that worked up

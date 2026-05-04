@@ -14,6 +14,7 @@ All notable changes are tracked here. The format follows
   reported (3-column layout instead of 4).
 
 ### Added
+- **PNG export** (opt-in via Preferences) — periodically writes MRTG-style PNG snapshots and an auto-refreshing `index.html` to a chosen folder, ready to be served by any static web server.
 - **Prometheus exporter** (opt-in via Preferences) — exposes live GPU/temp/power/fan/thermal/helper metrics on `http://127.0.0.1:9091/metrics` for Prometheus, Grafana Agent, and other compatible scrapers.
 - **History window**: MRTG-style Daily / Weekly / Monthly / Yearly graphs for
   GPU / Temp / Power / Fan, accessible via Cmd+Shift+H.

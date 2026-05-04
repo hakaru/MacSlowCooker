@@ -26,6 +26,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     private lazy var historyIngestor: HistoryIngestor? = historyStore.map { HistoryIngestor(store: $0) }
 
+    private lazy var pngExporter: PNGExporter? = historyStore.map { PNGExporter(store: $0) }
+
     private lazy var popupController = PopupWindowController(store: store)
     private var preferencesController: PreferencesWindowController?
     private lazy var historyController: HistoryWindowController? =
@@ -68,6 +70,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
         configurePrometheusExporter()
+        configurePNGExporter()
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
@@ -201,12 +204,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
+    private func configurePNGExporter() {
+        pngExporter?.stop()
+        guard settings.pngExportEnabled else { return }
+        let dir = URL(fileURLWithPath: settings.pngExportPath)
+        pngExporter?.start(at: dir)
+    }
+
     private func observeSettings() {
         settingsObservationTask = Task { @MainActor [weak self] in
             guard let self else { return }
             for await _ in settings.changes {
                 animator.settingsDidChange()
                 configurePrometheusExporter()
+                configurePNGExporter()
             }
         }
     }
@@ -214,6 +225,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ notification: Notification) {
         historyIngestor?.flushPending()
         prometheusExporter.stop()
+        pngExporter?.stop()
     }
 
     // MARK: - System sleep
