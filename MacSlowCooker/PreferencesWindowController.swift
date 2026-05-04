@@ -13,7 +13,7 @@ final class PreferencesWindowController: NSWindowController {
         let window = NSWindow(contentViewController: host)
         window.title = "Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 420, height: 540))
+        window.setContentSize(NSSize(width: 420, height: 640))
         window.center()
         super.init(window: window)
     }
@@ -126,7 +126,6 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
-        .scrollDisabled(true)
     }
 
     private func abbreviatedPath(_ path: String) -> String {
