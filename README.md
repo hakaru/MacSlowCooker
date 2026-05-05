@@ -38,6 +38,11 @@ collect a sample every second.
 - Translucent `NSVisualEffectView` background
 
 ### History window (MRTG-style)
+
+<p align="center">
+  <img src="docs/images/history-mrtg-panels.png" width="480" alt="MRTG-style history panels: Compute (GPU% + Power) and Thermal (SoC temp + Fan RPM) across Daily / Weekly / Monthly / Yearly" />
+</p>
+
 - Open with **Cmd+Shift+H** from the menu bar
 - Four stacked panels per category — **Daily / Weekly / Monthly / Yearly**
   (24 h / 7 d / 31 d / 400 d retention)
