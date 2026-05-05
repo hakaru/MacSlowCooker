@@ -266,3 +266,9 @@ PR-submission guidance. Submitted contributions are taken under the Apache
 </p>
 
 <p align="center"><em>Cluster Edition — four Mac minis, one plate. Same parody, four times the BTUs. Vertical stacking will trigger thermal throttling and shorten Mac lifespan; please array your LLM training rack horizontally instead.</em></p>
+
+<p align="center">
+  <img src="docs/images/brew-stand-concept.jpeg" width="520" alt="Concept product page parody: Mac mini Brew Stand, a coffee/tea warmer that sits on top of a Mac mini" />
+</p>
+
+<p align="center"><em>Mac mini Brew Stand — your Mac mini, now your barista. The cup-warmer cousin of the Cooking Plate. ~50 °C top plate is just enough for a coffee mug, a tumbler, and an espresso glass. Still not a real product. Still don't actually do this.</em></p>
