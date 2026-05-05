@@ -260,3 +260,9 @@ PR-submission guidance. Submitted contributions are taken under the Apache
 </p>
 
 <p align="center"><em>MacSlowCooker Cooking Plate — concept product page, not an actual accessory. Your Mac Studio reaches ~65 °C / 149 °F under sustained 100% GPU. Don't actually cook on it.</em></p>
+
+<p align="center">
+  <img src="docs/images/cluster-edition-concept.jpeg" width="520" alt="Concept product page parody: MacSlowCooker Cooking Plate Cluster Edition, four Mac minis stacked under a single plate" />
+</p>
+
+<p align="center"><em>Cluster Edition — four Mac minis, one plate. Same parody, four times the BTUs. Vertical stacking will trigger thermal throttling and shorten Mac lifespan; please array your LLM training rack horizontally instead.</em></p>
