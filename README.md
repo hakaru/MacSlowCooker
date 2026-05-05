@@ -252,3 +252,11 @@ contributed code if they initiate patent litigation against it.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for setup, build/test, and
 PR-submission guidance. Submitted contributions are taken under the Apache
 2.0 license (Apache License Section 5).
+
+---
+
+<p align="center">
+  <img src="docs/images/cooking-plate-concept.jpeg" width="520" alt="Concept product page parody: MacSlowCooker Cooking Plate, a fictional aluminum trivet that turns your Mac Studio into a cooking appliance" />
+</p>
+
+<p align="center"><em>MacSlowCooker Cooking Plate — concept product page, not an actual accessory. Your Mac Studio reaches ~65 °C / 149 °F under sustained 100% GPU. Don't actually cook on it.</em></p>
