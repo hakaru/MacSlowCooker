@@ -13,7 +13,7 @@ final class PreferencesWindowController: NSWindowController {
         let window = NSWindow(contentViewController: host)
         window.title = "Preferences"
         window.styleMask = [.titled, .closable]
-        window.setContentSize(NSSize(width: 420, height: 640))
+        window.setContentSize(NSSize(width: 420, height: 720))
         window.center()
         super.init(window: window)
     }
@@ -29,6 +29,9 @@ final class PreferencesWindowController: NSWindowController {
 
 struct PreferencesView: View {
     @Bindable var settings: Settings
+    @State private var draftKey: String = ""
+    @State private var isVerifying = false
+    @State private var licenseError: String? = nil
 
     var body: some View {
         Form {
@@ -113,6 +116,36 @@ struct PreferencesView: View {
                 }
             }
 
+            Section("License") {
+                HStack {
+                    TextField("License Key", text: $draftKey)
+                        .font(.system(.body, design: .monospaced))
+                        .textFieldStyle(.plain)
+                    if isVerifying {
+                        ProgressView()
+                            .scaleEffect(0.7)
+                    } else {
+                        Button("Verify") {
+                            Task { await verifyLicense() }
+                        }
+                        .disabled(draftKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+                if let verifiedAt = settings.licenseVerifiedAt,
+                   settings.licenseKey == draftKey.trimmingCharacters(in: .whitespaces) {
+                    Label(
+                        "Verified \(verifiedAt.formatted(date: .abbreviated, time: .omitted))",
+                        systemImage: "checkmark.seal.fill"
+                    )
+                    .foregroundStyle(.green)
+                    .font(.caption)
+                } else if let error = licenseError {
+                    Label(error, systemImage: "exclamationmark.circle")
+                        .foregroundStyle(.red)
+                        .font(.caption)
+                }
+            }
+
             Section("Energy") {
                 LowPowerStatusRow()
             }
@@ -126,6 +159,9 @@ struct PreferencesView: View {
             }
         }
         .formStyle(.grouped)
+        .onAppear {
+            draftKey = settings.licenseKey ?? ""
+        }
     }
 
     private func abbreviatedPath(_ path: String) -> String {
@@ -152,6 +188,26 @@ struct PreferencesView: View {
     private func revealInFinder() {
         let url = URL(fileURLWithPath: settings.pngExportPath)
         NSWorkspace.shared.activateFileViewerSelecting([url])
+    }
+
+    private func verifyLicense() async {
+        let key = draftKey.trimmingCharacters(in: .whitespaces)
+        guard !key.isEmpty else { return }
+        isVerifying = true
+        licenseError = nil
+        let validator = LicenseValidator(productPermalink: "fzifrw")
+        let result = await validator.verify(key: key)
+        isVerifying = false
+        switch result {
+        case .verified:
+            settings.licenseKey = key
+            settings.licenseVerifiedAt = Date()
+        case .invalid(let message):
+            settings.licenseVerifiedAt = nil
+            licenseError = message
+        case .networkError(let message):
+            licenseError = "Network error: \(message)"
+        }
     }
 }
 
