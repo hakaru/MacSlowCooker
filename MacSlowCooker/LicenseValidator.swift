@@ -38,10 +38,6 @@ struct LicenseValidator {
             guard response is HTTPURLResponse else {
                 return .networkError("No HTTP response")
             }
-            struct GumroadResponse: Decodable {
-                let success: Bool
-                let message: String?
-            }
             let decoded = try JSONDecoder().decode(GumroadResponse.self, from: data)
             return decoded.success
                 ? .verified
@@ -50,6 +46,11 @@ struct LicenseValidator {
             return .networkError(error.localizedDescription)
         }
     }
+}
+
+private struct GumroadResponse: Decodable {
+    let success: Bool
+    let message: String?
 }
 
 private extension String {

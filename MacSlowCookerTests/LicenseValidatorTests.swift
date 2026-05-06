@@ -49,9 +49,10 @@ final class LicenseValidatorTests: XCTestCase {
         }
         _ = await validator.verify(key: "MY-KEY-1234")
         let bodyString = String(data: capturedRequest!.httpBody!, encoding: .utf8)!
-        XCTAssertTrue(bodyString.contains("product_permalink=fzifrw"), "body: \(bodyString)")
-        XCTAssertTrue(bodyString.contains("license_key=MY-KEY-1234"), "body: \(bodyString)")
-        XCTAssertTrue(bodyString.contains("increment_uses_count=false"), "body: \(bodyString)")
+        XCTAssertEqual(
+            bodyString,
+            "product_permalink=fzifrw&license_key=MY-KEY-1234&increment_uses_count=false"
+        )
     }
 
     func testVerifyUsesInvalidMessageFallback() async {
