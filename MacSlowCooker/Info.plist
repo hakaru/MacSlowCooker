@@ -12,5 +12,7 @@
     <string>1.0</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
+    <key>GumroadProductPermalink</key>
+    <string>fzifrw</string>
 </dict>
 </plist>

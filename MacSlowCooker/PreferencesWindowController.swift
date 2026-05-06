@@ -196,7 +196,8 @@ struct PreferencesView: View {
         guard !key.isEmpty else { return }
         isVerifying = true
         licenseError = nil
-        let validator = LicenseValidator(productPermalink: "fzifrw")
+        let permalink = Bundle.main.infoDictionary?["GumroadProductPermalink"] as? String ?? ""
+        let validator = LicenseValidator(productPermalink: permalink)
         let result = await validator.verify(key: key)
         guard !Task.isCancelled else { return }
         guard key == draftKey.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
