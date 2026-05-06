@@ -14,7 +14,7 @@ final class LicenseValidatorTests: XCTestCase {
 
     func testVerifyReturnsVerifiedOnSuccess() async {
         let body = #"{"success":true,"purchase":{"license_key":"ABCD-1234-EFGH-5678"}}"#
-        let validator = LicenseValidator(productPermalink: "fzifrw") { _ in
+        let validator = LicenseValidator(productPermalink: "fzlfrw") { _ in
             (Data(body.utf8), self.makeResponse(statusCode: 200))
         }
         let result = await validator.verify(key: "ABCD-1234-EFGH-5678")
@@ -23,7 +23,7 @@ final class LicenseValidatorTests: XCTestCase {
 
     func testVerifyReturnsInvalidOnFailure() async {
         let body = #"{"success":false,"message":"That license does not exist for the provided product."}"#
-        let validator = LicenseValidator(productPermalink: "fzifrw") { _ in
+        let validator = LicenseValidator(productPermalink: "fzlfrw") { _ in
             (Data(body.utf8), self.makeResponse(statusCode: 404))
         }
         let result = await validator.verify(key: "INVALID-KEY")
@@ -31,7 +31,7 @@ final class LicenseValidatorTests: XCTestCase {
     }
 
     func testVerifyReturnsNetworkErrorOnThrow() async {
-        let validator = LicenseValidator(productPermalink: "fzifrw") { _ in
+        let validator = LicenseValidator(productPermalink: "fzlfrw") { _ in
             throw URLError(.notConnectedToInternet)
         }
         let result = await validator.verify(key: "ANY-KEY")
@@ -43,7 +43,7 @@ final class LicenseValidatorTests: XCTestCase {
     func testVerifySendsCorrectFormBody() async {
         var capturedRequest: URLRequest?
         let body = #"{"success":true}"#
-        let validator = LicenseValidator(productPermalink: "fzifrw") { req in
+        let validator = LicenseValidator(productPermalink: "fzlfrw") { req in
             capturedRequest = req
             return (Data(body.utf8), self.makeResponse(statusCode: 200))
         }
@@ -51,13 +51,13 @@ final class LicenseValidatorTests: XCTestCase {
         let bodyString = String(data: capturedRequest!.httpBody!, encoding: .utf8)!
         XCTAssertEqual(
             bodyString,
-            "product_permalink=fzifrw&license_key=MY-KEY-1234&increment_uses_count=false"
+            "product_permalink=fzlfrw&license_key=MY-KEY-1234&increment_uses_count=false"
         )
     }
 
     func testVerifyUsesInvalidMessageFallback() async {
         let body = #"{"success":false}"#
-        let validator = LicenseValidator(productPermalink: "fzifrw") { _ in
+        let validator = LicenseValidator(productPermalink: "fzlfrw") { _ in
             (Data(body.utf8), self.makeResponse(statusCode: 404))
         }
         let result = await validator.verify(key: "BAD-KEY")
