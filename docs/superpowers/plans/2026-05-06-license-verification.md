@@ -76,7 +76,7 @@ final class KeychainStoreTests: XCTestCase {
 - [ ] **Step 2: xcodegen 実行後、テストが失敗することを確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -140,7 +140,7 @@ struct KeychainStore {
 - [ ] **Step 4: テスト実行・全通過を確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -239,7 +239,7 @@ final class LicenseValidatorTests: XCTestCase {
 - [ ] **Step 2: xcodegen 実行後、テストが失敗することを確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -319,7 +319,7 @@ private extension String {
 - [ ] **Step 4: テスト実行・全通過を確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -511,7 +511,7 @@ final class SettingsTests: XCTestCase {
 - [ ] **Step 2: テストが失敗することを確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -710,7 +710,7 @@ private final class SettingsChangeTracker {
 - [ ] **Step 4: テスト実行・全通過を確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild test -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO \
@@ -989,7 +989,7 @@ private struct LowPowerStatusRow: View {
 - [ ] **Step 2: ビルド確認**
 
 ```bash
-cd /Users/hakaru/DEVELOP/MacSlowCooker
+cd /path/to/MacSlowCooker
 xcodegen generate
 xcodebuild build -project MacSlowCooker.xcodeproj -scheme MacSlowCooker \
   -destination 'platform=macOS' CODE_SIGNING_ALLOWED=NO 2>&1 | grep -E "error:|BUILD SUCCEEDED|BUILD FAILED"
