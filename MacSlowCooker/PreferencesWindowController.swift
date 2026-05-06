@@ -130,11 +130,11 @@ struct PreferencesView: View {
                             verifyTask?.cancel()
                             verifyTask = Task { await verifyLicense() }
                         }
-                        .disabled(draftKey.trimmingCharacters(in: .whitespaces).isEmpty)
+                        .disabled(draftKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     }
                 }
                 if let verifiedAt = settings.licenseVerifiedAt,
-                   settings.licenseKey == draftKey.trimmingCharacters(in: .whitespaces) {
+                   settings.licenseKey == draftKey.trimmingCharacters(in: .whitespacesAndNewlines) {
                     Label(
                         "Verified \(verifiedAt.formatted(date: .abbreviated, time: .omitted))",
                         systemImage: "checkmark.seal.fill"
@@ -192,15 +192,15 @@ struct PreferencesView: View {
     }
 
     private func verifyLicense() async {
-        let key = draftKey.trimmingCharacters(in: .whitespaces)
+        let key = draftKey.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !key.isEmpty else { return }
         isVerifying = true
         licenseError = nil
         let validator = LicenseValidator(productPermalink: "fzifrw")
         let result = await validator.verify(key: key)
-        isVerifying = false
         guard !Task.isCancelled else { return }
-        guard key == draftKey.trimmingCharacters(in: .whitespaces) else { return }
+        guard key == draftKey.trimmingCharacters(in: .whitespacesAndNewlines) else { return }
+        isVerifying = false
         switch result {
         case .verified:
             settings.licenseKey = key

@@ -26,9 +26,13 @@ struct LicenseValidator {
             "application/x-www-form-urlencoded",
             forHTTPHeaderField: "Content-Type"
         )
+        guard let encodedPermalink = productPermalink.formEncoded,
+              let encodedKey = key.formEncoded else {
+            return .invalid("License key contains unencodable characters")
+        }
         let body = [
-            "product_permalink=\(productPermalink.formEncoded)",
-            "license_key=\(key.formEncoded)",
+            "product_permalink=\(encodedPermalink)",
+            "license_key=\(encodedKey)",
             "increment_uses_count=false"
         ].joined(separator: "&")
         request.httpBody = Data(body.utf8)
@@ -57,9 +61,9 @@ private struct GumroadResponse: Decodable {
 }
 
 private extension String {
-    var formEncoded: String {
+    var formEncoded: String? {
         var allowed = CharacterSet.alphanumerics
         allowed.insert(charactersIn: "-._~")
-        return addingPercentEncoding(withAllowedCharacters: allowed) ?? self
+        return addingPercentEncoding(withAllowedCharacters: allowed)
     }
 }
