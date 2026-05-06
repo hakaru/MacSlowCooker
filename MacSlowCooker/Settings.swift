@@ -25,6 +25,9 @@ final class Settings {
     @ObservationIgnored
     private let keychain: KeychainStore
 
+    @ObservationIgnored
+    private static let iso8601 = ISO8601DateFormatter()
+
     var potStyle: PotStyle = .dutchOven {
         didSet { defaults.set(potStyle.rawValue, forKey: Keys.potStyle) }
     }
@@ -72,7 +75,7 @@ final class Settings {
         didSet {
             if let d = licenseVerifiedAt {
                 keychain.write(
-                    ISO8601DateFormatter().string(from: d),
+                    Settings.iso8601.string(from: d),
                     forKey: Keys.licenseVerifiedAt
                 )
             } else {
@@ -126,7 +129,7 @@ final class Settings {
         self.pngExportPath    = (defaults.string(forKey: Keys.pngExportPath)) ?? Settings.defaultPNGExportPath
         self.licenseKey = keychain.read(forKey: Keys.licenseKey)
         if let s = keychain.read(forKey: Keys.licenseVerifiedAt) {
-            self.licenseVerifiedAt = ISO8601DateFormatter().date(from: s)
+            self.licenseVerifiedAt = Settings.iso8601.date(from: s)
         }
     }
 }
