@@ -19,6 +19,7 @@ struct KeychainStore {
         if updateStatus == errSecItemNotFound {
             var addQuery = query
             addQuery[kSecValueData] = data
+            addQuery[kSecAttrAccessible] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
             let addStatus = SecItemAdd(addQuery as CFDictionary, nil)
             if addStatus != errSecSuccess {
                 logger.error("KeychainStore.write add failed: \(addStatus) service=\(self.service) key=\(key)")

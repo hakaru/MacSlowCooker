@@ -119,7 +119,7 @@ struct PreferencesView: View {
 
             Section("License") {
                 HStack {
-                    TextField("License Key", text: $draftKey)
+                    SecureField("License Key", text: $draftKey)
                         .font(.system(.body, design: .monospaced))
                         .textFieldStyle(.plain)
                     if isVerifying {
@@ -200,6 +200,7 @@ struct PreferencesView: View {
         let result = await validator.verify(key: key)
         isVerifying = false
         guard !Task.isCancelled else { return }
+        guard key == draftKey.trimmingCharacters(in: .whitespaces) else { return }
         switch result {
         case .verified:
             settings.licenseKey = key

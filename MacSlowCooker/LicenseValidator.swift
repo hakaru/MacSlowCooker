@@ -35,8 +35,11 @@ struct LicenseValidator {
 
         do {
             let (data, response) = try await fetch(request)
-            guard response is HTTPURLResponse else {
+            guard let httpResponse = response as? HTTPURLResponse else {
                 return .networkError("No HTTP response")
+            }
+            guard httpResponse.statusCode < 500 else {
+                return .networkError("Server error (\(httpResponse.statusCode))")
             }
             let decoded = try JSONDecoder().decode(GumroadResponse.self, from: data)
             return decoded.success
