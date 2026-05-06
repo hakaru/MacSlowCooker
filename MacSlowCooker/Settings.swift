@@ -15,10 +15,18 @@ final class Settings {
         static let prometheusBindAll      = "prometheusBindAll"
         static let pngExportEnabled = "pngExportEnabled"
         static let pngExportPath    = "pngExportPath"
+        static let licenseKey        = "licenseKey"
+        static let licenseVerifiedAt = "licenseVerifiedAt"
     }
 
     @ObservationIgnored
     private let defaults: UserDefaults
+
+    @ObservationIgnored
+    private let keychain: KeychainStore
+
+    @ObservationIgnored
+    private static let iso8601 = ISO8601DateFormatter()
 
     var potStyle: PotStyle = .dutchOven {
         didSet { defaults.set(potStyle.rawValue, forKey: Keys.potStyle) }
@@ -56,9 +64,27 @@ final class Settings {
         didSet { defaults.set(pngExportPath, forKey: Keys.pngExportPath) }
     }
 
-    /// Restore every tracked property to its default value. didSet on each
-    /// property handles persistence; downstream observers see one yield per
-    /// changed field through `Settings.changes`.
+    var licenseKey: String? = nil {
+        didSet {
+            if let v = licenseKey { keychain.write(v, forKey: Keys.licenseKey) }
+            else { keychain.delete(forKey: Keys.licenseKey) }
+        }
+    }
+
+    var licenseVerifiedAt: Date? = nil {
+        didSet {
+            if let d = licenseVerifiedAt {
+                keychain.write(
+                    Settings.iso8601.string(from: d),
+                    forKey: Keys.licenseVerifiedAt
+                )
+            } else {
+                keychain.delete(forKey: Keys.licenseVerifiedAt)
+            }
+        }
+    }
+
+    /// licenseKey と licenseVerifiedAt は意図的にリセットしない（アカウント情報は設定とは別）
     func resetToDefaults() {
         potStyle = .dutchOven
         flameAnimation = .both
@@ -85,8 +111,10 @@ final class Settings {
     /// `UserDefaults`. Harmless and accepted as the tradeoff for keeping persistence
     /// declarative. `Settings.changes` (Task 4) starts tracking after init, so these
     /// init-time writes are not observed by consumers.
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard,
+         keychain: KeychainStore = KeychainStore(service: "com.macslowcooker.app")) {
         self.defaults = defaults
+        self.keychain = keychain
         self.potStyle       = PotStyle(rawValue: defaults.string(forKey: Keys.potStyle) ?? "")        ?? .dutchOven
         self.flameAnimation = FlameAnimation(rawValue: defaults.string(forKey: Keys.flameAnimation) ?? "") ?? .both
         self.boilingTrigger = BoilingTrigger(rawValue: defaults.string(forKey: Keys.boilingTrigger) ?? "") ?? .combined
@@ -99,6 +127,10 @@ final class Settings {
         self.prometheusBindAll = (defaults.object(forKey: Keys.prometheusBindAll) as? Bool) ?? false
         self.pngExportEnabled = (defaults.object(forKey: Keys.pngExportEnabled) as? Bool) ?? false
         self.pngExportPath    = (defaults.string(forKey: Keys.pngExportPath)) ?? Settings.defaultPNGExportPath
+        self.licenseKey = keychain.read(forKey: Keys.licenseKey)
+        if let s = keychain.read(forKey: Keys.licenseVerifiedAt) {
+            self.licenseVerifiedAt = Settings.iso8601.date(from: s)
+        }
     }
 }
 
@@ -150,6 +182,8 @@ private final class SettingsChangeTracker {
             _ = settings.prometheusBindAll
             _ = settings.pngExportEnabled
             _ = settings.pngExportPath
+            _ = settings.licenseKey
+            _ = settings.licenseVerifiedAt
         } onChange: { [weak self] in
             // onChange fires synchronously *before* the mutation completes.
             // Hop to a Task so the new value is observable when downstream
