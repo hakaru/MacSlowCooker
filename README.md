@@ -83,6 +83,8 @@ collect a sample every second.
 - **Prometheus exporter**: enable / port / bind-all
 - **PNG export**: enable / folder picker / Reveal in Finder
 - Live "Low Power Mode is on" status row
+- **License key**: enter and verify a Gumroad license key; verified status
+  is stored in the Keychain and shown as a green "Verified" badge
 
 ## Architecture
 
