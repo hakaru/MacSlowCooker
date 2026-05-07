@@ -336,6 +336,15 @@ etc.) sometimes show up as "not in scope" in the editor. Indexing artifact
   `PowerMetricsRunner.flushSamplesLocked` that writes the chunk to `/tmp`
   before parsing — essential when the macOS schema doesn't match
   expectations.
+- **HelperTool CPU 100% / GPU% stuck at 0%**: symptom of the
+  `readabilityHandler` busy-loop bug (fixed in #31). When powermetrics
+  crashes 3 times and gives up, the EOF pipe fd stays permanently readable
+  and spins the handler. Recover immediately with:
+  ```bash
+  sudo launchctl kickstart -k system/com.macslowcooker.helper
+  ```
+  After a code fix and redeploy, kickstart is required to pick up the new
+  binary.
 
 ## Intel Mac support
 

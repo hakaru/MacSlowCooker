@@ -59,6 +59,7 @@ final class PowerMetricsRunner {
 
     /// Must be called on `queue`.
     private func launchProcessLocked() throws {
+        stdoutPipe?.fileHandleForReading.readabilityHandler = nil
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/powermetrics")
         // --show-all is required on macOS 26 to surface processor.ane_power; drop it
@@ -98,7 +99,14 @@ final class PowerMetricsRunner {
         pipe.fileHandleForReading.readabilityHandler = { [weak self] handle in
             // Read off Foundation's queue, but mutate splitter buffer on ours.
             let chunk = handle.availableData
-            guard !chunk.isEmpty else { return }
+            guard !chunk.isEmpty else {
+                // EOF: pipe closed because powermetrics terminated. Cancel the
+                // dispatch source immediately to avoid a busy-loop — an EOF fd
+                // stays permanently "readable" and will fire the handler
+                // continuously until it is cleared.
+                handle.readabilityHandler = nil
+                return
+            }
             self?.queue.async {
                 guard let self else { return }
                 self.flushSamplesLocked(chunk: chunk)
