@@ -7,9 +7,9 @@
     <key>CFBundleName</key>
     <string>MacSlowCooker</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0.2</string>
+    <string>1.0.3</string>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>GumroadProductPermalink</key>

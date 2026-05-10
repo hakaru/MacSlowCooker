@@ -5,7 +5,7 @@
     <key>CFBundleIdentifier</key>
     <string>com.macslowcooker.helper</string>
     <key>CFBundleVersion</key>
-    <string>1</string>
+    <string>3</string>
     <key>SMAuthorizedClients</key>
     <array>
         <string>identifier "com.macslowcooker.app" and anchor apple generic and certificate leaf[subject.OU] = "K38MBRNKAT"</string>

@@ -3,6 +3,29 @@
 All notable changes are tracked here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.3] — 2026-05-10
+
+### Fixed
+
+**PowerMetricsRunner: permanent give-up after 3 crashes**
+
+When powermetrics crashed 3 times the runner called `return` and stopped
+retrying forever. The HelperTool kept running under launchd (so no automatic
+restart occurred), but without a powermetrics child process GPU metrics were
+stuck. Recovery required `sudo launchctl kickstart -k system/com.macslowcooker.helper`.
+
+Fix: instead of giving up, switch to a 60-second backoff after the third
+failure and keep retrying indefinitely — the same resilience model launchd
+itself uses. Additionally, a successful sample parse now resets the failure
+counter, so transient crashes across days no longer accumulate toward the
+give-up threshold.
+
+**Symptoms this fixes:**
+- GPU% / temperature / power / fan stuck after leaving the Mac idle overnight
+- Required manual HelperTool kickstart to restore metrics
+
+**Recovery without update:** `sudo launchctl kickstart -k system/com.macslowcooker.helper`
+
 ## [Unreleased]
 
 ### Changed

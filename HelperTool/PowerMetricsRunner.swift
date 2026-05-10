@@ -118,14 +118,21 @@ final class PowerMetricsRunner {
 
     /// Must be called on `queue`.
     private func handleCrashLocked() {
+        process = nil
         failureCount += 1
+        // Never give up permanently — giving up requires a manual HelperTool kickstart
+        // to recover, which is unacceptable for a background service. After maxFailures
+        // quick retries, switch to a 60 s backoff and keep trying indefinitely.
+        let delay: TimeInterval
         if failureCount >= maxFailures {
-            os_log("powermetrics failed %d times, giving up", log: log, type: .fault, failureCount)
-            onError?("powermetrics crashed \(failureCount) times — GPU monitoring unavailable")
-            return
+            delay = 60.0
+            os_log("powermetrics failed %d times, retrying in 60s", log: log, type: .fault, failureCount)
+            onError?("powermetrics crashed \(failureCount) times — retrying in 60s")
+        } else {
+            delay = restartDelay
+            os_log("powermetrics crash #%d, restarting in 5s", log: log, type: .error, failureCount)
         }
-        os_log("powermetrics crash #%d, restarting in 5s", log: log, type: .error, failureCount)
-        queue.asyncAfter(deadline: .now() + restartDelay) { [weak self] in
+        queue.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self, !self.isStopping else { return }
             do {
                 try self.launchProcessLocked()
@@ -141,6 +148,7 @@ final class PowerMetricsRunner {
     private func flushSamplesLocked(chunk: Data) {
         for plist in splitter.append(chunk) {
             if let sample = PowerMetricsParser.parse(plistData: plist, timestamp: Date()) {
+                failureCount = 0  // successful parse: reset so transient crashes don't accumulate
                 onSample?(sample)
             }
         }
